@@ -850,15 +850,15 @@ app.get("/manage-ui", (req, res) => {
                 <h2>Create Page</h2>
 
                 <label>Page Name</label>
-                <input placeholder="Example: Home & Kitchen" />
+                <input id="pageName" placeholder="Example: Home & Kitchen" />
 
                 <div class="check-row">
-                  <input type="checkbox" />
+                  <input id="showOnHeader" type="checkbox" />
                   <span>Show on Header</span>
                 </div>
 
                 <div class="check-row">
-                  <input type="checkbox" />
+                  <input id="showOnBanner" type="checkbox" />
                   <span>Show on Banner</span>
                 </div>
 
@@ -866,13 +866,13 @@ app.get("/manage-ui", (req, res) => {
                 <input type="file" accept="image/*" />
 
                 <label>Banner Image URL</label>
-                <input placeholder="Banner image URL" />
+                <input id="bannerImageUrl" placeholder="Banner image URL" />
 
                 <label>Banner Subheading</label>
-                <input placeholder="Example: Fresh collection available now" />
+                <input id="bannerSubheading" placeholder="Example: Fresh collection available now" />
 
                 <div class="check-row">
-                  <input type="checkbox" />
+                  <input id="createCircularIcon" type="checkbox" />
                   <span>Create Circular Icon</span>
                 </div>
 
@@ -880,16 +880,16 @@ app.get("/manage-ui", (req, res) => {
                 <input type="file" accept="image/*" />
 
                 <label>Circular Image URL</label>
-                <input placeholder="Circular image URL" />
+                <input id="circularImageUrl" placeholder="Circular image URL" />
 
-                <button class="primary">Create Page</button>
+                <button class="primary" onclick="createPage()">Create Page</button>
               </div>
 
               <div class="card">
                 <h2>Manage Pages</h2>
-                <div class="placeholder">
-                  Page list will appear here after we connect the page API.
-                </div>
+                <div id="pagesList" class="placeholder">
+				Loading pages...
+				</div>
               </div>
             </div>
           </div>
@@ -941,12 +941,107 @@ app.get("/manage-ui", (req, res) => {
             localStorage.removeItem("admin_token");
             window.location.href = "/admin";
           }
+		  
+		  async function createPage() {
+  const page_name = document.getElementById("pageName").value.trim();
+  const show_on_header = document.getElementById("showOnHeader").checked;
+  const show_on_banner = document.getElementById("showOnBanner").checked;
+  const banner_image_url = document.getElementById("bannerImageUrl").value.trim();
+  const banner_subheading = document.getElementById("bannerSubheading").value.trim();
+  const create_circular_icon = document.getElementById("createCircularIcon").checked;
+  const circular_image_url = document.getElementById("circularImageUrl").value.trim();
+
+  if (!page_name) {
+    alert("Please enter page name");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/pages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+      },
+      body: JSON.stringify({
+        page_name,
+        show_on_header,
+        show_on_banner,
+        banner_image_url,
+        banner_subheading,
+        create_circular_icon,
+        circular_image_url
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Page creation failed");
+      return;
+    }
+
+    document.getElementById("pageName").value = "";
+    document.getElementById("showOnHeader").checked = false;
+    document.getElementById("showOnBanner").checked = false;
+    document.getElementById("bannerImageUrl").value = "";
+    document.getElementById("bannerSubheading").value = "";
+    document.getElementById("createCircularIcon").checked = false;
+    document.getElementById("circularImageUrl").value = "";
+
+    alert("Page created successfully");
+    loadPages();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function loadPages() {
+  const list = document.getElementById("pagesList");
+
+  if (!list) return;
+
+  try {
+    const res = await fetch("/api/pages");
+    const data = await res.json();
+
+    const pages = data.pages || [];
+
+    if (pages.length === 0) {
+      list.innerHTML = "No pages created yet.";
+      return;
+    }
+
+    list.className = "";
+    list.innerHTML = "";
+
+    pages.forEach(function(page) {
+      const div = document.createElement("div");
+      div.style.border = "1px solid #DCCCAC";
+      div.style.borderRadius = "14px";
+      div.style.padding = "12px";
+      div.style.marginBottom = "10px";
+      div.style.background = "#FFF8EC";
+
+      div.innerHTML =
+        "<strong>" + page.page_name + "</strong>" +
+        "<div style='font-size:13px;margin-top:5px;color:#6f7a5f;'>Slug: " + page.slug + "</div>" +
+        "<div style='font-size:13px;color:#6f7a5f;'>Header: " + (page.show_on_header ? "Yes" : "No") + " | Banner: " + (page.show_on_banner ? "Yes" : "No") + " | Circular: " + (page.create_circular_icon ? "Yes" : "No") + "</div>";
+
+      list.appendChild(div);
+    });
+  } catch (error) {
+    list.innerHTML = error.message;
+  }
+}
 
           const token = localStorage.getItem("admin_token");
 
           if (!token) {
-            window.location.href = "/admin";
-          }
+			window.location.href = "/admin";
+						} else {
+								loadPages();
+						}
         </script>
       </body>
     </html>
