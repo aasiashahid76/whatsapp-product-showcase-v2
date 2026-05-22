@@ -2034,8 +2034,13 @@ app.get("/manage-ui", (req, res) => {
     <label>Product Name</label>
     <input id="productName" placeholder="Example: Kitchen Bottle" />
 
-    <label>Product Image URL</label>
-    <input id="productImageUrl" placeholder="Paste product image URL for now" />
+    <label>Product Image</label>
+<div style="display:flex;gap:8px;align-items:center;">
+  <input id="productImageFile" type="file" accept="image/*" />
+  <button type="button" onclick="uploadImageFile('productImageFile', 'productImageUrl', 'productImageUploadStatus')" style="width:auto;margin-top:0;background:#546B41;color:#FFF8EC;border:none;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;">Upload</button>
+</div>
+<input id="productImageUrl" type="hidden" />
+<div id="productImageUploadStatus" style="font-size:13px;color:#6f7a5f;margin-top:6px;">No product image uploaded yet.</div>
 
     <label>Show Price</label>
     <input id="showPrice" type="number" placeholder="Example: 499" />
@@ -2518,6 +2523,8 @@ async function createProduct() {
     document.getElementById("productSku").value = "";
     document.getElementById("productName").value = "";
     document.getElementById("productImageUrl").value = "";
+	document.getElementById("productImageFile").value = "";
+document.getElementById("productImageUploadStatus").textContent = "No product image uploaded yet.";
     document.getElementById("showPrice").value = "";
     document.getElementById("crossedPrice").value = "";
     document.getElementById("productTag").value = "None";
