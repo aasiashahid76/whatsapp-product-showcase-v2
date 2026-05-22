@@ -516,6 +516,7 @@ app.get("/", (req, res) => {
 
         <script>
           let allProducts = [];
+let siteSettings = {};
 
           function productCard(product) {
             const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
@@ -560,18 +561,28 @@ app.get("/", (req, res) => {
             grid.innerHTML = products.map(productCard).join("");
           }
 
-          async function loadProducts() {
-            try {
-              const res = await fetch("/api/products");
-              const data = await res.json();
+          async function loadSettings() {
+  try {
+    const res = await fetch("/api/settings");
+    const data = await res.json();
+    siteSettings = data.settings || {};
+  } catch (error) {
+    siteSettings = {};
+  }
+}
 
-              allProducts = data.products || [];
-              renderProducts(allProducts);
-            } catch (error) {
-              document.getElementById("productsGrid").innerHTML =
-                '<div class="empty">' + error.message + '</div>';
-            }
-          }
+async function loadProducts() {
+  try {
+    const res = await fetch("/api/products");
+    const data = await res.json();
+
+    allProducts = data.products || [];
+    renderProducts(allProducts);
+  } catch (error) {
+    document.getElementById("productsGrid").innerHTML =
+      '<div class="empty">' + error.message + '</div>';
+  }
+}
 
           function filterProducts() {
             const q = document.getElementById("searchInput").value.toLowerCase().trim();
@@ -759,9 +770,14 @@ function sendToWhatsapp() {
     return;
   }
 
-  const whatsappNumber = "918802884309";
+  const whatsappNumber = String(siteSettings.whatsapp_number || "").replace(/[^0-9]/g, "");
 
-  let total = 0;
+if (!whatsappNumber) {
+  alert("WhatsApp number is not set. Please add it from Manage UI > Header & Footer.");
+  return;
+}
+
+let total = 0;
   let message = "Hello, I want to order these products:" + String.fromCharCode(10) + String.fromCharCode(10);
 
   list.forEach(function(item) {
@@ -777,9 +793,11 @@ function sendToWhatsapp() {
 
   window.open(url, "_blank");
 }
-          loadProducts();
-updateListButton();
-renderYourList();
+          loadSettings().then(function() {
+  loadProducts();
+  updateListButton();
+  renderYourList();
+});
         </script>
       </body>
     </html>
