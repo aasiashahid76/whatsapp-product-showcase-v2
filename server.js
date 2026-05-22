@@ -498,6 +498,82 @@ app.post("/api/admin/pages", verifyAdmin, async (req, res) => {
   }
 });
 
+app.put("/api/admin/pages/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      page_name,
+      show_on_header,
+      show_on_banner,
+      banner_image_url,
+      banner_subheading,
+      create_circular_icon,
+      circular_image_url,
+      is_active
+    } = req.body;
+
+    if (!page_name) {
+      return res.status(400).json({
+        status: "error",
+        message: "Page name is required"
+      });
+    }
+
+    const slug = createSlug(page_name);
+
+    const [existing] = await db.query(
+      "SELECT id FROM pages WHERE slug = ? AND id != ? LIMIT 1",
+      [slug, id]
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({
+        status: "error",
+        message: "Another page with this name already exists"
+      });
+    }
+
+    await db.query(
+      `UPDATE pages
+       SET page_name = ?,
+           slug = ?,
+           show_on_header = ?,
+           show_on_banner = ?,
+           banner_image_url = ?,
+           banner_subheading = ?,
+           create_circular_icon = ?,
+           circular_image_url = ?,
+           is_active = ?
+       WHERE id = ?`,
+      [
+        page_name,
+        slug,
+        show_on_header ? 1 : 0,
+        show_on_banner ? 1 : 0,
+        banner_image_url || null,
+        banner_subheading || null,
+        create_circular_icon ? 1 : 0,
+        circular_image_url || null,
+        is_active === false ? 0 : 1,
+        id
+      ]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Page updated successfully",
+      slug
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update page",
+      error: error.message
+    });
+  }
+});
+
 app.delete("/api/admin/pages/:id", verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
