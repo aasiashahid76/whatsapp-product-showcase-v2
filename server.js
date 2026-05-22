@@ -277,13 +277,160 @@ app.get("/", (req, res) => {
           }
 
           .empty {
-            background: white;
-            border: 1px solid #DCCCAC;
-            border-radius: 14px;
-            padding: 16px;
-            color: #6f7a5f;
-            font-size: 14px;
-          }
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 14px;
+  padding: 16px;
+  color: #6f7a5f;
+  font-size: 14px;
+}
+
+.list-btn.active {
+  background: #546B41;
+  color: #FFF8EC;
+  border-color: #546B41;
+}
+
+.your-list-panel {
+  display: none;
+  position: fixed;
+  top: 59px;
+  left: 10px;
+  right: 10px;
+  z-index: 60;
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.your-list-panel.show {
+  display: block;
+}
+
+.list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #546B41;
+  color: #FFF8EC;
+}
+
+.list-head strong {
+  font-size: 15px;
+}
+
+.close-list-btn {
+  border: none;
+  background: #DCCCAC;
+  color: #546B41;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  font-weight: 700;
+}
+
+.list-body {
+  padding: 10px;
+}
+
+.list-row {
+  display: grid;
+  grid-template-columns: 48px 1fr 72px 72px 28px;
+  gap: 6px;
+  align-items: center;
+  border-bottom: 1px solid #f0e4ce;
+  padding: 8px 0;
+}
+
+.list-row img {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #DCCCAC;
+}
+
+.list-product-name {
+  font-size: 11px;
+  line-height: 1.2;
+  color: #38472d;
+  margin-top: 3px;
+}
+
+.list-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: #546B41;
+}
+
+.list-mini-qty {
+  display: grid;
+  grid-template-columns: 20px 1fr 20px;
+  gap: 2px;
+}
+
+.list-mini-qty button {
+  border: none;
+  background: #DCCCAC;
+  color: #546B41;
+  border-radius: 6px;
+  height: 24px;
+  font-weight: 700;
+}
+
+.list-mini-qty input {
+  width: 100%;
+  border: 1px solid #DCCCAC;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 11px;
+  height: 24px;
+  padding: 0;
+}
+
+.remove-list-btn {
+  border: none;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 7px;
+  height: 26px;
+  font-weight: 700;
+}
+
+.list-footer {
+  padding: 12px;
+  border-top: 1px solid #DCCCAC;
+  background: #FFF8EC;
+}
+
+.total-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.send-wa-btn {
+  width: 100%;
+  border: none;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.small-message {
+  padding: 14px;
+  color: #6f7a5f;
+  font-size: 14px;
+}
 
           @media (min-width: 768px) {
             .page-wrap {
@@ -327,8 +474,26 @@ app.get("/", (req, res) => {
             <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
           </div>
 
-          <button class="list-btn" id="yourListBtn">Your List (0)</button>
+          <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
         </header>
+
+		<div id="yourListPanel" class="your-list-panel">
+  <div class="list-head">
+    <strong>Your List</strong>
+    <button class="close-list-btn" onclick="closeYourList()">×</button>
+  </div>
+
+  <div id="yourListBody" class="list-body"></div>
+
+  <div class="list-footer">
+    <div class="total-line">
+      <span>Total</span>
+      <span id="yourListTotal">₹0</span>
+    </div>
+
+    <button class="send-wa-btn" onclick="sendToWhatsapp()">☘ Send to WhatsApp</button>
+  </div>
+</div>
 
         <main class="page-wrap">
           <section class="hero">
@@ -432,11 +597,181 @@ app.get("/", (req, res) => {
             input.value = next;
           }
 
-          function addToList(productId) {
-            alert("Your List will be connected in the next step.");
-          }
+         function getList() {
+  try {
+    return JSON.parse(localStorage.getItem("your_list") || "[]");
+  } catch (error) {
+    return [];
+  }
+}
 
+function saveList(list) {
+  localStorage.setItem("your_list", JSON.stringify(list));
+  updateListButton();
+  renderYourList();
+}
+
+function addToList(productId) {
+  const product = allProducts.find(function(item) {
+    return String(item.id) === String(productId);
+  });
+
+  if (!product) return;
+
+  const qtyInput = document.getElementById("qty-" + productId);
+  const qty = Math.max(1, Number(qtyInput ? qtyInput.value : 1));
+
+  const list = getList();
+  const existing = list.find(function(item) {
+    return String(item.id) === String(product.id);
+  });
+
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    list.push({
+      id: product.id,
+      name: product.product_name,
+      price: Number(product.show_price || 0),
+      image: product.product_image_url || "https://via.placeholder.com/300x300?text=Product",
+      slug: product.slug,
+      qty: qty
+    });
+  }
+
+  saveList(list);
+}
+
+function updateListButton() {
+  const list = getList();
+  const totalQty = list.reduce(function(sum, item) {
+    return sum + Number(item.qty || 0);
+  }, 0);
+
+  const btn = document.getElementById("yourListBtn");
+  if (!btn) return;
+
+  btn.textContent = "Your List (" + totalQty + ")";
+
+  if (totalQty > 0) {
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
+  }
+}
+
+function toggleYourList() {
+  const panel = document.getElementById("yourListPanel");
+  renderYourList();
+  panel.classList.toggle("show");
+}
+
+function closeYourList() {
+  document.getElementById("yourListPanel").classList.remove("show");
+}
+
+function renderYourList() {
+  const body = document.getElementById("yourListBody");
+  const totalBox = document.getElementById("yourListTotal");
+
+  if (!body || !totalBox) return;
+
+  const list = getList();
+
+  if (list.length === 0) {
+    body.innerHTML = '<div class="small-message">You have not added any product yet.</div>';
+    totalBox.textContent = "₹0";
+    return;
+  }
+
+  let total = 0;
+  body.innerHTML = "";
+
+  list.forEach(function(item) {
+    const itemTotal = Number(item.price || 0) * Number(item.qty || 1);
+    total += itemTotal;
+
+    const row = document.createElement("div");
+    row.className = "list-row";
+
+    row.innerHTML =
+      "<div>" +
+        "<img src='" + item.image + "' />" +
+        "<div class='list-product-name'>" + item.name + "</div>" +
+      "</div>" +
+      "<div class='list-price'>₹" + Number(item.price || 0).toFixed(0) + " × " + item.qty + "</div>" +
+      "<div class='list-price'>₹" + itemTotal.toFixed(0) + "</div>" +
+      "<div class='list-mini-qty'>" +
+        "<button onclick='changeListQty(" + item.id + ", -1)'>-</button>" +
+        "<input value='" + item.qty + "' onchange='setListQty(" + item.id + ", this.value)' />" +
+        "<button onclick='changeListQty(" + item.id + ", 1)'>+</button>" +
+      "</div>" +
+      "<button class='remove-list-btn' onclick='removeFromList(" + item.id + ")'>×</button>";
+
+    body.appendChild(row);
+  });
+
+  totalBox.textContent = "₹" + total.toFixed(0);
+}
+
+function changeListQty(productId, delta) {
+  const list = getList();
+
+  const item = list.find(function(row) {
+    return String(row.id) === String(productId);
+  });
+
+  if (!item) return;
+
+  item.qty = Math.max(1, Number(item.qty || 1) + delta);
+  saveList(list);
+}
+
+function setListQty(productId, value) {
+  const list = getList();
+
+  const item = list.find(function(row) {
+    return String(row.id) === String(productId);
+  });
+
+  if (!item) return;
+
+  item.qty = Math.max(1, Number(value || 1));
+  saveList(list);
+}
+
+function removeFromList(productId) {
+  const list = getList().filter(function(item) {
+    return String(item.id) !== String(productId);
+  });
+
+  saveList(list);
+}
+
+function sendToWhatsapp() {
+  const list = getList();
+
+  if (list.length === 0) {
+    alert("You have not added any product yet.");
+    return;
+  }
+
+  let total = 0;
+  let message = "Hello, I want to order these products:%0A%0A";
+
+  list.forEach(function(item) {
+    const itemTotal = Number(item.price || 0) * Number(item.qty || 1);
+    total += itemTotal;
+    message += item.name + " × " + item.qty + " = ₹" + itemTotal.toFixed(0) + "%0A";
+  });
+
+  message += "%0ATotal = ₹" + total.toFixed(0);
+
+  alert("WhatsApp number will be connected from Header & Footer settings later. Message ready:%0A%0A" + decodeURIComponent(message));
+}
           loadProducts();
+updateListButton();
+renderYourList();
         </script>
       </body>
     </html>
