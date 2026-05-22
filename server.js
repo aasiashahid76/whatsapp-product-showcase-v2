@@ -2700,15 +2700,324 @@ app.get("/all-products", (req, res) => {
     <html>
       <head>
         <title>All Products</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #FFF8EC;
+            color: #546B41;
+          }
+
+          .topbar {
+            background: #546B41;
+            color: #FFF8EC;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+          }
+
+          .topbar h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+          }
+
+          .admin-nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+          }
+
+          .admin-nav a,
+          .admin-nav button {
+            background: #99AD7A;
+            color: #FFF8EC;
+            border: none;
+            border-radius: 10px;
+            padding: 9px 13px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+          }
+
+          .admin-nav a.active {
+            background: #DCCCAC;
+            color: #546B41;
+          }
+
+          .container {
+            max-width: 1280px;
+            margin: auto;
+            padding: 24px;
+          }
+
+          .toolbar {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            box-shadow: 0 8px 24px rgba(84, 107, 65, 0.08);
+          }
+
+          .toolbar input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #DCCCAC;
+            background: #FFF8EC;
+            color: #546B41;
+            font-size: 14px;
+            outline: none;
+          }
+
+          .toolbar button {
+            border: none;
+            background: #546B41;
+            color: #FFF8EC;
+            border-radius: 12px;
+            padding: 12px 15px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+          }
+
+          .products-table-wrap {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(84, 107, 65, 0.08);
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          th {
+            background: #DCCCAC;
+            color: #546B41;
+            text-align: left;
+            font-size: 13px;
+            padding: 12px;
+            font-weight: 700;
+          }
+
+          td {
+            border-top: 1px solid #f0e4ce;
+            padding: 11px 12px;
+            font-size: 13px;
+            vertical-align: middle;
+          }
+
+          .product-img-small {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid #DCCCAC;
+            background: #FFF8EC;
+          }
+
+          .product-title {
+            font-weight: 700;
+            color: #38472d;
+            margin-bottom: 4px;
+          }
+
+          .muted {
+            color: #6f7a5f;
+            font-size: 12px;
+          }
+
+          .badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 12px;
+            font-weight: 700;
+          }
+
+          .badge-visible {
+            background: #dcfce7;
+            color: #166534;
+          }
+
+          .badge-hidden {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+
+          .empty {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 16px;
+            padding: 18px;
+            color: #6f7a5f;
+          }
+
+          .loading {
+            padding: 18px;
+            color: #6f7a5f;
+          }
+        </style>
       </head>
+
       <body>
+        <div class="topbar">
+          <h1>All Products</h1>
+
+          <div class="admin-nav">
+            <a href="/manage-ui">Manage UI</a>
+            <a class="active" href="/all-products">All Products</a>
+            <a href="/dashboard">Dashboard</a>
+            <button onclick="logoutAdmin()">Logout</button>
+          </div>
+        </div>
+
+        <div class="container">
+          <div class="toolbar">
+            <input id="productSearchInput" placeholder="Search by product name, SKU, dealer, page..." oninput="filterAdminProducts()" />
+            <button onclick="loadAdminProducts()">Refresh</button>
+          </div>
+
+          <div id="productsBox" class="products-table-wrap">
+            <div class="loading">Loading products...</div>
+          </div>
+        </div>
+
         <script>
           const token = localStorage.getItem("admin_token");
+          let adminProducts = [];
+
           if (!token) {
             window.location.href = "/admin";
-          } else {
-            document.body.innerHTML = "<h1>All Products Panel</h1><p>Fresh Version 2 panel placeholder.</p><p><a href='/manage-ui'>Manage UI</a> | <a href='/dashboard'>Dashboard</a></p>";
           }
+
+          function logoutAdmin() {
+            localStorage.removeItem("admin_token");
+            window.location.href = "/admin";
+          }
+
+          async function loadAdminProducts() {
+            const box = document.getElementById("productsBox");
+            box.innerHTML = '<div class="loading">Loading products...</div>';
+
+            try {
+              const res = await fetch("/api/admin/products", {
+                headers: {
+                  "Authorization": "Bearer " + localStorage.getItem("admin_token")
+                }
+              });
+
+              const data = await res.json();
+
+              if (!res.ok) {
+                box.innerHTML = '<div class="empty">' + (data.message || "Failed to load products") + '</div>';
+                return;
+              }
+
+              adminProducts = data.products || [];
+              renderAdminProducts(adminProducts);
+            } catch (error) {
+              box.innerHTML = '<div class="empty">' + error.message + '</div>';
+            }
+          }
+
+          function renderAdminProducts(products) {
+            const box = document.getElementById("productsBox");
+
+            if (!products || products.length === 0) {
+              box.className = "";
+              box.innerHTML = '<div class="empty">No products found.</div>';
+              return;
+            }
+
+            box.className = "products-table-wrap";
+
+            let html = "";
+            html += "<table>";
+            html += "<thead>";
+            html += "<tr>";
+            html += "<th>Image</th>";
+            html += "<th>Product</th>";
+            html += "<th>Price</th>";
+            html += "<th>Dealer</th>";
+            html += "<th>Stock</th>";
+            html += "<th>Pages</th>";
+            html += "<th>Status</th>";
+            html += "</tr>";
+            html += "</thead>";
+            html += "<tbody>";
+
+            products.forEach(function(product) {
+              const image = product.product_image_url || "https://via.placeholder.com/100x100?text=Product";
+              const visibleBadge = product.is_visible ? "badge-visible" : "badge-hidden";
+              const visibleText = product.is_visible ? "Visible" : "Hidden";
+
+              html += "<tr>";
+              html += "<td><img class='product-img-small' src='" + image + "' /></td>";
+              html += "<td>";
+              html += "<div class='product-title'>" + (product.product_name || "") + "</div>";
+              html += "<div class='muted'>SKU: " + (product.sku || "-") + "</div>";
+              html += "<div class='muted'>Tag: " + (product.tag || "None") + "</div>";
+              html += "</td>";
+              html += "<td>";
+              html += "<div>₹" + Number(product.show_price || 0).toFixed(0) + "</div>";
+              html += "<div class='muted'>Crossed: ₹" + Number(product.crossed_price || 0).toFixed(0) + "</div>";
+              html += "</td>";
+              html += "<td>";
+              html += "<div>" + (product.dealer_name || "-") + "</div>";
+              html += "<div class='muted'>Dealer Price: ₹" + Number(product.dealer_price || 0).toFixed(0) + "</div>";
+              html += "</td>";
+              html += "<td>" + Number(product.qty_in_stock || 0) + "</td>";
+              html += "<td>" + (product.page_names || "-") + "</td>";
+              html += "<td><span class='badge " + visibleBadge + "'>" + visibleText + "</span></td>";
+              html += "</tr>";
+            });
+
+            html += "</tbody>";
+            html += "</table>";
+
+            box.innerHTML = html;
+          }
+
+          function filterAdminProducts() {
+            const q = document.getElementById("productSearchInput").value.toLowerCase().trim();
+
+            if (!q) {
+              renderAdminProducts(adminProducts);
+              return;
+            }
+
+            const filtered = adminProducts.filter(function(product) {
+              return (
+                String(product.product_name || "").toLowerCase().includes(q) ||
+                String(product.sku || "").toLowerCase().includes(q) ||
+                String(product.dealer_name || "").toLowerCase().includes(q) ||
+                String(product.page_names || "").toLowerCase().includes(q)
+              );
+            });
+
+            renderAdminProducts(filtered);
+          }
+
+          loadAdminProducts();
         </script>
       </body>
     </html>
