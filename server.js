@@ -1065,6 +1065,72 @@ app.get("/api/auth/me", verifyAdmin, (req, res) => {
 });
 
 /* =========================
+   SETTINGS API
+========================= */
+
+app.get("/api/settings", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT setting_key, setting_value FROM site_settings");
+
+    const settings = {};
+
+    rows.forEach(function(row) {
+      settings[row.setting_key] = row.setting_value || "";
+    });
+
+    res.json({
+      status: "ok",
+      settings
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch settings",
+      error: error.message
+    });
+  }
+});
+
+app.post("/api/admin/settings", verifyAdmin, async (req, res) => {
+  try {
+    const allowedKeys = [
+      "logo_url",
+      "email",
+      "mobile_number",
+      "whatsapp_number",
+      "instagram_link",
+      "browse_all_products_link",
+      "policies",
+      "privacy_policy",
+      "return_refund",
+      "terms_condition"
+    ];
+
+    for (const key of allowedKeys) {
+      if (Object.prototype.hasOwnProperty.call(req.body, key)) {
+        await db.query(
+          `INSERT INTO site_settings (setting_key, setting_value)
+           VALUES (?, ?)
+           ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
+          [key, req.body[key] || ""]
+        );
+      }
+    }
+
+    res.json({
+      status: "ok",
+      message: "Settings saved successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to save settings",
+      error: error.message
+    });
+  }
+});
+
+/* =========================
    PAGE API
 ========================= */
 
