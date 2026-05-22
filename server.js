@@ -397,6 +397,107 @@ app.get("/api/auth/me", verifyAdmin, (req, res) => {
   });
 });
 
+/* =========================
+   PAGE API
+========================= */
+
+app.get("/api/pages", async (req, res) => {
+  try {
+    const [pages] = await db.query(
+      "SELECT * FROM pages ORDER BY sort_order ASC, id DESC"
+    );
+
+    res.json({
+      status: "ok",
+      pages
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch pages",
+      error: error.message
+    });
+  }
+});
+
+app.post("/api/admin/pages", verifyAdmin, async (req, res) => {
+  try {
+    const {
+      page_name,
+      show_on_header,
+      show_on_banner,
+      banner_image_url,
+      banner_subheading,
+      create_circular_icon,
+      circular_image_url
+    } = req.body;
+
+    if (!page_name) {
+      return res.status(400).json({
+        status: "error",
+        message: "Page name is required"
+      });
+    }
+
+    const slug = createSlug(page_name);
+
+    const [existing] = await db.query(
+      "SELECT id FROM pages WHERE slug = ? LIMIT 1",
+      [slug]
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({
+        status: "error",
+        message: "A page with this name already exists"
+      });
+    }
+
+    const [maxOrderRows] = await db.query(
+      "SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM pages"
+    );
+
+    const nextOrder = Number(maxOrderRows[0].max_order || 0) + 1;
+
+    const [result] = await db.query(
+      `INSERT INTO pages 
+       (page_name, slug, show_on_header, show_on_banner, banner_image_url, banner_subheading, create_circular_icon, circular_image_url, sort_order, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, true)`,
+      [
+        page_name,
+        slug,
+        show_on_header ? 1 : 0,
+        show_on_banner ? 1 : 0,
+        banner_image_url || null,
+        banner_subheading || null,
+        create_circular_icon ? 1 : 0,
+        circular_image_url || null,
+        nextOrder
+      ]
+    );
+
+    await db.query(
+      `INSERT INTO home_layout_sections 
+       (section_type, reference_id, sort_order, is_active)
+       VALUES ('page', ?, ?, true)`,
+      [result.insertId, nextOrder]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Page created successfully",
+      page_id: result.insertId,
+      slug
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to create page",
+      error: error.message
+    });
+  }
+});
+
 app.get("/admin", (req, res) => {
   res.send(`
     <!DOCTYPE html>
