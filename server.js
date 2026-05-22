@@ -1965,11 +1965,42 @@ app.get("/manage-ui", (req, res) => {
           </div>
 
           <div id="settingsTab" class="tab-content">
-            <div class="card">
-              <h2>Header & Footer</h2>
-              <p>This tab will manage logo, email, mobile number, WhatsApp number, Instagram link, browse all products link, and policy content.</p>
-            </div>
-          </div>
+  <div class="card">
+    <h2>Header & Footer</h2>
+
+    <label>Logo URL</label>
+    <input id="settingLogoUrl" placeholder="Paste logo URL" />
+
+    <label>Email</label>
+    <input id="settingEmail" placeholder="Example: hello@example.com" />
+
+    <label>Mobile Number</label>
+    <input id="settingMobileNumber" placeholder="Example: +91 9999999999" />
+
+    <label>WhatsApp Number</label>
+    <input id="settingWhatsappNumber" placeholder="Example: 918802884309" />
+
+    <label>Instagram Link</label>
+    <input id="settingInstagramLink" placeholder="Instagram page link" />
+
+    <label>Browse All Products Link</label>
+    <input id="settingBrowseAllProductsLink" placeholder="/page/all-products" />
+
+    <label>Policies</label>
+    <textarea id="settingPolicies" placeholder="Write policies content"></textarea>
+
+    <label>Privacy Policy</label>
+    <textarea id="settingPrivacyPolicy" placeholder="Write privacy policy content"></textarea>
+
+    <label>Return & Refund</label>
+    <textarea id="settingReturnRefund" placeholder="Write return and refund content"></textarea>
+
+    <label>Terms & Condition</label>
+    <textarea id="settingTermsCondition" placeholder="Write terms and condition content"></textarea>
+
+    <button class="primary" onclick="saveSettings()">Save Header & Footer Settings</button>
+  </div>
+</div>
         </div>
 
 <div id="editPageOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;"></div>
@@ -2359,6 +2390,62 @@ async function createProduct() {
   }
 }
 
+async function loadSettings() {
+  try {
+    const res = await fetch("/api/settings");
+    const data = await res.json();
+    const settings = data.settings || {};
+
+    document.getElementById("settingLogoUrl").value = settings.logo_url || "";
+    document.getElementById("settingEmail").value = settings.email || "";
+    document.getElementById("settingMobileNumber").value = settings.mobile_number || "";
+    document.getElementById("settingWhatsappNumber").value = settings.whatsapp_number || "";
+    document.getElementById("settingInstagramLink").value = settings.instagram_link || "";
+    document.getElementById("settingBrowseAllProductsLink").value = settings.browse_all_products_link || "/page/all-products";
+    document.getElementById("settingPolicies").value = settings.policies || "";
+    document.getElementById("settingPrivacyPolicy").value = settings.privacy_policy || "";
+    document.getElementById("settingReturnRefund").value = settings.return_refund || "";
+    document.getElementById("settingTermsCondition").value = settings.terms_condition || "";
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function saveSettings() {
+  try {
+    const res = await fetch("/api/admin/settings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+      },
+      body: JSON.stringify({
+        logo_url: document.getElementById("settingLogoUrl").value.trim(),
+        email: document.getElementById("settingEmail").value.trim(),
+        mobile_number: document.getElementById("settingMobileNumber").value.trim(),
+        whatsapp_number: document.getElementById("settingWhatsappNumber").value.trim(),
+        instagram_link: document.getElementById("settingInstagramLink").value.trim(),
+        browse_all_products_link: document.getElementById("settingBrowseAllProductsLink").value.trim(),
+        policies: document.getElementById("settingPolicies").value.trim(),
+        privacy_policy: document.getElementById("settingPrivacyPolicy").value.trim(),
+        return_refund: document.getElementById("settingReturnRefund").value.trim(),
+        terms_condition: document.getElementById("settingTermsCondition").value.trim()
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Settings save failed");
+      return;
+    }
+
+    alert("Settings saved successfully");
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
 async function deletePage(pageId, pageName) {
   const ok = confirm("Delete this page permanently? Page: " + pageName);
 
@@ -2393,6 +2480,7 @@ async function deletePage(pageId, pageName) {
 						} else {
   loadPages();
   loadProductPageCheckboxes();
+  loadSettings();
 }
 
         </script>
