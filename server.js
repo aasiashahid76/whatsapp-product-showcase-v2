@@ -2089,8 +2089,13 @@ app.get("/manage-ui", (req, res) => {
   <div class="card">
     <h2>Header & Footer</h2>
 
-    <label>Logo URL</label>
-    <input id="settingLogoUrl" placeholder="Paste logo URL" />
+    <label>Logo</label>
+<div style="display:flex;gap:8px;align-items:center;">
+  <input id="settingLogoFile" type="file" accept="image/*" />
+  <button type="button" onclick="uploadImageFile('settingLogoFile', 'settingLogoUrl', 'logoUploadStatus')" style="width:auto;margin-top:0;background:#546B41;color:#FFF8EC;border:none;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;">Upload</button>
+</div>
+<input id="settingLogoUrl" type="hidden" />
+<div id="logoUploadStatus" style="font-size:13px;color:#6f7a5f;margin-top:6px;">No logo uploaded yet.</div>
 
     <label>Email</label>
     <input id="settingEmail" placeholder="Example: hello@example.com" />
@@ -2511,6 +2516,57 @@ async function createProduct() {
   }
 }
 
+async function uploadImageFile(fileInputId, hiddenInputId, statusId) {
+  const fileInput = document.getElementById(fileInputId);
+  const hiddenInput = document.getElementById(hiddenInputId);
+  const statusBox = document.getElementById(statusId);
+
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    alert("Please choose an image first.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("image", fileInput.files[0]);
+
+  if (statusBox) {
+    statusBox.textContent = "Uploading...";
+  }
+
+  try {
+    const res = await fetch("/api/admin/upload", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+      },
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (statusBox) {
+        statusBox.textContent = data.message || "Upload failed";
+      }
+      alert(data.message || "Upload failed");
+      return;
+    }
+
+    hiddenInput.value = data.file_url;
+
+    if (statusBox) {
+      statusBox.textContent = "Uploaded successfully";
+    }
+
+    alert("Image uploaded successfully");
+  } catch (error) {
+    if (statusBox) {
+      statusBox.textContent = error.message;
+    }
+    alert(error.message);
+  }
+}
+
 async function loadSettings() {
   try {
     const res = await fetch("/api/settings");
@@ -2518,6 +2574,7 @@ async function loadSettings() {
     const settings = data.settings || {};
 
     document.getElementById("settingLogoUrl").value = settings.logo_url || "";
+document.getElementById("logoUploadStatus").textContent = settings.logo_url ? "Logo already uploaded" : "No logo uploaded yet.";
     document.getElementById("settingEmail").value = settings.email || "";
     document.getElementById("settingMobileNumber").value = settings.mobile_number || "";
     document.getElementById("settingWhatsappNumber").value = settings.whatsapp_number || "";
