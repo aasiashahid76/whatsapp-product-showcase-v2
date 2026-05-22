@@ -2,11 +2,51 @@ import express from "express";
 import mysql from "mysql2/promise";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set("trust proxy", true);
 app.use(express.json());
+
+const MEDIA_DIR = path.join(process.cwd(), "media");
+
+if (!fs.existsSync(MEDIA_DIR)) {
+  fs.mkdirSync(MEDIA_DIR, { recursive: true });
+}
+
+app.use("/media", express.static(MEDIA_DIR));
+
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, MEDIA_DIR);
+  },
+  filename: function(req, file, cb) {
+    const safeName = file.originalname
+      .toLowerCase()
+      .replace(/[^a-z0-9.]+/g, "-")
+      .replace(/-+/g, "-");
+
+    cb(null, Date.now() + "-" + safeName);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024
+  },
+  fileFilter: function(req, file, cb) {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"));
+    }
+
+    cb(null, true);
+  }
+});
 
 const JWT_SECRET = process.env.JWT_SECRET || "temporary_secret_change_later";
 
@@ -1109,6 +1149,40 @@ app.get("/api/auth/me", verifyAdmin, (req, res) => {
     status: "ok",
     admin: req.admin
   });
+});
+
+/* =========================
+   UPLOAD API
+========================= */
+
+app.post("/api/admin/upload", verifyAdmin, upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        status: "error",
+        message: "No image uploaded"
+      });
+    }
+
+    const fileUrl = "/media/" + req.file.filename;
+
+    await db.query(
+      "INSERT INTO media_uploads (file_url, file_type) VALUES (?, ?)",
+      [fileUrl, req.file.mimetype]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Image uploaded successfully",
+      file_url: fileUrl
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Image upload failed",
+      error: error.message
+    });
+  }
 });
 
 /* =========================
