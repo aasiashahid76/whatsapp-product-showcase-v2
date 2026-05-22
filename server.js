@@ -1624,6 +1624,71 @@ app.post("/api/admin/products", verifyAdmin, async (req, res) => {
   }
 });
 
+app.put("/api/admin/products/:id/quantity", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { qty_in_stock } = req.body;
+
+    await db.query(
+      "UPDATE products SET qty_in_stock = ? WHERE id = ?",
+      [Number(qty_in_stock || 0), id]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Quantity updated successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update quantity",
+      error: error.message
+    });
+  }
+});
+
+app.put("/api/admin/products/:id/visibility", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_visible } = req.body;
+
+    await db.query(
+      "UPDATE products SET is_visible = ? WHERE id = ?",
+      [is_visible ? 1 : 0, id]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Product visibility updated successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update product visibility",
+      error: error.message
+    });
+  }
+});
+
+app.delete("/api/admin/products/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await db.query("DELETE FROM products WHERE id = ?", [id]);
+
+    res.json({
+      status: "ok",
+      message: "Product deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to delete product",
+      error: error.message
+    });
+  }
+});
+
 app.get("/admin", (req, res) => {
   res.send(`
     <!DOCTYPE html>
