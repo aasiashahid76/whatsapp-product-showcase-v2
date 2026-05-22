@@ -1989,10 +1989,12 @@ app.get("/manage-ui", (req, res) => {
                 </div>
 
                 <label>Banner Image</label>
-                <input type="file" accept="image/*" />
-
-                <label>Banner Image URL</label>
-                <input id="bannerImageUrl" placeholder="Banner image URL" />
+<div style="display:flex;gap:8px;align-items:center;">
+  <input id="bannerImageFile" type="file" accept="image/*" />
+  <button type="button" onclick="uploadImageFile('bannerImageFile', 'bannerImageUrl', 'bannerUploadStatus')" style="width:auto;margin-top:0;background:#546B41;color:#FFF8EC;border:none;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;">Upload</button>
+</div>
+<input id="bannerImageUrl" type="hidden" />
+<div id="bannerUploadStatus" style="font-size:13px;color:#6f7a5f;margin-top:6px;">No banner image uploaded yet.</div>
 
                 <label>Banner Subheading</label>
                 <input id="bannerSubheading" placeholder="Example: Fresh collection available now" />
@@ -2003,10 +2005,12 @@ app.get("/manage-ui", (req, res) => {
                 </div>
 
                 <label>Circular Image</label>
-                <input type="file" accept="image/*" />
-
-                <label>Circular Image URL</label>
-                <input id="circularImageUrl" placeholder="Circular image URL" />
+<div style="display:flex;gap:8px;align-items:center;">
+  <input id="circularImageFile" type="file" accept="image/*" />
+  <button type="button" onclick="uploadImageFile('circularImageFile', 'circularImageUrl', 'circularUploadStatus')" style="width:auto;margin-top:0;background:#546B41;color:#FFF8EC;border:none;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;">Upload</button>
+</div>
+<input id="circularImageUrl" type="hidden" />
+<div id="circularUploadStatus" style="font-size:13px;color:#6f7a5f;margin-top:6px;">No circular image uploaded yet.</div>
 
                 <button class="primary" onclick="createPage()">Create Page</button>
               </div>
@@ -2239,6 +2243,10 @@ app.get("/manage-ui", (req, res) => {
     document.getElementById("bannerSubheading").value = "";
     document.getElementById("createCircularIcon").checked = false;
     document.getElementById("circularImageUrl").value = "";
+	document.getElementById("bannerImageFile").value = "";
+document.getElementById("circularImageFile").value = "";
+document.getElementById("bannerUploadStatus").textContent = "No banner image uploaded yet.";
+document.getElementById("circularUploadStatus").textContent = "No circular image uploaded yet.";
 
     alert("Page created successfully");
     loadPages();
