@@ -1167,11 +1167,55 @@ app.get("/manage-ui", (req, res) => {
           </div>
 
           <div id="productsTab" class="tab-content">
-            <div class="card">
-              <h2>Add Product</h2>
-              <p>This tab will contain product creation form with SKU, name, image, price, dealer, stock, demand color, and page selection.</p>
-            </div>
-          </div>
+  <div class="card">
+    <h2>Add Product</h2>
+
+    <label>Product SKU</label>
+    <input id="productSku" placeholder="Example: SKU001" />
+
+    <label>Product Name</label>
+    <input id="productName" placeholder="Example: Kitchen Bottle" />
+
+    <label>Product Image URL</label>
+    <input id="productImageUrl" placeholder="Paste product image URL for now" />
+
+    <label>Show Price</label>
+    <input id="showPrice" type="number" placeholder="Example: 499" />
+
+    <label>Crossed Price</label>
+    <input id="crossedPrice" type="number" placeholder="Optional. Example: 699" />
+
+    <label>Tag</label>
+    <select id="productTag">
+      <option value="None">None</option>
+      <option value="New">New</option>
+      <option value="On Sale">On Sale</option>
+    </select>
+
+    <label>Dealer Name</label>
+    <input id="dealerName" placeholder="Dealer name" />
+
+    <label>Dealer Price</label>
+    <input id="dealerPrice" type="number" placeholder="Example: 300" />
+
+    <label>Quantity in Stock</label>
+    <input id="qtyInStock" type="number" placeholder="Example: 25" />
+
+    <label>Demand Color</label>
+    <select id="demandColor">
+      <option value="Green">Green - High Demand</option>
+      <option value="Yellow">Yellow - Moderate Demand</option>
+      <option value="Red">Red - Less Demand</option>
+    </select>
+
+    <label>Pages to be shown</label>
+    <div id="productPagesBox" class="placeholder">
+      Loading pages...
+    </div>
+
+    <button class="primary" onclick="createProduct()">Create Product</button>
+  </div>
+</div>
 
           <div id="logoBannerTab" class="tab-content">
             <div class="card">
@@ -1472,6 +1516,116 @@ async function updatePage() {
   }
 }
 
+async function loadProductPageCheckboxes() {
+  const box = document.getElementById("productPagesBox");
+
+  if (!box) return;
+
+  try {
+    const res = await fetch("/api/pages");
+    const data = await res.json();
+
+    const pages = data.pages || [];
+
+    if (pages.length === 0) {
+      box.innerHTML = "No pages created yet. Create a page first.";
+      return;
+    }
+
+    box.className = "";
+    box.innerHTML = "";
+
+    pages.forEach(function(page) {
+      const label = document.createElement("label");
+      label.className = "check-row";
+
+      label.innerHTML =
+        "<input type='checkbox' class='productPageCheckbox' value='" + page.id + "' />" +
+        "<span>" + page.page_name + "</span>";
+
+      box.appendChild(label);
+    });
+  } catch (error) {
+    box.innerHTML = error.message;
+  }
+}
+
+function getSelectedProductPageIds() {
+  const checked = document.querySelectorAll(".productPageCheckbox:checked");
+
+  return Array.from(checked).map(function(input) {
+    return Number(input.value);
+  });
+}
+
+async function createProduct() {
+  const sku = document.getElementById("productSku").value.trim();
+  const product_name = document.getElementById("productName").value.trim();
+  const product_image_url = document.getElementById("productImageUrl").value.trim();
+  const show_price = document.getElementById("showPrice").value;
+  const crossed_price = document.getElementById("crossedPrice").value;
+  const tag = document.getElementById("productTag").value;
+  const dealer_name = document.getElementById("dealerName").value.trim();
+  const dealer_price = document.getElementById("dealerPrice").value;
+  const qty_in_stock = document.getElementById("qtyInStock").value;
+  const demand_color = document.getElementById("demandColor").value;
+  const page_ids = getSelectedProductPageIds();
+
+  if (!product_name) {
+    alert("Please enter product name");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/products", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+      },
+      body: JSON.stringify({
+        sku,
+        product_name,
+        product_image_url,
+        show_price,
+        crossed_price,
+        tag,
+        dealer_name,
+        dealer_price,
+        qty_in_stock,
+        demand_color,
+        page_ids
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Product creation failed");
+      return;
+    }
+
+    document.getElementById("productSku").value = "";
+    document.getElementById("productName").value = "";
+    document.getElementById("productImageUrl").value = "";
+    document.getElementById("showPrice").value = "";
+    document.getElementById("crossedPrice").value = "";
+    document.getElementById("productTag").value = "None";
+    document.getElementById("dealerName").value = "";
+    document.getElementById("dealerPrice").value = "";
+    document.getElementById("qtyInStock").value = "";
+    document.getElementById("demandColor").value = "Green";
+
+    document.querySelectorAll(".productPageCheckbox").forEach(function(input) {
+      input.checked = false;
+    });
+
+    alert("Product created successfully");
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
 async function deletePage(pageId, pageName) {
   const ok = confirm("Delete this page permanently? Page: " + pageName);
 
@@ -1504,8 +1658,9 @@ async function deletePage(pageId, pageName) {
           if (!token) {
 			window.location.href = "/admin";
 						} else {
-								loadPages();
-						}
+  loadPages();
+  loadProductPageCheckboxes();
+}
 
         </script>
       </body>
