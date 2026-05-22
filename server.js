@@ -762,16 +762,16 @@ function sendToWhatsapp() {
   const whatsappNumber = "918802884309";
 
   let total = 0;
-  let message = "Hello, I want to order these products:\n\n";
+  let message = "Hello, I want to order these products:" + String.fromCharCode(10) + String.fromCharCode(10);
 
   list.forEach(function(item) {
     const itemTotal = Number(item.price || 0) * Number(item.qty || 1);
     total += itemTotal;
 
-    message += item.name + " × " + item.qty + " = ₹" + itemTotal.toFixed(0) + "\n";
+    message += item.name + " × " + item.qty + " = ₹" + itemTotal.toFixed(0) + String.fromCharCode(10);
   });
 
-  message += "\nTotal = ₹" + total.toFixed(0);
+  message += String.fromCharCode(10) + "Total = ₹" + total.toFixed(0);
 
   const url = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
 
