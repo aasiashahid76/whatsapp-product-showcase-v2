@@ -2153,8 +2153,13 @@ app.get("/manage-ui", (req, res) => {
     <span>Show on Banner</span>
   </div>
 
-  <label>Banner Image URL</label>
-  <input id="editBannerImageUrl" />
+  <label>Banner Image</label>
+<div style="display:flex;gap:8px;align-items:center;">
+  <input id="editBannerImageFile" type="file" accept="image/*" />
+  <button type="button" onclick="uploadImageFile('editBannerImageFile', 'editBannerImageUrl', 'editBannerUploadStatus')" style="width:auto;margin-top:0;background:#546B41;color:#FFF8EC;border:none;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;">Upload</button>
+</div>
+<input id="editBannerImageUrl" type="hidden" />
+<div id="editBannerUploadStatus" style="font-size:13px;color:#6f7a5f;margin-top:6px;">No banner image uploaded yet.</div>
 
   <label>Banner Subheading</label>
   <input id="editBannerSubheading" />
@@ -2164,8 +2169,13 @@ app.get("/manage-ui", (req, res) => {
     <span>Create Circular Icon</span>
   </div>
 
-  <label>Circular Image URL</label>
-  <input id="editCircularImageUrl" />
+  <label>Circular Image</label>
+<div style="display:flex;gap:8px;align-items:center;">
+  <input id="editCircularImageFile" type="file" accept="image/*" />
+  <button type="button" onclick="uploadImageFile('editCircularImageFile', 'editCircularImageUrl', 'editCircularUploadStatus')" style="width:auto;margin-top:0;background:#546B41;color:#FFF8EC;border:none;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;">Upload</button>
+</div>
+<input id="editCircularImageUrl" type="hidden" />
+<div id="editCircularUploadStatus" style="font-size:13px;color:#6f7a5f;margin-top:6px;">No circular image uploaded yet.</div>
 
   <div class="check-row">
     <input id="editIsActive" type="checkbox" />
@@ -2348,10 +2358,12 @@ function openEditPageBox(page) {
   document.getElementById("editPageName").value = page.page_name || "";
   document.getElementById("editShowOnHeader").checked = Boolean(page.show_on_header);
   document.getElementById("editShowOnBanner").checked = Boolean(page.show_on_banner);
-  document.getElementById("editBannerImageUrl").value = page.banner_image_url || "";
-  document.getElementById("editBannerSubheading").value = page.banner_subheading || "";
+document.getElementById("editBannerImageUrl").value = page.banner_image_url || "";
+document.getElementById("editBannerUploadStatus").textContent = page.banner_image_url ? "Banner image already uploaded" : "No banner image uploaded yet.";  
+document.getElementById("editBannerSubheading").value = page.banner_subheading || "";
   document.getElementById("editCreateCircularIcon").checked = Boolean(page.create_circular_icon);
   document.getElementById("editCircularImageUrl").value = page.circular_image_url || "";
+document.getElementById("editCircularUploadStatus").textContent = page.circular_image_url ? "Circular image already uploaded" : "No circular image uploaded yet.";
   document.getElementById("editIsActive").checked = page.is_active !== 0;
 
   document.getElementById("editPageOverlay").style.display = "block";
