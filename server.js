@@ -1,7 +1,21 @@
 import express from "express";
+import mysql from "mysql2/promise";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT || 3306),
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
 app.get("/", (req, res) => {
   res.send(`
@@ -36,6 +50,7 @@ app.get("/", (req, res) => {
           h1 {
             margin: 0 0 10px;
             font-size: 28px;
+            font-weight: 700;
           }
 
           p {
@@ -48,7 +63,7 @@ app.get("/", (req, res) => {
       <body>
         <div class="card">
           <h1>Product Showcase V2</h1>
-          <p>Fresh setup is working. Now we can build the full website step by step.</p>
+          <p>Fresh setup is working. Database test is now available.</p>
         </div>
       </body>
     </html>
@@ -60,6 +75,24 @@ app.get("/api/health", (req, res) => {
     status: "ok",
     message: "Version 2 backend is working"
   });
+});
+
+app.get("/api/db-test", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT 1 + 1 AS result");
+
+    res.json({
+      status: "ok",
+      message: "Database connected successfully",
+      result: rows[0].result
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Database connection failed",
+      error: error.message
+    });
+  }
 });
 
 app.listen(PORT, () => {
