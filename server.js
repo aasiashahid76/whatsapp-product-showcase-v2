@@ -62,62 +62,386 @@ app.get("/", (req, res) => {
         <title>Product Showcase V2</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
+          * {
+            box-sizing: border-box;
+          }
+
           body {
             margin: 0;
             font-family: Arial, sans-serif;
             background: #FFF8EC;
             color: #546B41;
-            display: flex;
-            min-height: 100vh;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
           }
 
-          .card {
+          .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #FFF8EC;
+            border-bottom: 1px solid #DCCCAC;
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: 82px 1fr auto;
+            gap: 8px;
+            align-items: center;
+          }
+
+          .logo-box {
+            height: 38px;
+            border-radius: 10px;
+            background: #546B41;
+            color: #FFF8EC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+          }
+
+          .search-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             background: white;
             border: 1px solid #DCCCAC;
-            border-radius: 18px;
-            padding: 28px;
-            max-width: 560px;
-            box-shadow: 0 10px 30px rgba(84, 107, 65, 0.12);
+            border-radius: 999px;
+            padding: 8px 10px;
           }
 
-          h1 {
-            margin: 0 0 10px;
-            font-size: 28px;
+          .search-box span {
+            font-size: 14px;
+          }
+
+          .search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #546B41;
+            font-size: 13px;
+          }
+
+          .list-btn {
+            border: none;
+            background: white;
+            color: #546B41;
+            border: 1px solid #DCCCAC;
+            border-radius: 999px;
+            padding: 9px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+          }
+
+          .page-wrap {
+            padding: 14px 10px 28px;
+          }
+
+          .hero {
+            border-radius: 18px;
+            background: linear-gradient(135deg, #546B41, #99AD7A);
+            color: #FFF8EC;
+            padding: 20px 16px;
+            margin-bottom: 16px;
+          }
+
+          .hero h1 {
+            margin: 0 0 6px;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.15;
+          }
+
+          .hero p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.45;
+            opacity: 0.95;
+          }
+
+          .section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 14px 2px 10px;
+          }
+
+          .section-head h2 {
+            margin: 0;
+            font-size: 17px;
             font-weight: 700;
           }
 
-          p {
-            margin: 0 0 12px;
+          .section-head a {
             color: #546B41;
-            line-height: 1.5;
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
           }
 
-          a {
-            color: white;
+          .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+          }
+
+          .product-card {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 13px;
+            overflow: hidden;
+          }
+
+          .product-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+            background: #DCCCAC;
+          }
+
+          .product-info {
+            padding: 6px;
+          }
+
+          .name-price-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            align-items: flex-start;
+            min-height: 30px;
+          }
+
+          .product-name {
+            font-size: 11px;
+            line-height: 1.2;
+            font-weight: 500;
+            color: #38472d;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+          }
+
+          .product-price {
+            font-size: 11px;
+            font-weight: 700;
+            color: #546B41;
+            white-space: nowrap;
+          }
+
+          .card-action-row {
+            display: grid;
+            grid-template-columns: 1fr 38px;
+            gap: 4px;
+            margin-top: 6px;
+            align-items: center;
+          }
+
+          .qty-row {
+            display: grid;
+            grid-template-columns: 18px 1fr 18px;
+            gap: 2px;
+          }
+
+          .qty-row button {
+            border: none;
+            background: #DCCCAC;
+            color: #546B41;
+            border-radius: 6px;
+            height: 24px;
+            font-size: 12px;
+            font-weight: 700;
+          }
+
+          .qty-row input {
+            width: 100%;
+            border: 1px solid #DCCCAC;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 11px;
+            color: #546B41;
+            height: 24px;
+            padding: 0;
+          }
+
+          .add-btn {
+            border: none;
             background: #546B41;
-            padding: 10px 14px;
-            border-radius: 10px;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 8px;
+            color: #FFF8EC;
+            border-radius: 7px;
+            height: 24px;
+            font-size: 10px;
+            font-weight: 700;
+          }
+
+          .empty {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 14px;
+            padding: 16px;
+            color: #6f7a5f;
+            font-size: 14px;
+          }
+
+          @media (min-width: 768px) {
+            .page-wrap {
+              max-width: 1100px;
+              margin: auto;
+              padding: 24px;
+            }
+
+            .site-header {
+              grid-template-columns: 110px 1fr auto;
+              padding: 12px 24px;
+            }
+
+            .logo-box {
+              height: 44px;
+            }
+
+            .product-grid {
+              grid-template-columns: repeat(6, 1fr);
+              gap: 12px;
+            }
+
+            .product-name,
+            .product-price {
+              font-size: 13px;
+            }
+
+            .card-action-row {
+              grid-template-columns: 1fr 52px;
+            }
           }
         </style>
       </head>
+
       <body>
-        <div class="card">
-          <h1>Product Showcase V2</h1>
-          <p>Fresh backend is working. Database setup and admin login setup are ready.</p>
-          <a href="/admin">Go to Admin Login</a>
-        </div>
+        <header class="site-header">
+          <a href="/" class="logo-box">LOGO</a>
+
+          <div class="search-box">
+            <span>🔍</span>
+            <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
+          </div>
+
+          <button class="list-btn" id="yourListBtn">Your List (0)</button>
+        </header>
+
+        <main class="page-wrap">
+          <section class="hero">
+            <h1>Shop quality products easily</h1>
+            <p>Select products, add them to Your List, and send your order on WhatsApp.</p>
+          </section>
+
+          <section>
+            <div class="section-head">
+              <h2>Latest Products</h2>
+              <a href="#">View all</a>
+            </div>
+
+            <div id="productsGrid" class="product-grid"></div>
+          </section>
+        </main>
+
+        <script>
+          let allProducts = [];
+
+          function productCard(product) {
+            const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
+            const price = Number(product.show_price || 0).toFixed(0);
+
+            return \`
+              <div class="product-card">
+                <a href="/product/\${product.slug}">
+                  <img class="product-img" src="\${image}" alt="\${product.product_name}" />
+                </a>
+
+                <div class="product-info">
+                  <div class="name-price-row">
+                    <div class="product-name">\${product.product_name}</div>
+                    <div class="product-price">₹\${price}</div>
+                  </div>
+
+                  <div class="card-action-row">
+                    <div class="qty-row">
+                      <button onclick="changeQty('\${product.id}', -1)">-</button>
+                      <input id="qty-\${product.id}" type="number" min="1" value="1" />
+                      <button onclick="changeQty('\${product.id}', 1)">+</button>
+                    </div>
+
+                    <button class="add-btn" onclick="addToList('\${product.id}')">Add</button>
+                  </div>
+                </div>
+              </div>
+            \`;
+          }
+
+          function renderProducts(products) {
+            const grid = document.getElementById("productsGrid");
+
+            if (!products || products.length === 0) {
+              grid.className = "";
+              grid.innerHTML = '<div class="empty">No products found.</div>';
+              return;
+            }
+
+            grid.className = "product-grid";
+            grid.innerHTML = products.map(productCard).join("");
+          }
+
+          async function loadProducts() {
+            try {
+              const res = await fetch("/api/products");
+              const data = await res.json();
+
+              allProducts = data.products || [];
+              renderProducts(allProducts);
+            } catch (error) {
+              document.getElementById("productsGrid").innerHTML =
+                '<div class="empty">' + error.message + '</div>';
+            }
+          }
+
+          function filterProducts() {
+            const q = document.getElementById("searchInput").value.toLowerCase().trim();
+
+            if (!q) {
+              renderProducts(allProducts);
+              return;
+            }
+
+            const filtered = allProducts.filter(function(product) {
+              return (
+                String(product.product_name || "").toLowerCase().includes(q) ||
+                String(product.sku || "").toLowerCase().includes(q) ||
+                String(product.dealer_name || "").toLowerCase().includes(q) ||
+                String(product.page_names || "").toLowerCase().includes(q)
+              );
+            });
+
+            renderProducts(filtered);
+          }
+
+          function changeQty(productId, delta) {
+            const input = document.getElementById("qty-" + productId);
+            const current = Number(input.value || 1);
+            const next = Math.max(1, current + delta);
+            input.value = next;
+          }
+
+          function addToList(productId) {
+            alert("Your List will be connected in the next step.");
+          }
+
+          loadProducts();
+        </script>
       </body>
     </html>
   `);
 });
-
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
