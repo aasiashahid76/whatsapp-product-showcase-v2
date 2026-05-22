@@ -1026,6 +1026,51 @@ app.get("/manage-ui", (req, res) => {
           </div>
         </div>
 
+<div id="editPageOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;"></div>
+
+<div id="editPageBox" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:520px;max-width:92%;max-height:90vh;overflow:auto;background:white;border:1px solid #DCCCAC;border-radius:18px;padding:20px;z-index:101;box-shadow:0 16px 44px rgba(0,0,0,0.25);">
+  <h2>Edit Page</h2>
+
+  <input id="editPageId" type="hidden" />
+
+  <label>Page Name</label>
+  <input id="editPageName" />
+
+  <div class="check-row">
+    <input id="editShowOnHeader" type="checkbox" />
+    <span>Show on Header</span>
+  </div>
+
+  <div class="check-row">
+    <input id="editShowOnBanner" type="checkbox" />
+    <span>Show on Banner</span>
+  </div>
+
+  <label>Banner Image URL</label>
+  <input id="editBannerImageUrl" />
+
+  <label>Banner Subheading</label>
+  <input id="editBannerSubheading" />
+
+  <div class="check-row">
+    <input id="editCreateCircularIcon" type="checkbox" />
+    <span>Create Circular Icon</span>
+  </div>
+
+  <label>Circular Image URL</label>
+  <input id="editCircularImageUrl" />
+
+  <div class="check-row">
+    <input id="editIsActive" type="checkbox" />
+    <span>Page Active</span>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:14px;">
+    <button class="primary" onclick="updatePage()">Save Changes</button>
+    <button onclick="closeEditPageBox()" style="background:#DCCCAC;color:#546B41;border:none;border-radius:12px;padding:12px 15px;font-weight:700;cursor:pointer;">Cancel</button>
+  </div>
+</div>
+
         <script>
           function showTab(tabId, clickedButton) {
             document.querySelectorAll(".tab-content").forEach(function(tab) {
@@ -1119,24 +1164,69 @@ async function loadPages() {
     list.innerHTML = "";
 
     pages.forEach(function(page) {
-      const div = document.createElement("div");
-      div.style.border = "1px solid #DCCCAC";
-      div.style.borderRadius = "14px";
-      div.style.padding = "12px";
-      div.style.marginBottom = "10px";
-      div.style.background = "#FFF8EC";
+  const div = document.createElement("div");
+  div.style.border = "1px solid #DCCCAC";
+  div.style.borderRadius = "14px";
+  div.style.padding = "12px";
+  div.style.marginBottom = "10px";
+  div.style.background = "#FFF8EC";
 
-	 div.innerHTML =
-		  "<strong>" + page.page_name + "</strong>" +
-		  "<div style='font-size:13px;margin-top:5px;color:#6f7a5f;'>Slug: " + page.slug + "</div>" +
-		  "<div style='font-size:13px;color:#6f7a5f;'>Header: " + (page.show_on_header ? "Yes" : "No") + " | Banner: " + (page.show_on_banner ? "Yes" : "No") + " | Circular: " + (page.create_circular_icon ? "Yes" : "No") + "</div>" +
-"<div style='display:flex;gap:8px;margin-top:10px;'>" +
-  "<button onclick='openEditPageBox(" + JSON.stringify(page) + ")' style='background:#546B41;color:white;border:none;border-radius:10px;padding:8px 10px;cursor:pointer;'>Edit</button>" +
-  "<button onclick='deletePage(" + page.id + ", " + JSON.stringify(page.page_name) + ")' style='background:#991b1b;color:white;border:none;border-radius:10px;padding:8px 10px;cursor:pointer;'>Delete</button>" +
-"</div>";
+  const title = document.createElement("strong");
+  title.textContent = page.page_name;
 
-	  list.appendChild(div);
-    });
+  const slug = document.createElement("div");
+  slug.style.fontSize = "13px";
+  slug.style.marginTop = "5px";
+  slug.style.color = "#6f7a5f";
+  slug.textContent = "Slug: " + page.slug;
+
+  const meta = document.createElement("div");
+  meta.style.fontSize = "13px";
+  meta.style.color = "#6f7a5f";
+  meta.textContent =
+    "Header: " + (page.show_on_header ? "Yes" : "No") +
+    " | Banner: " + (page.show_on_banner ? "Yes" : "No") +
+    " | Circular: " + (page.create_circular_icon ? "Yes" : "No");
+
+  const actions = document.createElement("div");
+  actions.style.display = "flex";
+  actions.style.gap = "8px";
+  actions.style.marginTop = "10px";
+
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "Edit";
+  editBtn.style.background = "#546B41";
+  editBtn.style.color = "white";
+  editBtn.style.border = "none";
+  editBtn.style.borderRadius = "10px";
+  editBtn.style.padding = "8px 10px";
+  editBtn.style.cursor = "pointer";
+  editBtn.onclick = function() {
+    openEditPageBox(page);
+  };
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Delete";
+  deleteBtn.style.background = "#991b1b";
+  deleteBtn.style.color = "white";
+  deleteBtn.style.border = "none";
+  deleteBtn.style.borderRadius = "10px";
+  deleteBtn.style.padding = "8px 10px";
+  deleteBtn.style.cursor = "pointer";
+  deleteBtn.onclick = function() {
+    deletePage(page.id, page.page_name);
+  };
+
+  actions.appendChild(editBtn);
+  actions.appendChild(deleteBtn);
+
+  div.appendChild(title);
+  div.appendChild(slug);
+  div.appendChild(meta);
+  div.appendChild(actions);
+
+  list.appendChild(div);
+});
   } catch (error) {
     list.innerHTML = error.message;
   }
@@ -1248,50 +1338,6 @@ async function deletePage(pageId, pageName) {
 								loadPages();
 						}
 
-		<div id="editPageOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;"></div>
-
-<div id="editPageBox" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:520px;max-width:92%;max-height:90vh;overflow:auto;background:white;border:1px solid #DCCCAC;border-radius:18px;padding:20px;z-index:101;box-shadow:0 16px 44px rgba(0,0,0,0.25);">
-  <h2>Edit Page</h2>
-
-  <input id="editPageId" type="hidden" />
-
-  <label>Page Name</label>
-  <input id="editPageName" />
-
-  <div class="check-row">
-    <input id="editShowOnHeader" type="checkbox" />
-    <span>Show on Header</span>
-  </div>
-
-  <div class="check-row">
-    <input id="editShowOnBanner" type="checkbox" />
-    <span>Show on Banner</span>
-  </div>
-
-  <label>Banner Image URL</label>
-  <input id="editBannerImageUrl" />
-
-  <label>Banner Subheading</label>
-  <input id="editBannerSubheading" />
-
-  <div class="check-row">
-    <input id="editCreateCircularIcon" type="checkbox" />
-    <span>Create Circular Icon</span>
-  </div>
-
-  <label>Circular Image URL</label>
-  <input id="editCircularImageUrl" />
-
-  <div class="check-row">
-    <input id="editIsActive" type="checkbox" />
-    <span>Page Active</span>
-  </div>
-
-  <div style="display:flex;gap:10px;margin-top:14px;">
-    <button class="primary" onclick="updatePage()">Save Changes</button>
-    <button onclick="closeEditPageBox()" style="background:#DCCCAC;color:#546B41;border:none;border-radius:12px;padding:12px 15px;font-weight:700;cursor:pointer;">Cancel</button>
-  </div>
-</div>				
         </script>
       </body>
     </html>
