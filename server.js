@@ -1130,12 +1130,86 @@ async function loadPages() {
 		  "<strong>" + page.page_name + "</strong>" +
 		  "<div style='font-size:13px;margin-top:5px;color:#6f7a5f;'>Slug: " + page.slug + "</div>" +
 		  "<div style='font-size:13px;color:#6f7a5f;'>Header: " + (page.show_on_header ? "Yes" : "No") + " | Banner: " + (page.show_on_banner ? "Yes" : "No") + " | Circular: " + (page.create_circular_icon ? "Yes" : "No") + "</div>" +
-		  "<button onclick='deletePage(" + page.id + ", " + JSON.stringify(page.page_name) + ")' style='margin-top:10px;background:#991b1b;color:white;border:none;border-radius:10px;padding:8px 10px;cursor:pointer;'>Delete</button>";
-		     
+"<div style='display:flex;gap:8px;margin-top:10px;'>" +
+  "<button onclick='openEditPageBox(" + JSON.stringify(page) + ")' style='background:#546B41;color:white;border:none;border-radius:10px;padding:8px 10px;cursor:pointer;'>Edit</button>" +
+  "<button onclick='deletePage(" + page.id + ", " + JSON.stringify(page.page_name) + ")' style='background:#991b1b;color:white;border:none;border-radius:10px;padding:8px 10px;cursor:pointer;'>Delete</button>" +
+"</div>";
+
 	  list.appendChild(div);
     });
   } catch (error) {
     list.innerHTML = error.message;
+  }
+}
+
+function openEditPageBox(page) {
+  document.getElementById("editPageId").value = page.id;
+  document.getElementById("editPageName").value = page.page_name || "";
+  document.getElementById("editShowOnHeader").checked = Boolean(page.show_on_header);
+  document.getElementById("editShowOnBanner").checked = Boolean(page.show_on_banner);
+  document.getElementById("editBannerImageUrl").value = page.banner_image_url || "";
+  document.getElementById("editBannerSubheading").value = page.banner_subheading || "";
+  document.getElementById("editCreateCircularIcon").checked = Boolean(page.create_circular_icon);
+  document.getElementById("editCircularImageUrl").value = page.circular_image_url || "";
+  document.getElementById("editIsActive").checked = page.is_active !== 0;
+
+  document.getElementById("editPageOverlay").style.display = "block";
+  document.getElementById("editPageBox").style.display = "block";
+}
+
+function closeEditPageBox() {
+  document.getElementById("editPageOverlay").style.display = "none";
+  document.getElementById("editPageBox").style.display = "none";
+}
+
+async function updatePage() {
+  const id = document.getElementById("editPageId").value;
+
+  const page_name = document.getElementById("editPageName").value.trim();
+  const show_on_header = document.getElementById("editShowOnHeader").checked;
+  const show_on_banner = document.getElementById("editShowOnBanner").checked;
+  const banner_image_url = document.getElementById("editBannerImageUrl").value.trim();
+  const banner_subheading = document.getElementById("editBannerSubheading").value.trim();
+  const create_circular_icon = document.getElementById("editCreateCircularIcon").checked;
+  const circular_image_url = document.getElementById("editCircularImageUrl").value.trim();
+  const is_active = document.getElementById("editIsActive").checked;
+
+  if (!page_name) {
+    alert("Please enter page name");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/pages/" + id, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+      },
+      body: JSON.stringify({
+        page_name,
+        show_on_header,
+        show_on_banner,
+        banner_image_url,
+        banner_subheading,
+        create_circular_icon,
+        circular_image_url,
+        is_active
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Page update failed");
+      return;
+    }
+
+    alert("Page updated successfully");
+    closeEditPageBox();
+    loadPages();
+  } catch (error) {
+    alert(error.message);
   }
 }
 
@@ -1173,6 +1247,51 @@ async function deletePage(pageId, pageName) {
 						} else {
 								loadPages();
 						}
+
+		<div id="editPageOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;"></div>
+
+<div id="editPageBox" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:520px;max-width:92%;max-height:90vh;overflow:auto;background:white;border:1px solid #DCCCAC;border-radius:18px;padding:20px;z-index:101;box-shadow:0 16px 44px rgba(0,0,0,0.25);">
+  <h2>Edit Page</h2>
+
+  <input id="editPageId" type="hidden" />
+
+  <label>Page Name</label>
+  <input id="editPageName" />
+
+  <div class="check-row">
+    <input id="editShowOnHeader" type="checkbox" />
+    <span>Show on Header</span>
+  </div>
+
+  <div class="check-row">
+    <input id="editShowOnBanner" type="checkbox" />
+    <span>Show on Banner</span>
+  </div>
+
+  <label>Banner Image URL</label>
+  <input id="editBannerImageUrl" />
+
+  <label>Banner Subheading</label>
+  <input id="editBannerSubheading" />
+
+  <div class="check-row">
+    <input id="editCreateCircularIcon" type="checkbox" />
+    <span>Create Circular Icon</span>
+  </div>
+
+  <label>Circular Image URL</label>
+  <input id="editCircularImageUrl" />
+
+  <div class="check-row">
+    <input id="editIsActive" type="checkbox" />
+    <span>Page Active</span>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:14px;">
+    <button class="primary" onclick="updatePage()">Save Changes</button>
+    <button onclick="closeEditPageBox()" style="background:#DCCCAC;color:#546B41;border:none;border-radius:12px;padding:12px 15px;font-weight:700;cursor:pointer;">Cancel</button>
+  </div>
+</div>				
         </script>
       </body>
     </html>
