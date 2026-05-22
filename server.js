@@ -87,18 +87,31 @@ app.get("/", (req, res) => {
           }
 
           .logo-box {
-            height: 38px;
-            border-radius: 10px;
-            background: #546B41;
-            color: #FFF8EC;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            text-decoration: none;
-          }
+  height: 38px;
+  border-radius: 10px;
+  background: #546B41;
+  color: #FFF8EC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  overflow: hidden;
+  border: 1px solid #DCCCAC;
+}
 
+.logo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+  background: #FFF8EC;
+  padding: 3px;
+}
+
+.logo-box span {
+  font-size: 13px;
+  font-weight: 700;
+}
           .search-box {
             display: flex;
             align-items: center;
@@ -467,7 +480,10 @@ app.get("/", (req, res) => {
 
       <body>
         <header class="site-header">
-          <a href="/" class="logo-box">LOGO</a>
+          <a href="/" class="logo-box">
+  <img id="siteLogoImg" src="" alt="Logo" />
+  <span id="siteLogoText">LOGO</span>
+</a>
 
           <div class="search-box">
             <span>🔍</span>
@@ -566,6 +582,19 @@ let siteSettings = {};
     const res = await fetch("/api/settings");
     const data = await res.json();
     siteSettings = data.settings || {};
+
+    const logoImg = document.getElementById("siteLogoImg");
+    const logoText = document.getElementById("siteLogoText");
+    const logoUrl = String(siteSettings.logo_url || "").trim();
+
+    if (logoUrl && logoImg && logoText) {
+      logoImg.src = logoUrl;
+      logoImg.style.display = "block";
+      logoText.style.display = "none";
+    } else if (logoImg && logoText) {
+      logoImg.style.display = "none";
+      logoText.style.display = "block";
+    }
   } catch (error) {
     siteSettings = {};
   }
