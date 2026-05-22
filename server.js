@@ -601,6 +601,175 @@ app.delete("/api/admin/pages/:id", verifyAdmin, async (req, res) => {
   }
 });
 
+/* =========================
+   PRODUCT API
+========================= */
+
+async function getProductPageIds(productId) {
+  const [rows] = await db.query(
+    "SELECT page_id FROM product_pages WHERE product_id = ?",
+    [productId]
+  );
+
+  return rows.map(function(row) {
+    return row.page_id;
+  });
+}
+
+async function replaceProductPages(productId, pageIds) {
+  await db.query("DELETE FROM product_pages WHERE product_id = ?", [productId]);
+
+  if (!Array.isArray(pageIds) || pageIds.length === 0) {
+    return;
+  }
+
+  for (const pageId of pageIds) {
+    await db.query(
+      "INSERT IGNORE INTO product_pages (product_id, page_id) VALUES (?, ?)",
+      [productId, pageId]
+    );
+  }
+}
+
+app.get("/api/products", async (req, res) => {
+  try {
+    const [products] = await db.query(`
+      SELECT 
+        p.*,
+        GROUP_CONCAT(pg.page_name ORDER BY pg.page_name SEPARATOR ', ') AS page_names
+      FROM products p
+      LEFT JOIN product_pages pp ON p.id = pp.product_id
+      LEFT JOIN pages pg ON pp.page_id = pg.id
+      WHERE p.is_visible = true
+      GROUP BY p.id
+      ORDER BY p.id DESC
+    `);
+
+    res.json({
+      status: "ok",
+      products
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch products",
+      error: error.message
+    });
+  }
+});
+
+app.get("/api/admin/products", verifyAdmin, async (req, res) => {
+  try {
+    const [products] = await db.query(`
+      SELECT 
+        p.*,
+        GROUP_CONCAT(pg.page_name ORDER BY pg.page_name SEPARATOR ', ') AS page_names,
+        GROUP_CONCAT(pg.id ORDER BY pg.id SEPARATOR ',') AS page_ids
+      FROM products p
+      LEFT JOIN product_pages pp ON p.id = pp.product_id
+      LEFT JOIN pages pg ON pp.page_id = pg.id
+      GROUP BY p.id
+      ORDER BY p.id DESC
+    `);
+
+    res.json({
+      status: "ok",
+      products
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch admin products",
+      error: error.message
+    });
+  }
+});
+
+app.post("/api/admin/products", verifyAdmin, async (req, res) => {
+  try {
+    const {
+      sku,
+      product_name,
+      product_image_url,
+      show_price,
+      crossed_price,
+      tag,
+      dealer_name,
+      dealer_price,
+      qty_in_stock,
+      demand_color,
+      page_ids
+    } = req.body;
+
+    if (!product_name) {
+      return res.status(400).json({
+        status: "error",
+        message: "Product name is required"
+      });
+    }
+
+    const slugBase = createSlug(product_name);
+    let slug = slugBase;
+
+    const [existingSlug] = await db.query(
+      "SELECT id FROM products WHERE slug = ? LIMIT 1",
+      [slug]
+    );
+
+    if (existingSlug.length > 0) {
+      slug = slugBase + "-" + Date.now();
+    }
+
+    if (sku) {
+      const [existingSku] = await db.query(
+        "SELECT id FROM products WHERE sku = ? LIMIT 1",
+        [sku]
+      );
+
+      if (existingSku.length > 0) {
+        return res.status(409).json({
+          status: "error",
+          message: "Product SKU already exists"
+        });
+      }
+    }
+
+    const [result] = await db.query(
+      `INSERT INTO products 
+       (sku, product_name, slug, product_image_url, show_price, crossed_price, tag, dealer_name, dealer_price, qty_in_stock, demand_color, is_visible)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)`,
+      [
+        sku || null,
+        product_name,
+        slug,
+        product_image_url || null,
+        show_price || 0,
+        crossed_price || null,
+        tag || "None",
+        dealer_name || null,
+        dealer_price || 0,
+        qty_in_stock || 0,
+        demand_color || "Green"
+      ]
+    );
+
+    await replaceProductPages(result.insertId, page_ids);
+
+    res.json({
+      status: "ok",
+      message: "Product created successfully",
+      product_id: result.insertId,
+      slug
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to create product",
+      error: error.message
+    });
+  }
+});
+
 app.get("/admin", (req, res) => {
   res.send(`
     <!DOCTYPE html>
