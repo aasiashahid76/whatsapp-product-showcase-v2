@@ -546,6 +546,10 @@ app.get("/manage-ui", (req, res) => {
         <title>Manage UI</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
+          * {
+            box-sizing: border-box;
+          }
+
           body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -556,10 +560,14 @@ app.get("/manage-ui", (req, res) => {
           .topbar {
             background: #546B41;
             color: #FFF8EC;
-            padding: 16px 24px;
+            padding: 14px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
           }
 
           .topbar h1 {
@@ -568,43 +576,158 @@ app.get("/manage-ui", (req, res) => {
             font-weight: 700;
           }
 
-          .nav {
+          .admin-nav {
             display: flex;
             gap: 10px;
+            align-items: center;
           }
 
-          .nav a,
-          .nav button {
+          .admin-nav a,
+          .admin-nav button {
             background: #99AD7A;
             color: #FFF8EC;
             border: none;
             border-radius: 10px;
-            padding: 9px 12px;
+            padding: 9px 13px;
             text-decoration: none;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
           }
 
+          .admin-nav a.active {
+            background: #DCCCAC;
+            color: #546B41;
+          }
+
           .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: auto;
             padding: 24px;
+          }
+
+          .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+          }
+
+          .tab-btn {
+            border: 1px solid #DCCCAC;
+            background: white;
+            color: #546B41;
+            border-radius: 12px;
+            padding: 11px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+          }
+
+          .tab-btn.active {
+            background: #546B41;
+            color: #FFF8EC;
+            border-color: #546B41;
+          }
+
+          .tab-content {
+            display: none;
+          }
+
+          .tab-content.active {
+            display: block;
+          }
+
+          .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
           }
 
           .card {
             background: white;
             border: 1px solid #DCCCAC;
             border-radius: 18px;
-            padding: 22px;
+            padding: 20px;
             box-shadow: 0 8px 24px rgba(84, 107, 65, 0.08);
+          }
+
+          h2 {
+            margin: 0 0 14px;
+            font-size: 20px;
+            font-weight: 700;
+          }
+
+          p {
+            color: #6f7a5f;
+            line-height: 1.5;
+          }
+
+          label {
+            display: block;
+            margin: 12px 0 6px;
+            font-size: 14px;
+            font-weight: 600;
+          }
+
+          input,
+          select,
+          textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #DCCCAC;
+            background: #FFF8EC;
+            color: #546B41;
+            font-size: 14px;
+            outline: none;
+          }
+
+          textarea {
+            min-height: 110px;
+            resize: vertical;
+          }
+
+          .check-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 14px;
+          }
+
+          .check-row input {
+            width: auto;
+          }
+
+          button.primary {
+            background: #546B41;
+            color: #FFF8EC;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 15px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 14px;
+          }
+
+          .placeholder {
+            background: #FFF8EC;
+            border: 1px dashed #DCCCAC;
+            border-radius: 14px;
+            padding: 16px;
+            color: #6f7a5f;
           }
         </style>
       </head>
+
       <body>
         <div class="topbar">
           <h1>Manage UI</h1>
-          <div class="nav">
-            <a href="/manage-ui">Manage UI</a>
+
+          <div class="admin-nav">
+            <a class="active" href="/manage-ui">Manage UI</a>
             <a href="/all-products">All Products</a>
             <a href="/dashboard">Dashboard</a>
             <button onclick="logoutAdmin()">Logout</button>
@@ -612,19 +735,114 @@ app.get("/manage-ui", (req, res) => {
         </div>
 
         <div class="container">
-          <div class="card">
-            <h2>Manage UI Panel</h2>
-            <p>This is the fresh Version 2 Manage UI panel. Next, we will add tabs and management features here.</p>
+          <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('pagesTab', this)">Create & Manage Page</button>
+            <button class="tab-btn" onclick="showTab('productsTab', this)">Add Product</button>
+            <button class="tab-btn" onclick="showTab('logoBannerTab', this)">Logo & Banner</button>
+            <button class="tab-btn" onclick="showTab('reviewsTab', this)">Reviews</button>
+            <button class="tab-btn" onclick="showTab('settingsTab', this)">Header & Footer</button>
+          </div>
+
+          <div id="pagesTab" class="tab-content active">
+            <div class="grid">
+              <div class="card">
+                <h2>Create Page</h2>
+
+                <label>Page Name</label>
+                <input placeholder="Example: Home & Kitchen" />
+
+                <div class="check-row">
+                  <input type="checkbox" />
+                  <span>Show on Header</span>
+                </div>
+
+                <div class="check-row">
+                  <input type="checkbox" />
+                  <span>Show on Banner</span>
+                </div>
+
+                <label>Banner Image</label>
+                <input type="file" accept="image/*" />
+
+                <label>Banner Image URL</label>
+                <input placeholder="Banner image URL" />
+
+                <label>Banner Subheading</label>
+                <input placeholder="Example: Fresh collection available now" />
+
+                <div class="check-row">
+                  <input type="checkbox" />
+                  <span>Create Circular Icon</span>
+                </div>
+
+                <label>Circular Image</label>
+                <input type="file" accept="image/*" />
+
+                <label>Circular Image URL</label>
+                <input placeholder="Circular image URL" />
+
+                <button class="primary">Create Page</button>
+              </div>
+
+              <div class="card">
+                <h2>Manage Pages</h2>
+                <div class="placeholder">
+                  Page list will appear here after we connect the page API.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="productsTab" class="tab-content">
+            <div class="card">
+              <h2>Add Product</h2>
+              <p>This tab will contain product creation form with SKU, name, image, price, dealer, stock, demand color, and page selection.</p>
+            </div>
+          </div>
+
+          <div id="logoBannerTab" class="tab-content">
+            <div class="card">
+              <h2>Logo & Banner</h2>
+              <p>This tab will manage homepage fixed banners and homepage layout order. Logo upload will be inside Header & Footer only.</p>
+            </div>
+          </div>
+
+          <div id="reviewsTab" class="tab-content">
+            <div class="card">
+              <h2>Reviews</h2>
+              <p>This tab will manage customer reviews.</p>
+            </div>
+          </div>
+
+          <div id="settingsTab" class="tab-content">
+            <div class="card">
+              <h2>Header & Footer</h2>
+              <p>This tab will manage logo, email, mobile number, WhatsApp number, Instagram link, browse all products link, and policy content.</p>
+            </div>
           </div>
         </div>
 
         <script>
+          function showTab(tabId, clickedButton) {
+            document.querySelectorAll(".tab-content").forEach(function(tab) {
+              tab.classList.remove("active");
+            });
+
+            document.querySelectorAll(".tab-btn").forEach(function(btn) {
+              btn.classList.remove("active");
+            });
+
+            document.getElementById(tabId).classList.add("active");
+            clickedButton.classList.add("active");
+          }
+
           function logoutAdmin() {
             localStorage.removeItem("admin_token");
             window.location.href = "/admin";
           }
 
           const token = localStorage.getItem("admin_token");
+
           if (!token) {
             window.location.href = "/admin";
           }
