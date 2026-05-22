@@ -491,7 +491,10 @@ app.get("/", (req, res) => {
       <span id="yourListTotal">₹0</span>
     </div>
 
-    <button class="send-wa-btn" onclick="sendToWhatsapp()">☘ Send to WhatsApp</button>
+    <button class="send-wa-btn" onclick="sendToWhatsapp()">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;" />
+  Send to WhatsApp
+</button>
   </div>
 </div>
 
@@ -756,18 +759,23 @@ function sendToWhatsapp() {
     return;
   }
 
+  const whatsappNumber = "918802884309";
+
   let total = 0;
-  let message = "Hello, I want to order these products:%0A%0A";
+  let message = "Hello, I want to order these products:\n\n";
 
   list.forEach(function(item) {
     const itemTotal = Number(item.price || 0) * Number(item.qty || 1);
     total += itemTotal;
-    message += item.name + " × " + item.qty + " = ₹" + itemTotal.toFixed(0) + "%0A";
+
+    message += item.name + " × " + item.qty + " = ₹" + itemTotal.toFixed(0) + "\n";
   });
 
-  message += "%0ATotal = ₹" + total.toFixed(0);
+  message += "\nTotal = ₹" + total.toFixed(0);
 
-  alert("WhatsApp number will be connected from Header & Footer settings later. Message ready:%0A%0A" + decodeURIComponent(message));
+  const url = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
+
+  window.open(url, "_blank");
 }
           loadProducts();
 updateListButton();
