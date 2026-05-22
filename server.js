@@ -498,6 +498,33 @@ app.post("/api/admin/pages", verifyAdmin, async (req, res) => {
   }
 });
 
+app.delete("/api/admin/pages/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await db.query(
+      "DELETE FROM home_layout_sections WHERE section_type = 'page' AND reference_id = ?",
+      [id]
+    );
+
+    await db.query(
+      "DELETE FROM pages WHERE id = ?",
+      [id]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Page deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to delete page",
+      error: error.message
+    });
+  }
+});
+
 app.get("/admin", (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -1023,15 +1050,43 @@ async function loadPages() {
       div.style.marginBottom = "10px";
       div.style.background = "#FFF8EC";
 
-      div.innerHTML =
-        "<strong>" + page.page_name + "</strong>" +
-        "<div style='font-size:13px;margin-top:5px;color:#6f7a5f;'>Slug: " + page.slug + "</div>" +
-        "<div style='font-size:13px;color:#6f7a5f;'>Header: " + (page.show_on_header ? "Yes" : "No") + " | Banner: " + (page.show_on_banner ? "Yes" : "No") + " | Circular: " + (page.create_circular_icon ? "Yes" : "No") + "</div>";
-
-      list.appendChild(div);
+	 div.innerHTML =
+		  "<strong>" + page.page_name + "</strong>" +
+		  "<div style='font-size:13px;margin-top:5px;color:#6f7a5f;'>Slug: " + page.slug + "</div>" +
+		  "<div style='font-size:13px;color:#6f7a5f;'>Header: " + (page.show_on_header ? "Yes" : "No") + " | Banner: " + (page.show_on_banner ? "Yes" : "No") + " | Circular: " + (page.create_circular_icon ? "Yes" : "No") + "</div>" +
+		  "<button onclick='deletePage(" + page.id + ", " + JSON.stringify(page.page_name) + ")' style='margin-top:10px;background:#991b1b;color:white;border:none;border-radius:10px;padding:8px 10px;cursor:pointer;'>Delete</button>";
+		     
+	  list.appendChild(div);
     });
   } catch (error) {
     list.innerHTML = error.message;
+  }
+}
+
+async function deletePage(pageId, pageName) {
+  const ok = confirm("Delete this page permanently? Page: " + pageName);
+
+  if (!ok) return;
+
+  try {
+    const res = await fetch("/api/admin/pages/" + pageId, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+      }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Page delete failed");
+      return;
+    }
+
+    alert("Page deleted successfully");
+    loadPages();
+  } catch (error) {
+    alert(error.message);
   }
 }
 
