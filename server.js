@@ -4278,10 +4278,7 @@ app.get("/legal/:type", async (req, res) => {
         </head>
 
         <body>
-          <header class="simple-header">
-            <a href="/">← Back to Home</a>
-            <a href="/">Home</a>
-          </header>
+          ${globalHeaderHtml()}
 
           <main class="page-wrap">
             <div class="legal-card">
@@ -5258,6 +5255,8 @@ app.get("/page/:slug", (req, res) => {
             color: #546B41;
           }
 
+		  ${globalHeaderFooterCss()}
+
           .site-header {
   position: sticky;
   top: 0;
@@ -5899,6 +5898,8 @@ app.get("/page/:slug", (req, res) => {
             <div id="productsGrid" class="product-grid"></div>
           </section>
         </main>
+
+		${globalFooterHtml()}
 
         <script>
           const pageSlug = ${JSON.stringify(pageSlug)};
