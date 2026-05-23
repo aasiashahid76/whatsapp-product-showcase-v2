@@ -3361,7 +3361,7 @@ app.get("/all-products", (req, res) => {
 
 				html += "<td>";
 				html += "<div class='action-row'>";
-				html += "<button class='action-btn edit-btn' onclick='openEditProductBox(" + JSON.stringify(product) + ")'>Edit</button>";
+				html += "<button class='action-btn edit-btn' onclick='openEditProductById(" + product.id + ")'>Edit</button>";				
 				html += "<button class='action-btn update-btn' onclick='updateProductQty(" + product.id + ")'>Update Qty</button>";
 				html += "<button class='action-btn " + (product.is_visible ? "hide-btn" : "show-btn") + "' onclick='toggleProductVisibility(" + product.id + ", " + (product.is_visible ? "false" : "true") + ")'>" + (product.is_visible ? "Hide" : "Show") + "</button>";
 				html += "<button class='action-btn delete-btn' onclick='deleteProduct(" + product.id + ", " + JSON.stringify(product.product_name || "") + ")'>Delete</button>";
@@ -3505,6 +3505,19 @@ app.get("/all-products", (req, res) => {
     if (statusBox) statusBox.textContent = error.message;
     alert(error.message);
   }
+}
+
+function openEditProductById(productId) {
+  const product = adminProducts.find(function(item) {
+    return Number(item.id) === Number(productId);
+  });
+
+  if (!product) {
+    alert("Product not found. Please refresh and try again.");
+    return;
+  }
+
+  openEditProductBox(product);
 }
 
 async function openEditProductBox(product) {
