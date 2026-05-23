@@ -176,15 +176,23 @@ app.get("/", (req, res) => {
           }
 
           .list-btn {
-  border: none;
+  border: 1px solid #DCCCAC;
   background: white;
   color: #546B41;
-  border: 1px solid #DCCCAC;
   border-radius: 999px;
   padding: 9px 10px;
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.desktop-pages-nav {
+  display: none;
+}
+
+.desktop-search-btn {
+  display: none;
 }
 
 .pages-menu-btn {
@@ -199,7 +207,8 @@ app.get("/", (req, res) => {
   line-height: 1;
 }
 
-.pages-menu-panel {
+.pages-menu-panel,
+.desktop-search-panel {
   display: none;
   position: fixed;
   top: 59px;
@@ -213,7 +222,8 @@ app.get("/", (req, res) => {
   padding: 10px;
 }
 
-.pages-menu-panel.show {
+.pages-menu-panel.show,
+.desktop-search-panel.show {
   display: grid;
   gap: 8px;
 }
@@ -232,6 +242,16 @@ app.get("/", (req, res) => {
 .pages-menu-panel a.active {
   background: #546B41;
   color: #FFF8EC;
+}
+
+.desktop-search-panel input {
+  width: 100%;
+  border: 1px solid #DCCCAC;
+  background: #FFF8EC;
+  color: #546B41;
+  border-radius: 12px;
+  padding: 12px;
+  outline: none;
 }
 
           .page-wrap {
@@ -568,9 +588,55 @@ app.get("/", (req, res) => {
             }
 
             .site-header {
-              grid-template-columns: 110px 1fr 44px auto;
-              padding: 12px 24px;
-            }
+  grid-template-columns: 140px auto 44px auto;
+  justify-content: start;
+  padding: 12px 24px;
+}
+
+.mobile-search-box {
+  display: none;
+}
+
+.pages-menu-btn {
+  display: none;
+}
+
+.desktop-pages-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  align-items: center;
+}
+
+.desktop-pages-nav a {
+  flex: 0 0 auto;
+  text-decoration: none;
+  background: white;
+  color: #546B41;
+  border: 1px solid #DCCCAC;
+  border-radius: 999px;
+  padding: 9px 13px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.desktop-pages-nav a.active {
+  background: #546B41;
+  color: #FFF8EC;
+  border-color: #546B41;
+}
+
+.desktop-search-btn {
+  display: block;
+  border: 1px solid #DCCCAC;
+  background: white;
+  color: #546B41;
+  border-radius: 999px;
+  width: 42px;
+  height: 42px;
+  font-size: 17px;
+  cursor: pointer;
+}
 
             .logo-box {
               height: 44px;
@@ -595,21 +661,29 @@ app.get("/", (req, res) => {
 
       <body>
         <header class="site-header">
-          <a href="/" class="logo-box">
-  <img id="siteLogoImg" src="" alt="Logo" />
-  <span id="siteLogoText">LOGO</span>
-</a>
+  <a href="/" class="logo-box">
+    <img id="siteLogoImg" src="" alt="Logo" />
+    <span id="siteLogoText">LOGO</span>
+  </a>
 
-          <div class="search-box">
-            <span>🔍</span>
-            <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
-          </div>
+  <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
 
-          <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
-		  <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
-        </header>
+  <div class="search-box mobile-search-box">
+    <span>🔍</span>
+    <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
+  </div>
+
+  <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
+
+  <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
+
+  <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
+</header>
 
 		<div id="pagesMenuPanel" class="pages-menu-panel"></div>
+		<div id="desktopSearchPanel" class="desktop-search-panel">
+ 			 <input id="desktopSearchInput" placeholder="Search products..." oninput="filterProductsFromDesktop()" />
+		</div>
 		<div id="yourListPanel" class="your-list-panel">
   <div class="list-head">
     <strong>Your List</strong>
@@ -716,33 +790,54 @@ app.get("/", (req, res) => {
 }
 
 async function loadHeaderPages() {
-  const panel = document.getElementById("pagesMenuPanel");
-
-  if (!panel) return;
+  const desktopNav = document.getElementById("desktopPagesNav");
+  const mobilePanel = document.getElementById("pagesMenuPanel");
 
   try {
     const res = await fetch("/api/header-pages");
     const data = await res.json();
     const pages = data.pages || [];
 
-    let html = "";
-    html += "<a class='active' href='/'>Home</a>";
+    let desktopHtml = "";
+    let mobileHtml = "";
+
+    desktopHtml += "<a class='active' href='/'>Home</a>";
+    mobileHtml += "<a class='active' href='/'>Home</a>";
 
     pages.forEach(function(page) {
-      html += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+      desktopHtml += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+      mobileHtml += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
     });
 
-    panel.innerHTML = html;
+    if (desktopNav) desktopNav.innerHTML = desktopHtml;
+    if (mobilePanel) mobilePanel.innerHTML = mobileHtml;
   } catch (error) {
-    panel.innerHTML = "";
+    if (desktopNav) desktopNav.innerHTML = "";
+    if (mobilePanel) mobilePanel.innerHTML = "";
   }
 }
 
 function togglePagesMenu() {
   const panel = document.getElementById("pagesMenuPanel");
   if (!panel) return;
-
   panel.classList.toggle("show");
+}
+
+function toggleDesktopSearch() {
+  const panel = document.getElementById("desktopSearchPanel");
+  if (!panel) return;
+  panel.classList.toggle("show");
+}
+
+function filterProductsFromDesktop() {
+  const mobileInput = document.getElementById("searchInput");
+  const desktopInput = document.getElementById("desktopSearchInput");
+
+  if (mobileInput && desktopInput) {
+    mobileInput.value = desktopInput.value;
+  }
+
+  filterProducts();
 }
 
           async function loadSettings() {
