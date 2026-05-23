@@ -5266,25 +5266,78 @@ ${globalFooterHtml()}
           }
 
           function loadSettings() {
-            fetch("/api/settings")
-              .then(function(res) { return res.json(); })
-              .then(function(data) {
-                siteSettings = data.settings || {};
+  fetch("/api/settings")
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      siteSettings = data.settings || {};
 
-                const logoImg = document.getElementById("siteLogoImg");
-                const logoText = document.getElementById("siteLogoText");
-                const logoUrl = String(siteSettings.logo_url || "").trim();
+      const logoImg = document.getElementById("siteLogoImg");
+      const logoText = document.getElementById("siteLogoText");
+      const footerLogoImg = document.getElementById("footerLogoImg");
+      const footerLogoText = document.getElementById("footerLogoText");
 
-                if (logoUrl && logoImg && logoText) {
-                  logoImg.src = logoUrl;
-                  logoImg.style.display = "block";
-                  logoText.style.display = "none";
-                } else if (logoImg && logoText) {
-                  logoImg.style.display = "none";
-                  logoText.style.display = "block";
-                }
-              });
-          }
+      const logoUrl = String(siteSettings.logo_url || "").trim();
+
+      if (logoUrl && logoImg && logoText) {
+        logoImg.src = logoUrl;
+        logoImg.style.display = "block";
+        logoText.style.display = "none";
+      } else if (logoImg && logoText) {
+        logoImg.style.display = "none";
+        logoText.style.display = "block";
+      }
+
+      if (logoUrl && footerLogoImg && footerLogoText) {
+        footerLogoImg.src = logoUrl;
+        footerLogoImg.style.display = "block";
+        footerLogoText.style.display = "none";
+      } else if (footerLogoImg && footerLogoText) {
+        footerLogoImg.style.display = "none";
+        footerLogoText.style.display = "block";
+      }
+
+      const footerMobile = document.getElementById("footerMobile");
+      const footerEmail = document.getElementById("footerEmail");
+      const footerInstagram = document.getElementById("footerInstagram");
+      const footerWhatsapp = document.getElementById("footerWhatsapp");
+      const footerWhatsappSocial = document.getElementById("footerWhatsappSocial");
+
+      const mobileNumber = String(siteSettings.mobile_number || "").trim();
+      const whatsappNumber = String(siteSettings.whatsapp_number || "").replace(/[^0-9]/g, "");
+      const email = String(siteSettings.email || "").trim();
+      const instagram = String(siteSettings.instagram_link || "").trim();
+
+      if (footerMobile) {
+        footerMobile.innerHTML = mobileNumber
+          ? "📞 <a href='tel:" + mobileNumber + "'>" + mobileNumber + "</a>"
+          : "";
+      }
+
+      if (footerEmail) {
+        footerEmail.innerHTML = email
+          ? "✉️ <a href='mailto:" + email + "'>" + email + "</a>"
+          : "";
+      }
+
+      if (footerWhatsapp) {
+        footerWhatsapp.innerHTML = whatsappNumber
+          ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
+          : "";
+      }
+
+      if (footerInstagram) {
+        footerInstagram.innerHTML = instagram
+          ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>📷 Instagram</a>"
+          : "";
+      }
+
+      if (footerWhatsappSocial) {
+        footerWhatsappSocial.innerHTML = whatsappNumber
+          ? "<a class='footer-social-btn whatsapp' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
+          : "";
+      }
+    });
+}
 
           function sendToWhatsapp() {
             const list = getList();
