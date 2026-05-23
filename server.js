@@ -326,57 +326,112 @@ app.get("/", (req, res) => {
             padding: 14px 10px 28px;
           }
 
-		  .home-banner {
+		  .home-banner-slider {
   position: relative;
   border-radius: 20px;
   overflow: hidden;
-  margin-bottom: 14px;
-  min-height: 170px;
+  margin-bottom: 16px;
+  height: 210px;
   background: linear-gradient(135deg, #546B41, #99AD7A);
   border: 1px solid #DCCCAC;
 }
 
-.home-banner img {
+.home-banner-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+}
+
+.home-banner-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.home-banner-slide img {
   width: 100%;
-  height: 190px;
+  height: 100%;
   object-fit: cover;
   display: block;
+  filter: brightness(0.72);
 }
 
 .home-banner-content {
   position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 14px;
-  background: rgba(84, 107, 65, 0.82);
+  left: 16px;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #FFF8EC;
-  border-radius: 14px;
-  padding: 12px;
+  max-width: 560px;
 }
 
 .home-banner-content h1 {
-  margin: 0 0 5px;
-  font-size: 20px;
+  margin: 0 0 8px;
+  font-size: 24px;
   line-height: 1.15;
+  font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.35);
 }
 
 .home-banner-content p {
-  margin: 0;
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  max-width: 420px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+}
+
+.banner-shop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFF8EC;
+  color: #546B41;
+  border-radius: 999px;
+  padding: 10px 18px;
   font-size: 13px;
-  line-height: 1.4;
+  font-weight: 800;
+  text-decoration: none;
+  border: 1px solid #DCCCAC;
+}
+
+.banner-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.banner-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 248, 236, 0.55);
+}
+
+.banner-dot.active {
+  background: #FFF8EC;
+  width: 18px;
 }
 
 .circular-pages-wrap {
   display: flex;
-  gap: 12px;
+  justify-content: center;
+  gap: 14px;
   overflow-x: auto;
-  padding: 6px 2px 16px;
+  padding: 8px 2px 18px;
   margin-bottom: 8px;
+  text-align: center;
 }
 
 .circular-page-item {
   flex: 0 0 auto;
-  width: 74px;
+  width: 78px;
   text-align: center;
   text-decoration: none;
   color: #38472d;
@@ -389,8 +444,8 @@ app.get("/", (req, res) => {
 .circular-page-item:nth-child(5) { animation-delay: 2s; }
 
 .circular-img {
-  width: 68px;
-  height: 68px;
+  width: 70px;
+  height: 70px;
   border-radius: 999px;
   object-fit: cover;
   border: 2px solid #DCCCAC;
@@ -399,7 +454,7 @@ app.get("/", (req, res) => {
 }
 
 .circular-page-name {
-  margin-top: 5px;
+  margin-top: 6px;
   font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
@@ -411,6 +466,37 @@ app.get("/", (req, res) => {
   }
   50% {
     transform: translateY(-5px);
+  }
+}
+
+@media (min-width: 768px) {
+  .home-banner-slider {
+    height: 340px;
+  }
+
+  .home-banner-content {
+    left: 42px;
+  }
+
+  .home-banner-content h1 {
+    font-size: 38px;
+  }
+
+  .home-banner-content p {
+    font-size: 16px;
+  }
+
+  .circular-pages-wrap {
+    gap: 22px;
+  }
+
+  .circular-page-item {
+    width: 96px;
+  }
+
+  .circular-img {
+    width: 86px;
+    height: 86px;
   }
 }
 
@@ -1341,6 +1427,9 @@ if (footerWhatsappSocial) {
   }
 }
 
+let currentBannerIndex = 0;
+let bannerTimer = null;
+
 async function loadHomeTopDesign() {
   try {
     const res = await fetch("/api/pages");
@@ -1351,28 +1440,51 @@ async function loadHomeTopDesign() {
       return page.is_active === 1 || page.is_active === true;
     });
 
-    const bannerPage = activePages.find(function(page) {
+    const bannerPages = activePages.filter(function(page) {
       return (page.show_on_banner === 1 || page.show_on_banner === true) && page.banner_image_url;
     });
 
     const bannerWrap = document.getElementById("homeBannerWrap");
 
     if (bannerWrap) {
-      if (bannerPage) {
+      if (bannerPages.length > 0) {
+        let slidesHtml = "";
+
+        bannerPages.forEach(function(page, index) {
+          const activeClass = index === 0 ? " active" : "";
+
+          slidesHtml +=
+            "<div class='home-banner-slide" + activeClass + "'>" +
+              "<img src='" + page.banner_image_url + "' alt='" + page.page_name + "' />" +
+              "<div class='home-banner-content'>" +
+                "<h1>" + page.page_name + "</h1>" +
+                "<p>" + (page.banner_subheading || "Explore our latest products") + "</p>" +
+                "<a class='banner-shop-btn' href='/page/" + page.slug + "'>Shop Now</a>" +
+              "</div>" +
+            "</div>";
+        });
+
+        let dotsHtml = "<div class='banner-dots'>";
+        bannerPages.forEach(function(page, index) {
+          dotsHtml += "<span class='banner-dot" + (index === 0 ? " active" : "") + "'></span>";
+        });
+        dotsHtml += "</div>";
+
         bannerWrap.innerHTML =
-          "<a href='/page/" + bannerPage.slug + "' class='home-banner'>" +
-            "<img src='" + bannerPage.banner_image_url + "' alt='" + bannerPage.page_name + "' />" +
-            "<div class='home-banner-content'>" +
-              "<h1>" + bannerPage.page_name + "</h1>" +
-              "<p>" + (bannerPage.banner_subheading || "Explore our latest products") + "</p>" +
-            "</div>" +
-          "</a>";
+          "<div class='home-banner-slider'>" +
+            slidesHtml +
+            dotsHtml +
+          "</div>";
+
+        startBannerSlider();
       } else {
         bannerWrap.innerHTML =
-          "<div class='home-banner'>" +
-            "<div class='home-banner-content'>" +
-              "<h1>Shop quality products easily</h1>" +
-              "<p>Select products, add them to Your List, and send your order on WhatsApp.</p>" +
+          "<div class='home-banner-slider'>" +
+            "<div class='home-banner-slide active'>" +
+              "<div class='home-banner-content'>" +
+                "<h1>Shop quality products easily</h1>" +
+                "<p>Select products, add them to Your List, and send your order on WhatsApp.</p>" +
+              "</div>" +
             "</div>" +
           "</div>";
       }
@@ -1401,6 +1513,27 @@ async function loadHomeTopDesign() {
   } catch (error) {
     console.log(error.message);
   }
+}
+
+function startBannerSlider() {
+  const slides = document.querySelectorAll(".home-banner-slide");
+  const dots = document.querySelectorAll(".banner-dot");
+
+  if (!slides || slides.length <= 1) return;
+
+  if (bannerTimer) {
+    clearInterval(bannerTimer);
+  }
+
+  bannerTimer = setInterval(function() {
+    slides[currentBannerIndex].classList.remove("active");
+    if (dots[currentBannerIndex]) dots[currentBannerIndex].classList.remove("active");
+
+    currentBannerIndex = (currentBannerIndex + 1) % slides.length;
+
+    slides[currentBannerIndex].classList.add("active");
+    if (dots[currentBannerIndex]) dots[currentBannerIndex].classList.add("active");
+  }, 3500);
 }
 
 async function loadHomeSections() {
