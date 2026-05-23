@@ -504,10 +504,12 @@ app.get("/", (req, res) => {
   display: grid;
   gap: 12px;
   margin: 6px 0 18px;
+  width: 100%;
 }
 
 .fixed-banner-card {
   display: block;
+  width: 100%;
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid #DCCCAC;
@@ -518,6 +520,7 @@ app.get("/", (req, res) => {
   width: 100%;
   height: auto;
   display: block;
+  object-fit: cover;
 }
 
 @media (min-width: 768px) {
