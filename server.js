@@ -660,15 +660,15 @@ app.get("/", (req, res) => {
   padding: 12px 24px;
 }
 
+.mobile-list-btn {
+  display: none;
+}
+
 .mobile-search-box {
   display: none;
 }
 
 .pages-menu-btn {
-  display: none;
-}
-
-.mobile-list-btn {
   display: none;
 }
 
@@ -712,7 +712,6 @@ app.get("/", (req, res) => {
   font-size: 18px;
   cursor: pointer;
 }
-
             .logo-box {
               height: 44px;
             }
