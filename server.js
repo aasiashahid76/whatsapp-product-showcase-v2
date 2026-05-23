@@ -3142,6 +3142,108 @@ app.delete("/api/admin/reviews/:id", verifyAdmin, async (req, res) => {
   }
 });
 
+async function syncPageBannerPositionRows() {
+  await db.query(`
+    INSERT INTO home_layout_sections
+    (section_type, reference_id, sort_order, is_active)
+    SELECT 'page', p.id, p.sort_order, p.is_active
+    FROM pages p
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM home_layout_sections h
+      WHERE h.section_type = 'page'
+      AND h.reference_id = p.id
+    )
+  `);
+
+  await db.query(`
+    INSERT INTO home_layout_sections
+    (section_type, reference_id, sort_order, is_active)
+    SELECT 'banner', b.id, 1000 + b.sort_order, b.is_active
+    FROM home_fixed_banners b
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM home_layout_sections h
+      WHERE h.section_type = 'banner'
+      AND h.reference_id = b.id
+    )
+  `);
+}
+
+app.get("/api/admin/page-banner-position", verifyAdmin, async (req, res) => {
+  try {
+    await syncPageBannerPositionRows();
+
+    const [items] = await db.query(`
+      SELECT
+        h.id AS layout_id,
+        h.section_type,
+        h.reference_id,
+        h.sort_order,
+        p.page_name,
+        p.slug AS page_slug,
+        b.banner_name,
+        b.image_url AS banner_image_url
+      FROM home_layout_sections h
+      LEFT JOIN pages p
+        ON h.section_type = 'page'
+        AND h.reference_id = p.id
+      LEFT JOIN home_fixed_banners b
+        ON h.section_type = 'banner'
+        AND h.reference_id = b.id
+      WHERE h.is_active = true
+      AND (
+        (h.section_type = 'page' AND p.id IS NOT NULL)
+        OR
+        (h.section_type = 'banner' AND b.id IS NOT NULL)
+      )
+      ORDER BY h.sort_order ASC, h.id ASC
+    `);
+
+    res.json({
+      status: "ok",
+      items
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to load Page & Banners Position",
+      error: error.message
+    });
+  }
+});
+
+app.post("/api/admin/page-banner-position/reorder", verifyAdmin, async (req, res) => {
+  try {
+    const { items } = req.body;
+
+    if (!Array.isArray(items)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Items must be an array"
+      });
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      await db.query(
+        "UPDATE home_layout_sections SET sort_order = ? WHERE id = ?",
+        [i + 1, items[i].layout_id]
+      );
+    }
+
+    res.json({
+      status: "ok",
+      message: "Page & Banners Position saved successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to save Page & Banners Position",
+      error: error.message
+    });
+  }
+});
+
 app.get("/api/home-sections", async (req, res) => {
   try {
     const [pages] = await db.query(`
