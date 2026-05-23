@@ -561,13 +561,8 @@ app.get("/", (req, res) => {
           </section>
 
           <section>
-            <div class="section-head">
-              <h2>Latest Products</h2>
-              <a href="#">View all</a>
-            </div>
-
-            <div id="productsGrid" class="product-grid"></div>
-          </section>
+  <div id="homeSections"></div>
+</section>
         </main>
 
         <script>
@@ -604,18 +599,32 @@ app.get("/", (req, res) => {
             \`;
           }
 
-          function renderProducts(products) {
-            const grid = document.getElementById("productsGrid");
+          function renderHomeSections(sections) {
+  const wrap = document.getElementById("homeSections");
 
-            if (!products || products.length === 0) {
-              grid.className = "";
-              grid.innerHTML = '<div class="empty">No products found.</div>';
-              return;
-            }
+  if (!sections || sections.length === 0) {
+    wrap.innerHTML = '<div class="empty">No products found.</div>';
+    return;
+  }
 
-            grid.className = "product-grid";
-            grid.innerHTML = products.map(productCard).join("");
-          }
+  let html = "";
+
+  sections.forEach(function(section) {
+    const page = section.page;
+    const products = section.products || [];
+
+    html += "<div class='section-head'>";
+    html += "<h2>" + page.page_name + "</h2>";
+    html += "<a href='/page/" + page.slug + "'>View all</a>";
+    html += "</div>";
+
+    html += "<div class='product-grid'>";
+    html += products.map(productCard).join("");
+    html += "</div>";
+  });
+
+  wrap.innerHTML = html;
+}
 
           async function loadSettings() {
   try {
@@ -640,38 +649,61 @@ app.get("/", (req, res) => {
   }
 }
 
-async function loadProducts() {
+async function loadHomeSections() {
   try {
-    const res = await fetch("/api/products");
+    const res = await fetch("/api/home-sections");
     const data = await res.json();
 
-    allProducts = data.products || [];
-    renderProducts(allProducts);
+    const sections = data.sections || [];
+
+    allProducts = [];
+
+    sections.forEach(function(section) {
+      (section.products || []).forEach(function(product) {
+        allProducts.push(product);
+      });
+    });
+
+    renderHomeSections(sections);
   } catch (error) {
-    document.getElementById("productsGrid").innerHTML =
+    document.getElementById("homeSections").innerHTML =
       '<div class="empty">' + error.message + '</div>';
   }
 }
 
           function filterProducts() {
-            const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  const wrap = document.getElementById("homeSections");
 
-            if (!q) {
-              renderProducts(allProducts);
-              return;
-            }
+  if (!q) {
+    loadHomeSections();
+    return;
+  }
 
-            const filtered = allProducts.filter(function(product) {
-              return (
-                String(product.product_name || "").toLowerCase().includes(q) ||
-                String(product.sku || "").toLowerCase().includes(q) ||
-                String(product.dealer_name || "").toLowerCase().includes(q) ||
-                String(product.page_names || "").toLowerCase().includes(q)
-              );
-            });
+  const filtered = allProducts.filter(function(product) {
+    return (
+      String(product.product_name || "").toLowerCase().includes(q) ||
+      String(product.sku || "").toLowerCase().includes(q) ||
+      String(product.dealer_name || "").toLowerCase().includes(q) ||
+      String(product.page_names || "").toLowerCase().includes(q)
+    );
+  });
 
-            renderProducts(filtered);
-          }
+  if (filtered.length === 0) {
+    wrap.innerHTML = '<div class="empty">No products found.</div>';
+    return;
+  }
+
+  let html = "";
+  html += "<div class='section-head'>";
+  html += "<h2>Search Results</h2>";
+  html += "</div>";
+  html += "<div class='product-grid'>";
+  html += filtered.map(productCard).join("");
+  html += "</div>";
+
+  wrap.innerHTML = html;
+}
 
           function changeQty(productId, delta) {
             const input = document.getElementById("qty-" + productId);
@@ -863,7 +895,7 @@ let total = 0;
   window.open(url, "_blank");
 }
           loadSettings().then(function() {
-  loadProducts();
+  loadHomeSections();
   updateListButton();
   renderYourList();
 });
