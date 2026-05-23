@@ -121,7 +121,7 @@ app.get("/", (req, res) => {
             border-bottom: 1px solid #DCCCAC;
             padding: 10px 12px;
             display: grid;
-            grid-template-columns: 70px 1fr 38px auto;
+            grid-template-columns: 70px 1fr auto 38px;
             gap: 8px;
             align-items: center;
           }
@@ -702,9 +702,9 @@ app.get("/", (req, res) => {
     <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
   </div>
 
-  <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
-
   <button class="list-btn mobile-list-btn" id="yourListBtnMobile" onclick="toggleYourList()">Your List (0)</button>
+
+	<button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
 </header>
 
 		<div id="pagesMenuPanel" class="pages-menu-panel"></div>
