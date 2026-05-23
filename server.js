@@ -199,6 +199,10 @@ app.get("/", (req, res) => {
   display: none;
 }
 
+.mobile-list-btn {
+  display: inline-block;
+}
+
 .pages-menu-btn {
   border: 1px solid #DCCCAC;
   background: white;
@@ -611,6 +615,10 @@ app.get("/", (req, res) => {
 }
 
 .pages-menu-btn {
+  display: none;
+}
+
+.mobile-list-btn {
   display: none;
 }
 
