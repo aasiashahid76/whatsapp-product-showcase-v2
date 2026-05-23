@@ -6876,8 +6876,8 @@ async function loadFixedBannersAdmin() {
       html += "<div style='font-weight:700;margin-top:8px;color:#38472d;'>" + banner.banner_name + "</div>";
       html += "<div style='font-size:12px;color:#6f7a5f;margin-top:4px;'>Sort Order: " + banner.sort_order + "</div>";
       html += "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;'>";
-html += "<button onclick='moveFixedBanner(" + banner.id + ", \"up\")' style='background:#DCCCAC;color:#546B41;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>↑ Up</button>";
-html += "<button onclick='moveFixedBanner(" + banner.id + ", \"down\")' style='background:#DCCCAC;color:#546B41;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>↓ Down</button>";
+html += "<button onclick='moveFixedBanner(" + banner.id + ", &quot;up&quot;)' style='background:#DCCCAC;color:#546B41;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>↑ Up</button>";
+html += "<button onclick='moveFixedBanner(" + banner.id + ", &quot;down&quot;)' style='background:#DCCCAC;color:#546B41;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>↓ Down</button>";
 html += "<button onclick='deleteFixedBanner(" + banner.id + ")' style='background:#fee2e2;color:#991b1b;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>Delete</button>";
 html += "</div>";
       html += "</div>";
@@ -7136,29 +7136,7 @@ async function deleteReview(reviewId) {
 
           var token = localStorage.getItem("admin_token");
 
-window.showTab = showTab;
-window.logoutAdmin = logoutAdmin;
-window.uploadImageFile = uploadImageFile;
-
-window.createPage = createPage;
-window.openEditPageBox = openEditPageBox;
-window.closeEditPageBox = closeEditPageBox;
-window.updatePage = updatePage;
-window.deletePage = deletePage;
-window.movePage = movePage;
-
-window.createProduct = createProduct;
-
-window.addFixedBanner = addFixedBanner;
-window.deleteFixedBanner = deleteFixedBanner;
-window.moveFixedBanner = moveFixedBanner;
-
-window.addReview = addReview;
-window.deleteReview = deleteReview;
-
-window.saveSettings = saveSettings;
-
-          if (!token) {
+if (!token) {
   window.location.href = "/admin";
 } else {
   loadPages();
