@@ -1355,6 +1355,28 @@ app.get("/api/pages", async (req, res) => {
   }
 });
 
+app.get("/api/header-pages", async (req, res) => {
+  try {
+    const [pages] = await db.query(`
+      SELECT id, page_name, slug
+      FROM pages
+      WHERE is_active = true AND show_on_header = true
+      ORDER BY sort_order ASC, id DESC
+    `);
+
+    res.json({
+      status: "ok",
+      pages
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to load header pages",
+      error: error.message
+    });
+  }
+});
+
 app.get("/api/page/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
