@@ -6434,6 +6434,32 @@ async function loadPages() {
   actions.style.gap = "8px";
   actions.style.marginTop = "10px";
 
+  const upBtn = document.createElement("button");
+upBtn.textContent = "↑ Up";
+upBtn.style.background = "#DCCCAC";
+upBtn.style.color = "#546B41";
+upBtn.style.border = "none";
+upBtn.style.borderRadius = "10px";
+upBtn.style.padding = "8px 10px";
+upBtn.style.cursor = "pointer";
+upBtn.style.fontWeight = "700";
+upBtn.onclick = function() {
+  movePage(page.id, "up");
+};
+
+const downBtn = document.createElement("button");
+downBtn.textContent = "↓ Down";
+downBtn.style.background = "#DCCCAC";
+downBtn.style.color = "#546B41";
+downBtn.style.border = "none";
+downBtn.style.borderRadius = "10px";
+downBtn.style.padding = "8px 10px";
+downBtn.style.cursor = "pointer";
+downBtn.style.fontWeight = "700";
+downBtn.onclick = function() {
+  movePage(page.id, "down");
+};
+
   const editBtn = document.createElement("button");
   editBtn.textContent = "Edit";
   editBtn.style.background = "#546B41";
@@ -6458,8 +6484,10 @@ async function loadPages() {
     deletePage(page.id, page.page_name);
   };
 
-  actions.appendChild(editBtn);
-  actions.appendChild(deleteBtn);
+  actions.appendChild(upBtn);
+actions.appendChild(downBtn);
+actions.appendChild(editBtn);
+actions.appendChild(deleteBtn);
 
   div.appendChild(title);
   div.appendChild(slug);
@@ -6793,6 +6821,32 @@ async function deletePage(pageId, pageName) {
   }
 }
 
+async function movePage(pageId, direction) {
+  try {
+    const res = await fetch("/api/admin/pages/" + pageId + "/move", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+      },
+      body: JSON.stringify({
+        direction: direction
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Page move failed");
+      return;
+    }
+
+    loadPages();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
 async function loadFixedBannersAdmin() {
   const box = document.getElementById("fixedBannersList");
 
@@ -6821,7 +6875,11 @@ async function loadFixedBannersAdmin() {
       html += "<img src='" + banner.image_url + "' style='width:100%;max-height:150px;object-fit:cover;border-radius:10px;border:1px solid #DCCCAC;' />";
       html += "<div style='font-weight:700;margin-top:8px;color:#38472d;'>" + banner.banner_name + "</div>";
       html += "<div style='font-size:12px;color:#6f7a5f;margin-top:4px;'>Sort Order: " + banner.sort_order + "</div>";
-      html += "<button onclick='deleteFixedBanner(" + banner.id + ")' style='margin-top:8px;background:#fee2e2;color:#991b1b;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>Delete</button>";
+      html += "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;'>";
+html += "<button onclick='moveFixedBanner(" + banner.id + ", \"up\")' style='background:#DCCCAC;color:#546B41;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>↑ Up</button>";
+html += "<button onclick='moveFixedBanner(" + banner.id + ", \"down\")' style='background:#DCCCAC;color:#546B41;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>↓ Down</button>";
+html += "<button onclick='deleteFixedBanner(" + banner.id + ")' style='background:#fee2e2;color:#991b1b;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>Delete</button>";
+html += "</div>";
       html += "</div>";
     });
 
@@ -6908,6 +6966,37 @@ async function deleteFixedBanner(bannerId) {
     }
 
     alert("Fixed banner deleted successfully");
+    loadFixedBannersAdmin();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function moveFixedBanner(bannerId, direction) {
+  if (!token) {
+    alert("Please login first");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/fixed-banners/" + bannerId + "/move", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        direction: direction
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Fixed banner move failed");
+      return;
+    }
+
     loadFixedBannersAdmin();
   } catch (error) {
     alert(error.message);
