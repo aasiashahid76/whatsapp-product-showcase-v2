@@ -649,52 +649,146 @@ app.get("/", (req, res) => {
 }
 
 .site-footer {
-  margin-top: 24px;
+  margin-top: 34px;
+  background: white;
+  color: #38472d;
+  border-top: 1px solid #DCCCAC;
+}
+
+.footer-main {
+  display: grid;
+  gap: 24px;
+  padding: 28px 14px;
+}
+
+.footer-logo-box {
+  width: 150px;
+  height: 56px;
+  border-radius: 12px;
   background: #546B41;
   color: #FFF8EC;
-  border-radius: 18px 18px 0 0;
-  padding: 18px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  overflow: hidden;
+  border: 1px solid #DCCCAC;
+  margin-bottom: 12px;
 }
 
-.footer-title {
-  font-size: 16px;
-  font-weight: 800;
-  margin-bottom: 8px;
+.footer-logo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+  background: #FFF8EC;
+  padding: 4px;
 }
 
-.footer-contact {
-  display: grid;
-  gap: 6px;
+.footer-logo-box span {
   font-size: 13px;
-  margin-bottom: 14px;
+  font-weight: 800;
 }
 
-.footer-contact a {
-  color: #FFF8EC;
-  text-decoration: none;
+.footer-brand p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 260px;
 }
 
-.footer-links {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.footer-column h4 {
+  margin: 0 0 12px;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.footer-contact-row {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  color: #4b5563;
+  font-size: 14px;
+  margin-bottom: 10px;
 }
 
-.footer-links a {
-  color: #FFF8EC;
-  background: rgba(255, 248, 236, 0.12);
-  border: 1px solid rgba(255, 248, 236, 0.25);
-  border-radius: 10px;
-  padding: 9px;
+.footer-contact-row a,
+.footer-legal-link,
+.footer-browse-link {
+  color: #4b5563;
   text-decoration: none;
-  font-size: 12px;
+}
+
+.footer-legal-list {
+  display: grid;
+  gap: 12px;
+}
+
+.footer-social-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.footer-social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 10px 16px;
+  text-decoration: none;
+  font-size: 14px;
   font-weight: 600;
 }
 
+.footer-social-btn.instagram {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.footer-social-btn.whatsapp {
+  background: #16a34a;
+  color: white;
+}
+
+.footer-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #16a34a;
+  color: white;
+  border-radius: 999px;
+  padding: 10px 18px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.footer-browse-link {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
 .footer-bottom {
-  margin-top: 14px;
-  font-size: 11px;
-  opacity: 0.85;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  padding: 18px 12px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+@media (min-width: 768px) {
+  .footer-main {
+    grid-template-columns: 1.3fr 1.2fr 1.2fr 1.4fr;
+    gap: 34px;
+    padding: 40px 24px;
+    max-width: 1180px;
+    margin: auto;
+  }
 }
 
           @media (min-width: 768px) {
@@ -841,24 +935,44 @@ app.get("/", (req, res) => {
 </section>
 
 <footer class="site-footer">
-  <div class="footer-title">Contact Us</div>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <a href="/" class="footer-logo-box">
+        <img id="footerLogoImg" src="" alt="Logo" />
+        <span id="footerLogoText">LOGO</span>
+      </a>
+      <p>Shop quality products with simple WhatsApp ordering.</p>
+    </div>
 
-  <div class="footer-contact">
-    <div id="footerMobile"></div>
-    <div id="footerEmail"></div>
-    <div id="footerInstagram"></div>
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <div class="footer-contact-row" id="footerMobile"></div>
+      <div class="footer-contact-row" id="footerEmail"></div>
+      <div id="footerWhatsapp"></div>
+    </div>
+
+    <div class="footer-column">
+      <h4>Legal</h4>
+      <div class="footer-legal-list">
+        <a class="footer-legal-link" href="/legal/terms-condition">Terms & Conditions</a>
+        <a class="footer-legal-link" href="/legal/policies">Policies</a>
+        <a class="footer-legal-link" href="/legal/privacy-policy">Privacy Policy</a>
+        <a class="footer-legal-link" href="/legal/return-refund">Return & Refund Policy</a>
+      </div>
+    </div>
+
+    <div class="footer-column">
+      <h4>Follow</h4>
+      <div class="footer-social-row">
+        <span id="footerInstagram"></span>
+        <span id="footerWhatsappSocial"></span>
+      </div>
+      <a class="footer-browse-link" href="/page/all-products">Browse all products →</a>
+    </div>
   </div>
 
-  <div class="footer-links">
-    <a href="/legal/policies">Policies</a>
-    <a href="/legal/privacy-policy">Privacy Policy</a>
-    <a href="/legal/return-refund">Return & Refund</a>
-    <a href="/legal/terms-condition">Terms & Conditions</a>
-  </div>
-
-  <div class="footer-bottom">© All rights reserved.</div>
+  <div class="footer-bottom">© 2026. All rights reserved.</div>
 </footer>
-
         </main>
 
         <script>
@@ -1018,25 +1132,56 @@ function filterProductsFromDesktop() {
       logoImg.style.display = "none";
       logoText.style.display = "block";
     }
+const footerLogoImg = document.getElementById("footerLogoImg");
+const footerLogoText = document.getElementById("footerLogoText");
+
+if (logoUrl && footerLogoImg && footerLogoText) {
+  footerLogoImg.src = logoUrl;
+  footerLogoImg.style.display = "block";
+  footerLogoText.style.display = "none";
+} else if (footerLogoImg && footerLogoText) {
+  footerLogoImg.style.display = "none";
+  footerLogoText.style.display = "block";
+}
+
 const footerMobile = document.getElementById("footerMobile");
 const footerEmail = document.getElementById("footerEmail");
 const footerInstagram = document.getElementById("footerInstagram");
+const footerWhatsapp = document.getElementById("footerWhatsapp");
+const footerWhatsappSocial = document.getElementById("footerWhatsappSocial");
+
+const mobileNumber = String(siteSettings.mobile_number || "").trim();
+const whatsappNumber = String(siteSettings.whatsapp_number || "").replace(/[^0-9]/g, "");
+const email = String(siteSettings.email || "").trim();
+const instagram = String(siteSettings.instagram_link || "").trim();
 
 if (footerMobile) {
-  footerMobile.innerHTML = siteSettings.mobile_number
-    ? "📞 <a href='tel:" + siteSettings.mobile_number + "'>" + siteSettings.mobile_number + "</a>"
+  footerMobile.innerHTML = mobileNumber
+    ? "📞 <a href='tel:" + mobileNumber + "'>" + mobileNumber + "</a>"
     : "";
 }
 
 if (footerEmail) {
-  footerEmail.innerHTML = siteSettings.email
-    ? "✉️ <a href='mailto:" + siteSettings.email + "'>" + siteSettings.email + "</a>"
+  footerEmail.innerHTML = email
+    ? "✉️ <a href='mailto:" + email + "'>" + email + "</a>"
+    : "";
+}
+
+if (footerWhatsapp) {
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
     : "";
 }
 
 if (footerInstagram) {
-  footerInstagram.innerHTML = siteSettings.instagram_link
-    ? "📷 <a href='" + siteSettings.instagram_link + "' target='_blank'>Instagram</a>"
+  footerInstagram.innerHTML = instagram
+    ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>📷 Instagram</a>"
+    : "";
+}
+
+if (footerWhatsappSocial) {
+  footerWhatsappSocial.innerHTML = whatsappNumber
+    ? "<a class='footer-social-btn whatsapp' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
     : "";
 }
 	
