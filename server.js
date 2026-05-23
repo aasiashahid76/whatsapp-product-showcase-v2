@@ -500,6 +500,33 @@ app.get("/", (req, res) => {
   }
 }
 
+.fixed-banners-wrap {
+  display: grid;
+  gap: 12px;
+  margin: 6px 0 18px;
+}
+
+.fixed-banner-card {
+  display: block;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #DCCCAC;
+  background: white;
+}
+
+.fixed-banner-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .fixed-banners-wrap {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
 .feature-strip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1167,6 +1194,8 @@ border-top: 1px solid #546B41;
   </div>
 </section>
 
+<section id="fixedBannersWrap" class="fixed-banners-wrap"></section>
+
           <section>
   <div id="homeSections"></div>
 </section>
@@ -1536,6 +1565,34 @@ function startBannerSlider() {
   }, 3500);
 }
 
+async function loadFixedBanners() {
+  const wrap = document.getElementById("fixedBannersWrap");
+
+  if (!wrap) return;
+
+  try {
+    const res = await fetch("/api/fixed-banners");
+    const data = await res.json();
+    const banners = data.banners || [];
+
+    if (banners.length === 0) {
+      wrap.style.display = "none";
+      return;
+    }
+
+    wrap.style.display = "grid";
+
+    wrap.innerHTML = banners.map(function(banner) {
+      return "" +
+        "<div class='fixed-banner-card'>" +
+          "<img src='" + banner.image_url + "' alt='" + banner.banner_name + "' />" +
+        "</div>";
+    }).join("");
+  } catch (error) {
+    wrap.style.display = "none";
+  }
+}
+
 async function loadHomeSections() {
   try {
     const res = await fetch("/api/home-sections");
@@ -1799,6 +1856,7 @@ let total = 0;
           loadSettings().then(function() {
   loadHeaderPages();
   loadHomeTopDesign();
+  loadFixedBanners();
   loadHomeSections();
   updateListButton();
   renderYourList();
@@ -2539,6 +2597,28 @@ app.get("/api/product/:slug", async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Failed to load product detail",
+      error: error.message
+    });
+  }
+});
+
+app.get("/api/fixed-banners", async (req, res) => {
+  try {
+    const [banners] = await db.query(`
+      SELECT id, banner_name, image_url, sort_order, is_active
+      FROM home_fixed_banners
+      WHERE is_active = true
+      ORDER BY sort_order ASC, id DESC
+    `);
+
+    res.json({
+      status: "ok",
+      banners
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to load fixed banners",
       error: error.message
     });
   }
