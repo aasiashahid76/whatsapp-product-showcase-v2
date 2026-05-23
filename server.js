@@ -572,7 +572,7 @@ app.get("/", (req, res) => {
 
         <script>
           let allProducts = [];
-let siteSettings = {};
+			let siteSettings = {};
 
           function productCard(product) {
             const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
@@ -3085,6 +3085,95 @@ app.get("/all-products", (req, res) => {
   color: #991b1b;
 }
 
+.edit-btn {
+  background: #DCCCAC;
+  color: #546B41;
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 100;
+}
+
+.modal-box {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  width: 640px;
+  max-width: 92%;
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid #DCCCAC;
+  padding: 20px;
+  z-index: 101;
+  box-shadow: 0 16px 44px rgba(0,0,0,0.25);
+}
+
+.modal-box h2 {
+  margin: 0 0 14px;
+  font-size: 20px;
+}
+
+.modal-box label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.modal-box input,
+.modal-box select {
+  width: 100%;
+  padding: 11px;
+  border-radius: 11px;
+  border: 1px solid #DCCCAC;
+  background: #FFF8EC;
+  color: #546B41;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.check-row input {
+  width: auto;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.modal-save {
+  background: #546B41;
+  color: #FFF8EC;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-cancel {
+  background: #DCCCAC;
+  color: #546B41;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
         </style>
       </head>
 
@@ -3110,6 +3199,72 @@ app.get("/all-products", (req, res) => {
             <div class="loading">Loading products...</div>
           </div>
         </div>
+
+		<div id="editProductOverlay" class="modal-overlay"></div>
+
+<div id="editProductBox" class="modal-box">
+  <h2>Edit Product</h2>
+
+  <input id="editProductId" type="hidden" />
+  <input id="editProductImageUrl" type="hidden" />
+
+  <label>Product SKU</label>
+  <input id="editProductSku" placeholder="SKU" />
+
+  <label>Product Name</label>
+  <input id="editProductName" placeholder="Product name" />
+
+  <label>Product Image</label>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <input id="editProductImageFile" type="file" accept="image/*" />
+    <button type="button" onclick="uploadImageFile('editProductImageFile', 'editProductImageUrl', 'editProductImageUploadStatus')" style="width:auto;background:#546B41;color:#FFF8EC;border:none;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;">Upload</button>
+  </div>
+  <div id="editProductImageUploadStatus" style="font-size:13px;color:#6f7a5f;margin-top:6px;">No product image uploaded yet.</div>
+
+  <label>Show Price</label>
+  <input id="editShowPrice" type="number" />
+
+  <label>Crossed Price</label>
+  <input id="editCrossedPrice" type="number" />
+
+  <label>Tag</label>
+  <select id="editProductTag">
+    <option value="None">None</option>
+    <option value="New">New</option>
+    <option value="On Sale">On Sale</option>
+  </select>
+
+  <label>Dealer Name</label>
+  <input id="editDealerName" />
+
+  <label>Dealer Price</label>
+  <input id="editDealerPrice" type="number" />
+
+  <label>Quantity in Stock</label>
+  <input id="editQtyInStock" type="number" />
+
+  <label>Demand Color</label>
+  <select id="editDemandColor">
+    <option value="Green">Green</option>
+    <option value="Yellow">Yellow</option>
+    <option value="Red">Red</option>
+  </select>
+
+  <label>Pages to be shown</label>
+  <div id="editProductPagesBox" style="background:#FFF8EC;border:1px dashed #DCCCAC;border-radius:12px;padding:12px;">
+    Loading pages...
+  </div>
+
+  <div class="check-row">
+    <input id="editProductVisible" type="checkbox" />
+    <span>Product Visible</span>
+  </div>
+
+  <div class="modal-actions">
+    <button class="modal-save" onclick="saveEditedProduct()">Save Changes</button>
+    <button class="modal-cancel" onclick="closeEditProductBox()">Cancel</button>
+  </div>
+</div>
 
         <script>
           const token = localStorage.getItem("admin_token");
@@ -3206,6 +3361,7 @@ app.get("/all-products", (req, res) => {
 
 				html += "<td>";
 				html += "<div class='action-row'>";
+				html += "<button class='action-btn edit-btn' onclick='openEditProductBox(" + JSON.stringify(product) + ")'>Edit</button>";
 				html += "<button class='action-btn update-btn' onclick='updateProductQty(" + product.id + ")'>Update Qty</button>";
 				html += "<button class='action-btn " + (product.is_visible ? "hide-btn" : "show-btn") + "' onclick='toggleProductVisibility(" + product.id + ", " + (product.is_visible ? "false" : "true") + ")'>" + (product.is_visible ? "Hide" : "Show") + "</button>";
 				html += "<button class='action-btn delete-btn' onclick='deleteProduct(" + product.id + ", " + JSON.stringify(product.product_name || "") + ")'>Delete</button>";
@@ -3303,6 +3459,184 @@ app.get("/all-products", (req, res) => {
 			    alert(error.message);
 			  }
 			}
+
+			async function uploadImageFile(fileInputId, hiddenInputId, statusId) {
+  const fileInput = document.getElementById(fileInputId);
+  const hiddenInput = document.getElementById(hiddenInputId);
+  const statusBox = document.getElementById(statusId);
+
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    alert("Please choose an image first.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("image", fileInput.files[0]);
+
+  if (statusBox) {
+    statusBox.textContent = "Uploading...";
+  }
+
+  try {
+    const res = await fetch("/api/admin/upload", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+      },
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (statusBox) statusBox.textContent = data.message || "Upload failed";
+      alert(data.message || "Upload failed");
+      return;
+    }
+
+    hiddenInput.value = data.file_url;
+
+    if (statusBox) {
+      statusBox.textContent = "Uploaded successfully";
+    }
+
+    alert("Image uploaded successfully");
+  } catch (error) {
+    if (statusBox) statusBox.textContent = error.message;
+    alert(error.message);
+  }
+}
+
+async function openEditProductBox(product) {
+  document.getElementById("editProductId").value = product.id;
+  document.getElementById("editProductSku").value = product.sku || "";
+  document.getElementById("editProductName").value = product.product_name || "";
+  document.getElementById("editProductImageUrl").value = product.product_image_url || "";
+  document.getElementById("editProductImageUploadStatus").textContent = product.product_image_url ? "Product image already uploaded" : "No product image uploaded yet.";
+  document.getElementById("editShowPrice").value = product.show_price || 0;
+  document.getElementById("editCrossedPrice").value = product.crossed_price || "";
+  document.getElementById("editProductTag").value = product.tag || "None";
+  document.getElementById("editDealerName").value = product.dealer_name || "";
+  document.getElementById("editDealerPrice").value = product.dealer_price || 0;
+  document.getElementById("editQtyInStock").value = product.qty_in_stock || 0;
+  document.getElementById("editDemandColor").value = product.demand_color || "Green";
+  document.getElementById("editProductVisible").checked = Boolean(product.is_visible);
+
+  await loadEditProductPageCheckboxes(product.page_ids || "");
+
+  document.getElementById("editProductOverlay").style.display = "block";
+  document.getElementById("editProductBox").style.display = "block";
+}
+
+function closeEditProductBox() {
+  document.getElementById("editProductOverlay").style.display = "none";
+  document.getElementById("editProductBox").style.display = "none";
+}
+
+async function loadEditProductPageCheckboxes(selectedPageIdsText) {
+  const box = document.getElementById("editProductPagesBox");
+  const selectedIds = String(selectedPageIdsText || "")
+    .split(",")
+    .map(function(id) {
+      return Number(id);
+    })
+    .filter(Boolean);
+
+  try {
+    const res = await fetch("/api/pages");
+    const data = await res.json();
+    const pages = data.pages || [];
+
+    if (pages.length === 0) {
+      box.innerHTML = "No pages created yet.";
+      return;
+    }
+
+    box.innerHTML = "";
+
+    pages.forEach(function(page) {
+      const label = document.createElement("label");
+      label.className = "check-row";
+
+      const checked = selectedIds.includes(Number(page.id)) ? "checked" : "";
+
+      label.innerHTML =
+        "<input type='checkbox' class='editProductPageCheckbox' value='" + page.id + "' " + checked + " />" +
+        "<span>" + page.page_name + "</span>";
+
+      box.appendChild(label);
+    });
+  } catch (error) {
+    box.innerHTML = error.message;
+  }
+}
+
+function getSelectedEditProductPageIds() {
+  const checked = document.querySelectorAll(".editProductPageCheckbox:checked");
+
+  return Array.from(checked).map(function(input) {
+    return Number(input.value);
+  });
+}
+
+async function saveEditedProduct() {
+  const productId = document.getElementById("editProductId").value;
+
+  const sku = document.getElementById("editProductSku").value.trim();
+  const product_name = document.getElementById("editProductName").value.trim();
+  const product_image_url = document.getElementById("editProductImageUrl").value.trim();
+  const show_price = document.getElementById("editShowPrice").value;
+  const crossed_price = document.getElementById("editCrossedPrice").value;
+  const tag = document.getElementById("editProductTag").value;
+  const dealer_name = document.getElementById("editDealerName").value.trim();
+  const dealer_price = document.getElementById("editDealerPrice").value;
+  const qty_in_stock = document.getElementById("editQtyInStock").value;
+  const demand_color = document.getElementById("editDemandColor").value;
+  const is_visible = document.getElementById("editProductVisible").checked;
+  const page_ids = getSelectedEditProductPageIds();
+
+  if (!product_name) {
+    alert("Please enter product name");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/products/" + productId, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+      },
+      body: JSON.stringify({
+        sku,
+        product_name,
+        product_image_url,
+        show_price,
+        crossed_price,
+        tag,
+        dealer_name,
+        dealer_price,
+        qty_in_stock,
+        demand_color,
+        is_visible,
+        page_ids
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Product update failed");
+      return;
+    }
+
+    alert("Product updated successfully");
+    closeEditProductBox();
+    loadAdminProducts();
+  } catch (error) {
+    alert(error.message);
+  }
+}
 
           function filterAdminProducts() {
             const q = document.getElementById("productSearchInput").value.toLowerCase().trim();
