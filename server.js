@@ -1893,6 +1893,761 @@ app.get("/api/admin/dashboard", verifyAdmin, async (req, res) => {
   }
 });
 
+app.get("/page/:slug", (req, res) => {
+  const pageSlug = req.params.slug;
+
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Category Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #FFF8EC;
+            color: #546B41;
+          }
+
+          .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #FFF8EC;
+            border-bottom: 1px solid #DCCCAC;
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: 82px 1fr auto;
+            gap: 8px;
+            align-items: center;
+          }
+
+          .logo-box {
+            height: 38px;
+            border-radius: 10px;
+            background: #546B41;
+            color: #FFF8EC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            overflow: hidden;
+            border: 1px solid #DCCCAC;
+          }
+
+          .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            background: #FFF8EC;
+            padding: 3px;
+          }
+
+          .logo-box span {
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          .search-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 999px;
+            padding: 8px 10px;
+          }
+
+          .search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #546B41;
+            font-size: 13px;
+          }
+
+          .list-btn {
+            border: 1px solid #DCCCAC;
+            background: white;
+            color: #546B41;
+            border-radius: 999px;
+            padding: 9px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+          }
+
+          .list-btn.active {
+            background: #546B41;
+            color: #FFF8EC;
+            border-color: #546B41;
+          }
+
+          .page-wrap {
+            padding: 14px 10px 28px;
+          }
+
+          .page-title-box {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 14px;
+          }
+
+          .page-title-box h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+          }
+
+          .page-title-box p {
+            margin: 5px 0 0;
+            color: #6f7a5f;
+            font-size: 14px;
+          }
+
+          .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+          }
+
+          .product-card {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 13px;
+            overflow: hidden;
+          }
+
+          .product-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+            background: #DCCCAC;
+          }
+
+          .product-info {
+            padding: 6px;
+          }
+
+          .name-price-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            align-items: flex-start;
+            min-height: 30px;
+          }
+
+          .product-name {
+            font-size: 11px;
+            line-height: 1.2;
+            font-weight: 500;
+            color: #38472d;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+          }
+
+          .product-price {
+            font-size: 11px;
+            font-weight: 700;
+            color: #546B41;
+            white-space: nowrap;
+          }
+
+          .card-action-row {
+            display: grid;
+            grid-template-columns: 1fr 38px;
+            gap: 4px;
+            margin-top: 6px;
+            align-items: center;
+          }
+
+          .qty-row {
+            display: grid;
+            grid-template-columns: 18px 1fr 18px;
+            gap: 2px;
+          }
+
+          .qty-row button {
+            border: none;
+            background: #DCCCAC;
+            color: #546B41;
+            border-radius: 6px;
+            height: 24px;
+            font-size: 12px;
+            font-weight: 700;
+          }
+
+          .qty-row input {
+            width: 100%;
+            border: 1px solid #DCCCAC;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 11px;
+            color: #546B41;
+            height: 24px;
+            padding: 0;
+          }
+
+          .add-btn {
+            border: none;
+            background: #546B41;
+            color: #FFF8EC;
+            border-radius: 7px;
+            height: 24px;
+            font-size: 10px;
+            font-weight: 700;
+          }
+
+          .empty {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 14px;
+            padding: 16px;
+            color: #6f7a5f;
+            font-size: 14px;
+          }
+
+          .your-list-panel {
+            display: none;
+            position: fixed;
+            top: 59px;
+            left: 10px;
+            right: 10px;
+            z-index: 60;
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 0 0 18px 18px;
+            box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+            max-height: 70vh;
+            overflow: auto;
+          }
+
+          .your-list-panel.show {
+            display: block;
+          }
+
+          .list-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #546B41;
+            color: #FFF8EC;
+          }
+
+          .close-list-btn {
+            border: none;
+            background: #DCCCAC;
+            color: #546B41;
+            border-radius: 999px;
+            width: 28px;
+            height: 28px;
+            font-weight: 700;
+          }
+
+          .list-body {
+            padding: 10px;
+          }
+
+          .list-row {
+            display: grid;
+            grid-template-columns: 48px 1fr 72px 72px 28px;
+            gap: 6px;
+            align-items: center;
+            border-bottom: 1px solid #f0e4ce;
+            padding: 8px 0;
+          }
+
+          .list-row img {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #DCCCAC;
+          }
+
+          .list-product-name {
+            font-size: 11px;
+            line-height: 1.2;
+            color: #38472d;
+            margin-top: 3px;
+          }
+
+          .list-price {
+            font-size: 12px;
+            font-weight: 700;
+            color: #546B41;
+          }
+
+          .list-mini-qty {
+            display: grid;
+            grid-template-columns: 20px 1fr 20px;
+            gap: 2px;
+          }
+
+          .list-mini-qty button {
+            border: none;
+            background: #DCCCAC;
+            color: #546B41;
+            border-radius: 6px;
+            height: 24px;
+            font-weight: 700;
+          }
+
+          .list-mini-qty input {
+            width: 100%;
+            border: 1px solid #DCCCAC;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 11px;
+            height: 24px;
+            padding: 0;
+          }
+
+          .remove-list-btn {
+            border: none;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 7px;
+            height: 26px;
+            font-weight: 700;
+          }
+
+          .list-footer {
+            padding: 12px;
+            border-top: 1px solid #DCCCAC;
+            background: #FFF8EC;
+          }
+
+          .total-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 10px;
+          }
+
+          .send-wa-btn {
+            width: 100%;
+            border: none;
+            background: #546B41;
+            color: #FFF8EC;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 700;
+          }
+
+          .small-message {
+            padding: 14px;
+            color: #6f7a5f;
+            font-size: 14px;
+          }
+
+          @media (min-width: 768px) {
+            .page-wrap {
+              max-width: 1100px;
+              margin: auto;
+              padding: 24px;
+            }
+
+            .site-header {
+              grid-template-columns: 110px 1fr auto;
+              padding: 12px 24px;
+            }
+
+            .logo-box {
+              height: 44px;
+            }
+
+            .product-grid {
+              grid-template-columns: repeat(6, 1fr);
+              gap: 12px;
+            }
+
+            .product-name,
+            .product-price {
+              font-size: 13px;
+            }
+
+            .card-action-row {
+              grid-template-columns: 1fr 52px;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+        <header class="site-header">
+          <a href="/" class="logo-box">
+            <img id="siteLogoImg" src="" alt="Logo" />
+            <span id="siteLogoText">LOGO</span>
+          </a>
+
+          <div class="search-box">
+            <span>🔍</span>
+            <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
+          </div>
+
+          <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
+        </header>
+
+        <div id="yourListPanel" class="your-list-panel">
+          <div class="list-head">
+            <strong>Your List</strong>
+            <button class="close-list-btn" onclick="closeYourList()">×</button>
+          </div>
+
+          <div id="yourListBody" class="list-body"></div>
+
+          <div class="list-footer">
+            <div class="total-line">
+              <span>Total</span>
+              <span id="yourListTotal">₹0</span>
+            </div>
+
+            <button class="send-wa-btn" onclick="sendToWhatsapp()">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;" />
+              Send to WhatsApp
+            </button>
+          </div>
+        </div>
+
+        <main class="page-wrap">
+          <section class="page-title-box">
+            <h1 id="pageTitle">Loading...</h1>
+            <p id="pageSubheading"></p>
+          </section>
+
+          <section>
+            <div id="productsGrid" class="product-grid"></div>
+          </section>
+        </main>
+
+        <script>
+          const pageSlug = ${JSON.stringify(pageSlug)};
+          let allProducts = [];
+          let siteSettings = {};
+
+          function productCard(product) {
+            const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
+            const price = Number(product.show_price || 0).toFixed(0);
+
+            return "" +
+              "<div class='product-card'>" +
+                "<a href='/product/" + product.slug + "'>" +
+                  "<img class='product-img' src='" + image + "' alt='" + product.product_name + "' />" +
+                "</a>" +
+                "<div class='product-info'>" +
+                  "<div class='name-price-row'>" +
+                    "<div class='product-name'>" + product.product_name + "</div>" +
+                    "<div class='product-price'>₹" + price + "</div>" +
+                  "</div>" +
+                  "<div class='card-action-row'>" +
+                    "<div class='qty-row'>" +
+                      "<button onclick='changeQty(" + product.id + ", -1)'>-</button>" +
+                      "<input id='qty-" + product.id + "' type='number' min='1' value='1' />" +
+                      "<button onclick='changeQty(" + product.id + ", 1)'>+</button>" +
+                    "</div>" +
+                    "<button class='add-btn' onclick='addToList(" + product.id + ")'>Add</button>" +
+                  "</div>" +
+                "</div>" +
+              "</div>";
+          }
+
+          function renderProducts(products) {
+            const grid = document.getElementById("productsGrid");
+
+            if (!products || products.length === 0) {
+              grid.className = "";
+              grid.innerHTML = '<div class="empty">No products found in this category.</div>';
+              return;
+            }
+
+            grid.className = "product-grid";
+            grid.innerHTML = products.map(productCard).join("");
+          }
+
+          async function loadSettings() {
+            try {
+              const res = await fetch("/api/settings");
+              const data = await res.json();
+              siteSettings = data.settings || {};
+
+              const logoImg = document.getElementById("siteLogoImg");
+              const logoText = document.getElementById("siteLogoText");
+              const logoUrl = String(siteSettings.logo_url || "").trim();
+
+              if (logoUrl && logoImg && logoText) {
+                logoImg.src = logoUrl;
+                logoImg.style.display = "block";
+                logoText.style.display = "none";
+              } else if (logoImg && logoText) {
+                logoImg.style.display = "none";
+                logoText.style.display = "block";
+              }
+            } catch (error) {
+              siteSettings = {};
+            }
+          }
+
+          async function loadPageProducts() {
+            try {
+              const res = await fetch("/api/page/" + pageSlug);
+              const data = await res.json();
+
+              if (!res.ok) {
+                document.getElementById("pageTitle").textContent = "Page not found";
+                document.getElementById("productsGrid").innerHTML =
+                  '<div class="empty">' + (data.message || "Page not found") + '</div>';
+                return;
+              }
+
+              document.title = data.page.page_name;
+              document.getElementById("pageTitle").textContent = data.page.page_name;
+              document.getElementById("pageSubheading").textContent = data.page.banner_subheading || "";
+
+              allProducts = data.products || [];
+              renderProducts(allProducts);
+            } catch (error) {
+              document.getElementById("productsGrid").innerHTML =
+                '<div class="empty">' + error.message + '</div>';
+            }
+          }
+
+          function filterProducts() {
+            const q = document.getElementById("searchInput").value.toLowerCase().trim();
+
+            if (!q) {
+              renderProducts(allProducts);
+              return;
+            }
+
+            const filtered = allProducts.filter(function(product) {
+              return (
+                String(product.product_name || "").toLowerCase().includes(q) ||
+                String(product.sku || "").toLowerCase().includes(q) ||
+                String(product.dealer_name || "").toLowerCase().includes(q) ||
+                String(product.page_names || "").toLowerCase().includes(q)
+              );
+            });
+
+            renderProducts(filtered);
+          }
+
+          function changeQty(productId, delta) {
+            const input = document.getElementById("qty-" + productId);
+            const current = Number(input.value || 1);
+            const next = Math.max(1, current + delta);
+            input.value = next;
+          }
+
+          function getList() {
+            try {
+              return JSON.parse(localStorage.getItem("your_list") || "[]");
+            } catch (error) {
+              return [];
+            }
+          }
+
+          function saveList(list) {
+            localStorage.setItem("your_list", JSON.stringify(list));
+            updateListButton();
+            renderYourList();
+          }
+
+          function addToList(productId) {
+            const product = allProducts.find(function(item) {
+              return String(item.id) === String(productId);
+            });
+
+            if (!product) return;
+
+            const qtyInput = document.getElementById("qty-" + productId);
+            const qty = Math.max(1, Number(qtyInput ? qtyInput.value : 1));
+
+            const list = getList();
+            const existing = list.find(function(item) {
+              return String(item.id) === String(product.id);
+            });
+
+            if (existing) {
+              existing.qty += qty;
+            } else {
+              list.push({
+                id: product.id,
+                name: product.product_name,
+                price: Number(product.show_price || 0),
+                image: product.product_image_url || "https://via.placeholder.com/300x300?text=Product",
+                slug: product.slug,
+                qty: qty
+              });
+            }
+
+            saveList(list);
+          }
+
+          function updateListButton() {
+            const list = getList();
+            const totalQty = list.reduce(function(sum, item) {
+              return sum + Number(item.qty || 0);
+            }, 0);
+
+            const btn = document.getElementById("yourListBtn");
+            if (!btn) return;
+
+            btn.textContent = "Your List (" + totalQty + ")";
+
+            if (totalQty > 0) {
+              btn.classList.add("active");
+            } else {
+              btn.classList.remove("active");
+            }
+          }
+
+          function toggleYourList() {
+            const panel = document.getElementById("yourListPanel");
+            renderYourList();
+            panel.classList.toggle("show");
+          }
+
+          function closeYourList() {
+            document.getElementById("yourListPanel").classList.remove("show");
+          }
+
+          function renderYourList() {
+            const body = document.getElementById("yourListBody");
+            const totalBox = document.getElementById("yourListTotal");
+
+            if (!body || !totalBox) return;
+
+            const list = getList();
+
+            if (list.length === 0) {
+              body.innerHTML = '<div class="small-message">You have not added any product yet.</div>';
+              totalBox.textContent = "₹0";
+              return;
+            }
+
+            let total = 0;
+            body.innerHTML = "";
+
+            list.forEach(function(item) {
+              const itemTotal = Number(item.price || 0) * Number(item.qty || 1);
+              total += itemTotal;
+
+              const row = document.createElement("div");
+              row.className = "list-row";
+
+              row.innerHTML =
+                "<div>" +
+                  "<img src='" + item.image + "' />" +
+                  "<div class='list-product-name'>" + item.name + "</div>" +
+                "</div>" +
+                "<div class='list-price'>₹" + Number(item.price || 0).toFixed(0) + " × " + item.qty + "</div>" +
+                "<div class='list-price'>₹" + itemTotal.toFixed(0) + "</div>" +
+                "<div class='list-mini-qty'>" +
+                  "<button onclick='changeListQty(" + item.id + ", -1)'>-</button>" +
+                  "<input value='" + item.qty + "' onchange='setListQty(" + item.id + ", this.value)' />" +
+                  "<button onclick='changeListQty(" + item.id + ", 1)'>+</button>" +
+                "</div>" +
+                "<button class='remove-list-btn' onclick='removeFromList(" + item.id + ")'>×</button>";
+
+              body.appendChild(row);
+            });
+
+            totalBox.textContent = "₹" + total.toFixed(0);
+          }
+
+          function changeListQty(productId, delta) {
+            const list = getList();
+
+            const item = list.find(function(row) {
+              return String(row.id) === String(productId);
+            });
+
+            if (!item) return;
+
+            item.qty = Math.max(1, Number(item.qty || 1) + delta);
+            saveList(list);
+          }
+
+          function setListQty(productId, value) {
+            const list = getList();
+
+            const item = list.find(function(row) {
+              return String(row.id) === String(productId);
+            });
+
+            if (!item) return;
+
+            item.qty = Math.max(1, Number(value || 1));
+            saveList(list);
+          }
+
+          function removeFromList(productId) {
+            const list = getList().filter(function(item) {
+              return String(item.id) !== String(productId);
+            });
+
+            saveList(list);
+          }
+
+          function sendToWhatsapp() {
+            const list = getList();
+
+            if (list.length === 0) {
+              alert("You have not added any product yet.");
+              return;
+            }
+
+            const whatsappNumber = String(siteSettings.whatsapp_number || "").replace(/[^0-9]/g, "");
+
+            if (!whatsappNumber) {
+              alert("WhatsApp number is not set. Please add it from Manage UI > Header & Footer.");
+              return;
+            }
+
+            let total = 0;
+            let message = "Hello, I want to order these products:" + String.fromCharCode(10) + String.fromCharCode(10);
+
+            list.forEach(function(item) {
+              const itemTotal = Number(item.price || 0) * Number(item.qty || 1);
+              total += itemTotal;
+
+              message += item.name + " × " + item.qty + " = ₹" + itemTotal.toFixed(0) + String.fromCharCode(10);
+            });
+
+            message += String.fromCharCode(10) + "Total = ₹" + total.toFixed(0);
+
+            const url = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
+
+            window.open(url, "_blank");
+          }
+
+          loadSettings().then(function() {
+            loadPageProducts();
+            updateListButton();
+            renderYourList();
+          });
+        </script>
+      </body>
+    </html>
+  `);
+});
+
 app.get("/admin", (req, res) => {
   res.send(`
     <!DOCTYPE html>
