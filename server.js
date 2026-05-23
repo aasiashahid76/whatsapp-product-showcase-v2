@@ -326,6 +326,143 @@ app.get("/", (req, res) => {
             padding: 14px 10px 28px;
           }
 
+		  .home-banner {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  min-height: 170px;
+  background: linear-gradient(135deg, #546B41, #99AD7A);
+  border: 1px solid #DCCCAC;
+}
+
+.home-banner img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+}
+
+.home-banner-content {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  background: rgba(84, 107, 65, 0.82);
+  color: #FFF8EC;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.home-banner-content h1 {
+  margin: 0 0 5px;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.home-banner-content p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.circular-pages-wrap {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 6px 2px 16px;
+  margin-bottom: 8px;
+}
+
+.circular-page-item {
+  flex: 0 0 auto;
+  width: 74px;
+  text-align: center;
+  text-decoration: none;
+  color: #38472d;
+  animation: circlePulse 4s infinite;
+}
+
+.circular-page-item:nth-child(2) { animation-delay: 0.5s; }
+.circular-page-item:nth-child(3) { animation-delay: 1s; }
+.circular-page-item:nth-child(4) { animation-delay: 1.5s; }
+.circular-page-item:nth-child(5) { animation-delay: 2s; }
+
+.circular-img {
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid #DCCCAC;
+  background: white;
+  padding: 2px;
+}
+
+.circular-page-name {
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@keyframes circlePulse {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.feature-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.feature-card {
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 14px;
+  padding: 10px 6px;
+  text-align: center;
+  color: #38472d;
+}
+
+.feature-card strong {
+  display: block;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.feature-card span {
+  font-size: 18px;
+}
+
+@media (min-width: 768px) {
+  .home-banner img {
+    height: 310px;
+  }
+
+  .home-banner-content h1 {
+    font-size: 30px;
+  }
+
+  .home-banner-content p {
+    font-size: 15px;
+  }
+
+  .circular-page-item {
+    width: 90px;
+  }
+
+  .circular-img {
+    width: 82px;
+    height: 82px;
+  }
+}
+
           .hero {
             border-radius: 18px;
             background: linear-gradient(135deg, #546B41, #99AD7A);
@@ -925,10 +1062,24 @@ border-top: 1px solid #546B41;
 </div>
 
         <main class="page-wrap">
-          <section class="hero">
-            <h1>Shop quality products easily</h1>
-            <p>Select products, add them to Your List, and send your order on WhatsApp.</p>
-          </section>
+          <section id="homeBannerWrap"></section>
+
+<section id="circularPagesWrap" class="circular-pages-wrap"></section>
+
+<section class="feature-strip">
+  <div class="feature-card">
+    <span>✅</span>
+    <strong>Best Quality</strong>
+  </div>
+  <div class="feature-card">
+    <span>⚡</span>
+    <strong>Easy Order</strong>
+  </div>
+  <div class="feature-card">
+    <span>💰</span>
+    <strong>Best Price</strong>
+  </div>
+</section>
 
           <section>
   <div id="homeSections"></div>
@@ -1187,6 +1338,68 @@ if (footerWhatsappSocial) {
 	
   } catch (error) {
     siteSettings = {};
+  }
+}
+
+async function loadHomeTopDesign() {
+  try {
+    const res = await fetch("/api/pages");
+    const data = await res.json();
+    const pages = data.pages || [];
+
+    const activePages = pages.filter(function(page) {
+      return page.is_active === 1 || page.is_active === true;
+    });
+
+    const bannerPage = activePages.find(function(page) {
+      return (page.show_on_banner === 1 || page.show_on_banner === true) && page.banner_image_url;
+    });
+
+    const bannerWrap = document.getElementById("homeBannerWrap");
+
+    if (bannerWrap) {
+      if (bannerPage) {
+        bannerWrap.innerHTML =
+          "<a href='/page/" + bannerPage.slug + "' class='home-banner'>" +
+            "<img src='" + bannerPage.banner_image_url + "' alt='" + bannerPage.page_name + "' />" +
+            "<div class='home-banner-content'>" +
+              "<h1>" + bannerPage.page_name + "</h1>" +
+              "<p>" + (bannerPage.banner_subheading || "Explore our latest products") + "</p>" +
+            "</div>" +
+          "</a>";
+      } else {
+        bannerWrap.innerHTML =
+          "<div class='home-banner'>" +
+            "<div class='home-banner-content'>" +
+              "<h1>Shop quality products easily</h1>" +
+              "<p>Select products, add them to Your List, and send your order on WhatsApp.</p>" +
+            "</div>" +
+          "</div>";
+      }
+    }
+
+    const circularPages = activePages.filter(function(page) {
+      return (page.create_circular_icon === 1 || page.create_circular_icon === true) && page.circular_image_url;
+    });
+
+    const circularWrap = document.getElementById("circularPagesWrap");
+
+    if (circularWrap) {
+      if (circularPages.length === 0) {
+        circularWrap.style.display = "none";
+      } else {
+        circularWrap.style.display = "flex";
+        circularWrap.innerHTML = circularPages.map(function(page) {
+          return "" +
+            "<a class='circular-page-item' href='/page/" + page.slug + "'>" +
+              "<img class='circular-img' src='" + page.circular_image_url + "' alt='" + page.page_name + "' />" +
+              "<div class='circular-page-name'>" + page.page_name + "</div>" +
+            "</a>";
+        }).join("");
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
   }
 }
 
@@ -1452,6 +1665,7 @@ let total = 0;
 }
           loadSettings().then(function() {
   loadHeaderPages();
+  loadHomeTopDesign();
   loadHomeSections();
   updateListButton();
   renderYourList();
