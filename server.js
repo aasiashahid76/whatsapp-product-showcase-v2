@@ -187,6 +187,10 @@ app.get("/", (req, res) => {
   cursor: pointer;
 }
 
+.desktop-right-header {
+  display: none;
+}
+
 .desktop-pages-nav {
   display: none;
 }
@@ -242,6 +246,16 @@ app.get("/", (req, res) => {
 .pages-menu-panel a.active {
   background: #546B41;
   color: #FFF8EC;
+}
+
+.desktop-search-panel input {
+  width: 100%;
+  border: 1px solid #DCCCAC;
+  background: #FFF8EC;
+  color: #546B41;
+  border-radius: 12px;
+  padding: 12px;
+  outline: none;
 }
 
 .desktop-search-panel input {
@@ -588,8 +602,7 @@ app.get("/", (req, res) => {
             }
 
             .site-header {
-  grid-template-columns: 140px auto 44px auto;
-  justify-content: start;
+  grid-template-columns: 140px 1fr;
   padding: 12px 24px;
 }
 
@@ -601,40 +614,44 @@ app.get("/", (req, res) => {
   display: none;
 }
 
+.desktop-right-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
 .desktop-pages-nav {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
+  gap: 16px;
   align-items: center;
+  overflow-x: auto;
 }
 
 .desktop-pages-nav a {
   flex: 0 0 auto;
   text-decoration: none;
-  background: white;
   color: #546B41;
-  border: 1px solid #DCCCAC;
-  border-radius: 999px;
-  padding: 9px 13px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .desktop-pages-nav a.active {
-  background: #546B41;
-  color: #FFF8EC;
-  border-color: #546B41;
+  color: #38472d;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .desktop-search-btn {
   display: block;
-  border: 1px solid #DCCCAC;
-  background: white;
+  border: none;
+  background: transparent;
   color: #546B41;
-  border-radius: 999px;
-  width: 42px;
-  height: 42px;
-  font-size: 17px;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
   cursor: pointer;
 }
 
@@ -666,18 +683,20 @@ app.get("/", (req, res) => {
     <span id="siteLogoText">LOGO</span>
   </a>
 
-  <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
+  <div class="desktop-right-header">
+    <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
+    <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
+    <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
+  </div>
 
   <div class="search-box mobile-search-box">
     <span>🔍</span>
     <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
   </div>
 
-  <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
-
   <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
 
-  <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
+  <button class="list-btn mobile-list-btn" id="yourListBtnMobile" onclick="toggleYourList()">Your List (0)</button>
 </header>
 
 		<div id="pagesMenuPanel" class="pages-menu-panel"></div>
@@ -986,16 +1005,22 @@ function updateListButton() {
     return sum + Number(item.qty || 0);
   }, 0);
 
-  const btn = document.getElementById("yourListBtn");
-  if (!btn) return;
+  const buttons = [
+    document.getElementById("yourListBtn"),
+    document.getElementById("yourListBtnMobile")
+  ];
 
-  btn.textContent = "Your List (" + totalQty + ")";
+  buttons.forEach(function(btn) {
+    if (!btn) return;
 
-  if (totalQty > 0) {
-    btn.classList.add("active");
-  } else {
-    btn.classList.remove("active");
-  }
+    btn.textContent = "Your List (" + totalQty + ")";
+
+    if (totalQty > 0) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
 }
 
 function toggleYourList() {
