@@ -2868,6 +2868,27 @@ app.get("/api/reviews", async (req, res) => {
   }
 });
 
+app.get("/api/admin/reviews", verifyAdmin, async (req, res) => {
+  try {
+    const [reviews] = await db.query(`
+      SELECT id, customer_name, rating, review_body, is_active, created_at
+      FROM reviews
+      ORDER BY id DESC
+    `);
+
+    res.json({
+      status: "ok",
+      reviews
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to load admin reviews",
+      error: error.message
+    });
+  }
+});
+
 app.post("/api/admin/reviews", verifyAdmin, async (req, res) => {
   try {
     const { customer_name, rating, review_body } = req.body;
@@ -6025,11 +6046,28 @@ app.get("/manage-ui", (req, res) => {
 </div>
 
           <div id="reviewsTab" class="tab-content">
-            <div class="card">
-              <h2>Reviews</h2>
-              <p>This tab will manage customer reviews.</p>
-            </div>
-          </div>
+  <div class="grid">
+    <div class="card">
+      <h2>Add Review</h2>
+
+      <label>Customer Name</label>
+      <input id="reviewCustomerName" placeholder="Example: Aasia" />
+
+      <label>Rating out of 5</label>
+      <input id="reviewRating" type="number" min="1" max="5" placeholder="Example: 5" />
+
+      <label>Review Text</label>
+      <textarea id="reviewBody" placeholder="Write customer review here"></textarea>
+
+      <button class="primary" onclick="addReview()">Add Review</button>
+    </div>
+
+    <div class="card">
+      <h2>Manage Reviews</h2>
+      <div id="reviewsList">Loading reviews...</div>
+    </div>
+  </div>
+</div>
 
           <div id="settingsTab" class="tab-content">
   <div class="card">
@@ -6736,6 +6774,137 @@ async function deleteFixedBanner(bannerId) {
   }
 }
 
+function renderStars(rating) {
+  const safeRating = Math.max(1, Math.min(5, Number(rating || 5)));
+  return "★".repeat(safeRating) + "☆".repeat(5 - safeRating);
+}
+
+async function loadReviewsAdmin() {
+  const box = document.getElementById("reviewsList");
+
+  if (!box) return;
+
+  if (!token) {
+    box.innerHTML = "Please login first.";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/reviews", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await res.json();
+    const reviews = data.reviews || [];
+
+    if (reviews.length === 0) {
+      box.innerHTML = "<div style='color:#6f7a5f;font-size:14px;'>No reviews added yet.</div>";
+      return;
+    }
+
+    let html = "";
+
+    reviews.forEach(function(review) {
+      html += "<div style='border:1px solid #DCCCAC;border-radius:14px;padding:10px;margin-bottom:10px;background:#FFF8EC;'>";
+      html += "<div style='font-weight:800;color:#38472d;'>" + review.customer_name + "</div>";
+      html += "<div style='font-size:13px;color:#546B41;margin:5px 0;'>Rating: " + review.rating + "/5 " + renderStars(review.rating) + "</div>";
+      html += "<div style='font-size:14px;color:#38472d;line-height:1.4;'>" + review.review_body + "</div>";
+      html += "<button onclick='deleteReview(" + review.id + ")' style='margin-top:8px;background:#fee2e2;color:#991b1b;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>Delete</button>";
+      html += "</div>";
+    });
+
+    box.innerHTML = html;
+  } catch (error) {
+    box.innerHTML = error.message;
+  }
+}
+
+async function addReview() {
+  if (!token) {
+    alert("Please login first");
+    return;
+  }
+
+  const customerName = document.getElementById("reviewCustomerName").value.trim();
+  const rating = document.getElementById("reviewRating").value.trim();
+  const reviewBody = document.getElementById("reviewBody").value.trim();
+
+  if (!customerName) {
+    alert("Customer name is required");
+    return;
+  }
+
+  if (!reviewBody) {
+    alert("Review text is required");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/reviews", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        customer_name: customerName,
+        rating: rating || 5,
+        review_body: reviewBody
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Review add failed");
+      return;
+    }
+
+    alert("Review added successfully");
+
+    document.getElementById("reviewCustomerName").value = "";
+    document.getElementById("reviewRating").value = "";
+    document.getElementById("reviewBody").value = "";
+
+    loadReviewsAdmin();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function deleteReview(reviewId) {
+  if (!token) {
+    alert("Please login first");
+    return;
+  }
+
+  const ok = confirm("Delete this review?");
+  if (!ok) return;
+
+  try {
+    const res = await fetch("/api/admin/reviews/" + reviewId, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Review delete failed");
+      return;
+    }
+
+    alert("Review deleted successfully");
+    loadReviewsAdmin();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
           const token = localStorage.getItem("admin_token");
 
           if (!token) {
@@ -6745,6 +6914,7 @@ async function deleteFixedBanner(bannerId) {
   loadProductPageCheckboxes();
   loadSettings();
   loadFixedBannersAdmin();
+  loadReviewsAdmin();
 }
 
         </script>
