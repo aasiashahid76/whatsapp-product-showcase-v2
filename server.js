@@ -4229,6 +4229,8 @@ app.get("/legal/:type", async (req, res) => {
               color: #546B41;
             }
 
+			${globalHeaderFooterCss()}
+
             .simple-header {
               position: sticky;
               top: 0;
@@ -4286,8 +4288,141 @@ app.get("/legal/:type", async (req, res) => {
               <div class="content">${content}</div>
             </div>
           </main>
-        </body>
-      </html>
+		  ${globalFooterHtml()}
+
+<script>
+  let siteSettings = {};
+
+  async function loadHeaderPages() {
+    const desktopNav = document.getElementById("desktopPagesNav");
+    const mobilePanel = document.getElementById("pagesMenuPanel");
+
+    try {
+      const res = await fetch("/api/header-pages");
+      const data = await res.json();
+      const pages = data.pages || [];
+
+      let desktopHtml = "";
+      let mobileLinks = "";
+
+      desktopHtml += "<a href='/'>Home</a>";
+      mobileLinks += "<a href='/'>Home</a>";
+
+      pages.forEach(function(page) {
+        desktopHtml += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+        mobileLinks += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+      });
+
+      const mobileHtml =
+        "<div class='menu-head'>" +
+          "<strong>Pages</strong>" +
+          "<button class='close-menu-btn' onclick='closePagesMenu()'>×</button>" +
+        "</div>" +
+        "<div class='menu-links'>" +
+          mobileLinks +
+        "</div>";
+
+      if (desktopNav) desktopNav.innerHTML = desktopHtml;
+      if (mobilePanel) mobilePanel.innerHTML = mobileHtml;
+    } catch (error) {}
+  }
+
+  function togglePagesMenu() {
+    const panel = document.getElementById("pagesMenuPanel");
+    if (!panel) return;
+    panel.classList.toggle("show");
+  }
+
+  function closePagesMenu() {
+    const panel = document.getElementById("pagesMenuPanel");
+    if (!panel) return;
+    panel.classList.remove("show");
+  }
+
+  function toggleDesktopSearch() {
+    const panel = document.getElementById("desktopSearchPanel");
+    if (!panel) return;
+    panel.classList.toggle("show");
+  }
+
+  function filterProducts() {}
+  function filterProductsFromDesktop() {}
+  function toggleYourList() {
+    const panel = document.getElementById("yourListPanel");
+    if (!panel) return;
+    panel.classList.toggle("show");
+  }
+  function closeYourList() {
+    const panel = document.getElementById("yourListPanel");
+    if (!panel) return;
+    panel.classList.remove("show");
+  }
+
+  async function loadSettings() {
+    try {
+      const res = await fetch("/api/settings");
+      const data = await res.json();
+      siteSettings = data.settings || {};
+
+      const logoUrl = String(siteSettings.logo_url || "").trim();
+
+      const logoImg = document.getElementById("siteLogoImg");
+      const logoText = document.getElementById("siteLogoText");
+      const footerLogoImg = document.getElementById("footerLogoImg");
+      const footerLogoText = document.getElementById("footerLogoText");
+
+      if (logoUrl && logoImg && logoText) {
+        logoImg.src = logoUrl;
+        logoImg.style.display = "block";
+        logoText.style.display = "none";
+      }
+
+      if (logoUrl && footerLogoImg && footerLogoText) {
+        footerLogoImg.src = logoUrl;
+        footerLogoImg.style.display = "block";
+        footerLogoText.style.display = "none";
+      }
+
+      const mobileNumber = String(siteSettings.mobile_number || "").trim();
+      const whatsappNumber = String(siteSettings.whatsapp_number || "").replace(/[^0-9]/g, "");
+      const email = String(siteSettings.email || "").trim();
+      const instagram = String(siteSettings.instagram_link || "").trim();
+
+      const footerMobile = document.getElementById("footerMobile");
+      const footerEmail = document.getElementById("footerEmail");
+      const footerWhatsapp = document.getElementById("footerWhatsapp");
+      const footerInstagram = document.getElementById("footerInstagram");
+      const footerWhatsappSocial = document.getElementById("footerWhatsappSocial");
+
+      if (footerMobile) {
+        footerMobile.innerHTML = mobileNumber ? "📞 <a href='tel:" + mobileNumber + "'>" + mobileNumber + "</a>" : "";
+      }
+
+      if (footerEmail) {
+        footerEmail.innerHTML = email ? "✉️ <a href='mailto:" + email + "'>" + email + "</a>" : "";
+      }
+
+      if (footerWhatsapp) {
+        footerWhatsapp.innerHTML = whatsappNumber ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>" : "";
+      }
+
+      if (footerInstagram) {
+        footerInstagram.innerHTML = instagram ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>📷 Instagram</a>" : "";
+      }
+
+      if (footerWhatsappSocial) {
+        footerWhatsappSocial.innerHTML = whatsappNumber ? "<a class='footer-social-btn whatsapp' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>" : "";
+      }
+    } catch (error) {}
+  }
+
+  loadSettings().then(function() {
+    loadHeaderPages();
+  });
+</script>
+
+</body>
+</html>
     `);
   } catch (error) {
     res.status(500).send("Failed to load legal page: " + error.message);
