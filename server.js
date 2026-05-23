@@ -2350,6 +2350,946 @@ app.get("/api/admin/dashboard", verifyAdmin, async (req, res) => {
   }
 });
 
+app.get("/product/:slug", (req, res) => {
+  const productSlug = req.params.slug;
+
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Product Detail</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #FFF8EC;
+            color: #546B41;
+          }
+
+          .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #FFF8EC;
+            border-bottom: 1px solid #DCCCAC;
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: 70px 1fr auto 38px;
+            gap: 8px;
+            align-items: center;
+          }
+
+          .logo-box {
+            height: 38px;
+            border-radius: 10px;
+            background: #546B41;
+            color: #FFF8EC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            overflow: hidden;
+            border: 1px solid #DCCCAC;
+          }
+
+          .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            background: #FFF8EC;
+            padding: 3px;
+          }
+
+          .logo-box span {
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          .search-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 999px;
+            padding: 8px 10px;
+          }
+
+          .search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #546B41;
+            font-size: 13px;
+          }
+
+          .list-btn {
+            border: 1px solid #DCCCAC;
+            background: white;
+            color: #546B41;
+            border-radius: 999px;
+            padding: 9px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+          }
+
+          .list-btn.active {
+            background: #546B41;
+            color: #FFF8EC;
+            border-color: #546B41;
+          }
+
+          .desktop-right-header,
+          .desktop-pages-nav,
+          .desktop-search-btn {
+            display: none;
+          }
+
+          .mobile-list-btn {
+            display: inline-block;
+          }
+
+          .pages-menu-btn {
+            border: 1px solid #DCCCAC;
+            background: white;
+            color: #546B41;
+            border-radius: 10px;
+            height: 38px;
+            font-size: 22px;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1;
+          }
+
+          .pages-menu-panel {
+            position: fixed;
+            top: 0;
+            right: -82%;
+            width: 82%;
+            max-width: 320px;
+            height: 100vh;
+            z-index: 100;
+            background: white;
+            border-left: 1px solid #DCCCAC;
+            box-shadow: -14px 0 34px rgba(84, 107, 65, 0.18);
+            padding: 14px;
+            transition: right 0.28s ease;
+            display: block;
+          }
+
+          .pages-menu-panel.show {
+            right: 0;
+          }
+
+          .desktop-search-panel {
+            display: none;
+            position: fixed;
+            top: 59px;
+            left: 10px;
+            right: 10px;
+            z-index: 70;
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 0 0 18px 18px;
+            box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+            padding: 10px;
+          }
+
+          .desktop-search-panel.show {
+            display: grid;
+            gap: 8px;
+          }
+
+          .desktop-search-panel input {
+            width: 100%;
+            border: 1px solid #DCCCAC;
+            background: #FFF8EC;
+            color: #546B41;
+            border-radius: 12px;
+            padding: 12px;
+            outline: none;
+          }
+
+          .menu-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #546B41;
+            color: #FFF8EC;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+          }
+
+          .close-menu-btn {
+            border: none;
+            background: #DCCCAC;
+            color: #546B41;
+            border-radius: 999px;
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+          }
+
+          .menu-links {
+            display: grid;
+            gap: 8px;
+          }
+
+          .pages-menu-panel a {
+            text-decoration: none;
+            background: #FFF8EC;
+            color: #546B41;
+            border: 1px solid #DCCCAC;
+            border-radius: 12px;
+            padding: 11px 12px;
+            font-size: 14px;
+            font-weight: 600;
+          }
+
+          .page-wrap {
+            padding: 14px 10px 28px;
+          }
+
+          .detail-card {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 18px;
+            overflow: hidden;
+          }
+
+          .detail-img-wrap {
+            position: relative;
+            background: #DCCCAC;
+          }
+
+          .detail-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+          }
+
+          .product-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #546B41;
+            color: #FFF8EC;
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 11px;
+            font-weight: 700;
+          }
+
+          .detail-info {
+            padding: 14px;
+          }
+
+          .detail-name {
+            margin: 0 0 8px;
+            font-size: 22px;
+            line-height: 1.2;
+            color: #38472d;
+          }
+
+          .price-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+          }
+
+          .detail-price {
+            font-size: 22px;
+            font-weight: 800;
+            color: #546B41;
+          }
+
+          .crossed-price {
+            font-size: 15px;
+            color: #8a8a8a;
+            text-decoration: line-through;
+          }
+
+          .page-names {
+            font-size: 13px;
+            color: #6f7a5f;
+            margin-bottom: 14px;
+          }
+
+          .detail-actions {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 10px;
+            align-items: center;
+          }
+
+          .qty-row {
+            display: grid;
+            grid-template-columns: 32px 1fr 32px;
+            gap: 4px;
+          }
+
+          .qty-row button {
+            border: none;
+            background: #DCCCAC;
+            color: #546B41;
+            border-radius: 8px;
+            height: 38px;
+            font-size: 16px;
+            font-weight: 800;
+          }
+
+          .qty-row input {
+            width: 100%;
+            border: 1px solid #DCCCAC;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            color: #546B41;
+            height: 38px;
+          }
+
+          .add-btn {
+            border: none;
+            background: #546B41;
+            color: #FFF8EC;
+            border-radius: 10px;
+            height: 38px;
+            font-size: 14px;
+            font-weight: 800;
+          }
+
+          .empty {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 14px;
+            padding: 16px;
+            color: #6f7a5f;
+            font-size: 14px;
+          }
+
+          .your-list-panel {
+            display: none;
+            position: fixed;
+            top: 59px;
+            left: 10px;
+            right: 10px;
+            z-index: 60;
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 0 0 18px 18px;
+            box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+            max-height: 70vh;
+            overflow: auto;
+          }
+
+          .your-list-panel.show {
+            display: block;
+          }
+
+          .list-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #546B41;
+            color: #FFF8EC;
+          }
+
+          .close-list-btn {
+            border: none;
+            background: #DCCCAC;
+            color: #546B41;
+            border-radius: 999px;
+            width: 28px;
+            height: 28px;
+            font-weight: 700;
+          }
+
+          .list-body {
+            padding: 10px;
+          }
+
+          .small-message {
+            padding: 14px;
+            color: #6f7a5f;
+            font-size: 14px;
+          }
+
+          .list-row {
+            display: grid;
+            grid-template-columns: 48px 1fr 72px 72px 28px;
+            gap: 6px;
+            align-items: center;
+            border-bottom: 1px solid #f0e4ce;
+            padding: 8px 0;
+          }
+
+          .list-row img {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #DCCCAC;
+          }
+
+          .list-product-name {
+            font-size: 11px;
+            line-height: 1.2;
+            color: #38472d;
+            margin-top: 3px;
+          }
+
+          .list-price {
+            font-size: 12px;
+            font-weight: 700;
+            color: #546B41;
+          }
+
+          .list-mini-qty {
+            display: grid;
+            grid-template-columns: 20px 1fr 20px;
+            gap: 2px;
+          }
+
+          .list-mini-qty button {
+            border: none;
+            background: #DCCCAC;
+            color: #546B41;
+            border-radius: 6px;
+            height: 24px;
+            font-weight: 700;
+          }
+
+          .list-mini-qty input {
+            width: 100%;
+            border: 1px solid #DCCCAC;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 11px;
+            height: 24px;
+            padding: 0;
+          }
+
+          .remove-list-btn {
+            border: none;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 7px;
+            height: 26px;
+            font-weight: 700;
+          }
+
+          .list-footer {
+            padding: 12px;
+            border-top: 1px solid #DCCCAC;
+            background: #FFF8EC;
+          }
+
+          .total-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 10px;
+          }
+
+          .send-wa-btn {
+            width: 100%;
+            border: none;
+            background: #546B41;
+            color: #FFF8EC;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 700;
+          }
+
+          @media (min-width: 768px) {
+            .page-wrap {
+              max-width: 900px;
+              margin: auto;
+              padding: 24px;
+            }
+
+            .site-header {
+              grid-template-columns: 140px 1fr;
+              padding: 12px 24px;
+            }
+
+            .mobile-list-btn,
+            .mobile-search-box,
+            .pages-menu-btn {
+              display: none;
+            }
+
+            .desktop-right-header {
+              display: flex;
+              justify-content: flex-end;
+              align-items: center;
+              gap: 18px;
+              min-width: 0;
+            }
+
+            .desktop-pages-nav {
+              display: flex;
+              gap: 16px;
+              align-items: center;
+              overflow-x: auto;
+            }
+
+            .desktop-pages-nav a {
+              flex: 0 0 auto;
+              text-decoration: none;
+              color: #546B41;
+              font-size: 14px;
+              font-weight: 600;
+            }
+
+            .desktop-pages-nav a.active {
+              color: #38472d;
+              font-weight: 800;
+              text-decoration: underline;
+              text-underline-offset: 4px;
+            }
+
+            .desktop-search-btn {
+              display: block;
+              border: none;
+              background: transparent;
+              color: #546B41;
+              width: 32px;
+              height: 32px;
+              font-size: 18px;
+              cursor: pointer;
+            }
+
+            .logo-box {
+              height: 44px;
+            }
+
+            .detail-card {
+              display: grid;
+              grid-template-columns: 380px 1fr;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+        <header class="site-header">
+          <a href="/" class="logo-box">
+            <img id="siteLogoImg" src="" alt="Logo" />
+            <span id="siteLogoText">LOGO</span>
+          </a>
+
+          <div class="desktop-right-header">
+            <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
+            <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
+            <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
+          </div>
+
+          <div class="search-box mobile-search-box">
+            <span>🔍</span>
+            <input id="searchInput" placeholder="Search products..." onkeydown="searchFromInput(event)" />
+          </div>
+
+          <button class="list-btn mobile-list-btn" id="yourListBtnMobile" onclick="toggleYourList()">Your List (0)</button>
+
+          <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
+        </header>
+
+        <div id="pagesMenuPanel" class="pages-menu-panel"></div>
+
+        <div id="desktopSearchPanel" class="desktop-search-panel">
+          <input id="desktopSearchInput" placeholder="Search products..." onkeydown="searchFromInput(event)" />
+        </div>
+
+        <div id="yourListPanel" class="your-list-panel">
+          <div class="list-head">
+            <strong>Your List</strong>
+            <button class="close-list-btn" onclick="closeYourList()">×</button>
+          </div>
+
+          <div id="yourListBody" class="list-body"></div>
+
+          <div class="list-footer">
+            <div class="total-line">
+              <span>Total</span>
+              <span id="yourListTotal">₹0</span>
+            </div>
+
+            <button class="send-wa-btn" onclick="sendToWhatsapp()">Send to WhatsApp</button>
+          </div>
+        </div>
+
+        <main class="page-wrap">
+          <div id="productDetail"></div>
+        </main>
+
+        <script>
+          const productSlug = ${JSON.stringify(productSlug)};
+          let currentProduct = null;
+          let siteSettings = {};
+
+          function loadHeaderPages() {
+            const desktopNav = document.getElementById("desktopPagesNav");
+            const mobilePanel = document.getElementById("pagesMenuPanel");
+
+            fetch("/api/header-pages")
+              .then(function(res) { return res.json(); })
+              .then(function(data) {
+                const pages = data.pages || [];
+                let desktopHtml = "";
+                let mobileLinks = "";
+
+                desktopHtml += "<a href='/'>Home</a>";
+                mobileLinks += "<a href='/'>Home</a>";
+
+                pages.forEach(function(page) {
+                  desktopHtml += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+                  mobileLinks += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+                });
+
+                const mobileHtml =
+                  "<div class='menu-head'>" +
+                    "<strong>Pages</strong>" +
+                    "<button class='close-menu-btn' onclick='closePagesMenu()'>×</button>" +
+                  "</div>" +
+                  "<div class='menu-links'>" +
+                    mobileLinks +
+                  "</div>";
+
+                if (desktopNav) desktopNav.innerHTML = desktopHtml;
+                if (mobilePanel) mobilePanel.innerHTML = mobileHtml;
+              });
+          }
+
+          function togglePagesMenu() {
+            const panel = document.getElementById("pagesMenuPanel");
+            if (!panel) return;
+            panel.classList.toggle("show");
+          }
+
+          function closePagesMenu() {
+            const panel = document.getElementById("pagesMenuPanel");
+            if (!panel) return;
+            panel.classList.remove("show");
+          }
+
+          function toggleDesktopSearch() {
+            const panel = document.getElementById("desktopSearchPanel");
+            if (!panel) return;
+            panel.classList.toggle("show");
+          }
+
+          function searchFromInput(event) {
+            if (event.key !== "Enter") return;
+
+            const value = event.target.value.trim();
+
+            if (value) {
+              window.location.href = "/?q=" + encodeURIComponent(value);
+            }
+          }
+
+          function renderProduct(product) {
+            const image = product.product_image_url || "https://via.placeholder.com/600x600?text=Product";
+            const price = Number(product.show_price || 0).toFixed(0);
+            const crossedPrice = Number(product.crossed_price || 0);
+            const tag = String(product.tag || "None");
+
+            const tagHtml = tag && tag !== "None"
+              ? "<div class='product-tag'>" + tag + "</div>"
+              : "";
+
+            const crossedPriceHtml = crossedPrice > 0
+              ? "<div class='crossed-price'>₹" + crossedPrice.toFixed(0) + "</div>"
+              : "";
+
+            const pageNamesHtml = product.page_names
+              ? "<div class='page-names'>Category: " + product.page_names + "</div>"
+              : "";
+
+            document.getElementById("productDetail").innerHTML =
+              "<div class='detail-card'>" +
+                "<div class='detail-img-wrap'>" +
+                  tagHtml +
+                  "<img class='detail-img' src='" + image + "' alt='" + product.product_name + "' />" +
+                "</div>" +
+                "<div class='detail-info'>" +
+                  "<h1 class='detail-name'>" + product.product_name + "</h1>" +
+                  "<div class='price-row'>" +
+                    "<div class='detail-price'>₹" + price + "</div>" +
+                    crossedPriceHtml +
+                  "</div>" +
+                  pageNamesHtml +
+                  "<div class='detail-actions'>" +
+                    "<div class='qty-row'>" +
+                      "<button onclick='changeQty(-1)'>-</button>" +
+                      "<input id='detailQty' type='number' min='1' value='1' />" +
+                      "<button onclick='changeQty(1)'>+</button>" +
+                    "</div>" +
+                    "<button class='add-btn' onclick='addToList()'>Add to Your List</button>" +
+                  "</div>" +
+                "</div>" +
+              "</div>";
+          }
+
+          function loadProduct() {
+            fetch("/api/product/" + productSlug)
+              .then(function(res) { return res.json(); })
+              .then(function(data) {
+                if (data.status !== "ok") {
+                  document.getElementById("productDetail").innerHTML =
+                    "<div class='empty'>Product not found.</div>";
+                  return;
+                }
+
+                currentProduct = data.product;
+                renderProduct(currentProduct);
+              })
+              .catch(function(error) {
+                document.getElementById("productDetail").innerHTML =
+                  "<div class='empty'>" + error.message + "</div>";
+              });
+          }
+
+          function changeQty(delta) {
+            const input = document.getElementById("detailQty");
+            const current = Number(input.value || 1);
+            input.value = Math.max(1, current + delta);
+          }
+
+          function getList() {
+            try {
+              return JSON.parse(localStorage.getItem("your_list") || "[]");
+            } catch (error) {
+              return [];
+            }
+          }
+
+          function saveList(list) {
+            localStorage.setItem("your_list", JSON.stringify(list));
+            updateListButton();
+            renderYourList();
+          }
+
+          function addToList() {
+            if (!currentProduct) return;
+
+            const qty = Math.max(1, Number(document.getElementById("detailQty").value || 1));
+            const list = getList();
+
+            const existing = list.find(function(item) {
+              return String(item.id) === String(currentProduct.id);
+            });
+
+            if (existing) {
+              existing.qty += qty;
+            } else {
+              list.push({
+                id: currentProduct.id,
+                name: currentProduct.product_name,
+                price: Number(currentProduct.show_price || 0),
+                image: currentProduct.product_image_url || "https://via.placeholder.com/300x300?text=Product",
+                slug: currentProduct.slug,
+                qty: qty
+              });
+            }
+
+            saveList(list);
+          }
+
+          function updateListButton() {
+            const list = getList();
+            const totalQty = list.reduce(function(sum, item) {
+              return sum + Number(item.qty || 0);
+            }, 0);
+
+            const buttons = [
+              document.getElementById("yourListBtn"),
+              document.getElementById("yourListBtnMobile")
+            ];
+
+            buttons.forEach(function(btn) {
+              if (!btn) return;
+
+              btn.textContent = "Your List (" + totalQty + ")";
+
+              if (totalQty > 0) {
+                btn.classList.add("active");
+              } else {
+                btn.classList.remove("active");
+              }
+            });
+          }
+
+          function toggleYourList() {
+            const panel = document.getElementById("yourListPanel");
+            renderYourList();
+            panel.classList.toggle("show");
+          }
+
+          function closeYourList() {
+            document.getElementById("yourListPanel").classList.remove("show");
+          }
+
+          function renderYourList() {
+            const body = document.getElementById("yourListBody");
+            const totalBox = document.getElementById("yourListTotal");
+
+            if (!body || !totalBox) return;
+
+            const list = getList();
+
+            if (list.length === 0) {
+              body.innerHTML = "<div class='small-message'>You have not added any product yet.</div>";
+              totalBox.textContent = "₹0";
+              return;
+            }
+
+            let total = 0;
+            body.innerHTML = "";
+
+            list.forEach(function(item) {
+              const itemTotal = Number(item.price || 0) * Number(item.qty || 1);
+              total += itemTotal;
+
+              const row = document.createElement("div");
+              row.className = "list-row";
+
+              row.innerHTML =
+                "<div>" +
+                  "<img src='" + item.image + "' />" +
+                  "<div class='list-product-name'>" + item.name + "</div>" +
+                "</div>" +
+                "<div class='list-price'>₹" + Number(item.price || 0).toFixed(0) + " × " + item.qty + "</div>" +
+                "<div class='list-price'>₹" + itemTotal.toFixed(0) + "</div>" +
+                "<div class='list-mini-qty'>" +
+                  "<button onclick='changeListQty(" + item.id + ", -1)'>-</button>" +
+                  "<input value='" + item.qty + "' onchange='setListQty(" + item.id + ", this.value)' />" +
+                  "<button onclick='changeListQty(" + item.id + ", 1)'>+</button>" +
+                "</div>" +
+                "<button class='remove-list-btn' onclick='removeFromList(" + item.id + ")'>×</button>";
+
+              body.appendChild(row);
+            });
+
+            totalBox.textContent = "₹" + total.toFixed(0);
+          }
+
+          function changeListQty(productId, delta) {
+            const list = getList();
+
+            const item = list.find(function(row) {
+              return String(row.id) === String(productId);
+            });
+
+            if (!item) return;
+
+            item.qty = Math.max(1, Number(item.qty || 1) + delta);
+            saveList(list);
+          }
+
+          function setListQty(productId, value) {
+            const list = getList();
+
+            const item = list.find(function(row) {
+              return String(row.id) === String(productId);
+            });
+
+            if (!item) return;
+
+            item.qty = Math.max(1, Number(value || 1));
+            saveList(list);
+          }
+
+          function removeFromList(productId) {
+            const list = getList().filter(function(item) {
+              return String(item.id) !== String(productId);
+            });
+
+            saveList(list);
+          }
+
+          function loadSettings() {
+            fetch("/api/settings")
+              .then(function(res) { return res.json(); })
+              .then(function(data) {
+                siteSettings = data.settings || {};
+
+                const logoImg = document.getElementById("siteLogoImg");
+                const logoText = document.getElementById("siteLogoText");
+                const logoUrl = String(siteSettings.logo_url || "").trim();
+
+                if (logoUrl && logoImg && logoText) {
+                  logoImg.src = logoUrl;
+                  logoImg.style.display = "block";
+                  logoText.style.display = "none";
+                } else if (logoImg && logoText) {
+                  logoImg.style.display = "none";
+                  logoText.style.display = "block";
+                }
+              });
+          }
+
+          function sendToWhatsapp() {
+            const list = getList();
+
+            if (list.length === 0) {
+              alert("You have not added any product yet.");
+              return;
+            }
+
+            const whatsappNumber = String(siteSettings.whatsapp_number || "").replace(/[^0-9]/g, "");
+
+            if (!whatsappNumber) {
+              alert("WhatsApp number is not set. Please add it from Manage UI > Header & Footer.");
+              return;
+            }
+
+            let total = 0;
+            let message = "Hello, I want to order these products:" + String.fromCharCode(10) + String.fromCharCode(10);
+
+            list.forEach(function(item) {
+              const itemTotal = Number(item.price || 0) * Number(item.qty || 1);
+              total += itemTotal;
+
+              message += item.name + " × " + item.qty + " = ₹" + itemTotal.toFixed(0) + String.fromCharCode(10);
+            });
+
+            message += String.fromCharCode(10) + "Total = ₹" + total.toFixed(0);
+
+            const url = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
+
+            window.open(url, "_blank");
+          }
+
+          loadSettings();
+          loadHeaderPages();
+          loadProduct();
+          updateListButton();
+          renderYourList();
+        </script>
+      </body>
+    </html>
+  `);
+});
+
 app.get("/page/:slug", (req, res) => {
   const pageSlug = req.params.slug;
 
