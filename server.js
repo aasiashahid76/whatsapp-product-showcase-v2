@@ -176,16 +176,43 @@ app.get("/", (req, res) => {
           }
 
           .list-btn {
-            border: none;
-            background: white;
-            color: #546B41;
-            border: 1px solid #DCCCAC;
-            border-radius: 999px;
-            padding: 9px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-          }
+  border: none;
+  background: white;
+  color: #546B41;
+  border: 1px solid #DCCCAC;
+  border-radius: 999px;
+  padding: 9px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.header-pages-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 10px;
+  background: #FFF8EC;
+  border-bottom: 1px solid #DCCCAC;
+}
+
+.header-pages-nav a {
+  flex: 0 0 auto;
+  text-decoration: none;
+  background: white;
+  color: #546B41;
+  border: 1px solid #DCCCAC;
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.header-pages-nav a.active {
+  background: #546B41;
+  color: #FFF8EC;
+  border-color: #546B41;
+}
 
           .page-wrap {
             padding: 14px 10px 28px;
@@ -561,6 +588,8 @@ app.get("/", (req, res) => {
           <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
         </header>
 
+		<nav id="headerPagesNav" class="header-pages-nav"></nav>
+
 		<div id="yourListPanel" class="your-list-panel">
   <div class="list-head">
     <strong>Your List</strong>
@@ -664,6 +693,34 @@ app.get("/", (req, res) => {
   });
 
   wrap.innerHTML = html;
+}
+
+async function loadHeaderPages() {
+  const nav = document.getElementById("headerPagesNav");
+
+  if (!nav) return;
+
+  try {
+    const res = await fetch("/api/header-pages");
+    const data = await res.json();
+    const pages = data.pages || [];
+
+    if (pages.length === 0) {
+      nav.style.display = "none";
+      return;
+    }
+
+    let html = "";
+    html += "<a class='active' href='/'>Home</a>";
+
+    pages.forEach(function(page) {
+      html += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+    });
+
+    nav.innerHTML = html;
+  } catch (error) {
+    nav.style.display = "none";
+  }
 }
 
           async function loadSettings() {
@@ -944,6 +1001,7 @@ let total = 0;
   window.open(url, "_blank");
 }
           loadSettings().then(function() {
+  loadHeaderPages();
   loadHomeSections();
   updateListButton();
   renderYourList();
