@@ -2381,6 +2381,130 @@ app.get("/api/admin/dashboard", verifyAdmin, async (req, res) => {
   }
 });
 
+app.get("/legal/:type", async (req, res) => {
+  try {
+    const { type } = req.params;
+
+    const legalMap = {
+      "policies": {
+        key: "policies",
+        title: "Policies"
+      },
+      "privacy-policy": {
+        key: "privacy_policy",
+        title: "Privacy Policy"
+      },
+      "return-refund": {
+        key: "return_refund",
+        title: "Return & Refund Policy"
+      },
+      "terms-condition": {
+        key: "terms_condition",
+        title: "Terms & Conditions"
+      }
+    };
+
+    const selected = legalMap[type];
+
+    if (!selected) {
+      return res.status(404).send("Page not found");
+    }
+
+    const [rows] = await db.query(
+      "SELECT setting_value FROM site_settings WHERE setting_key = ? LIMIT 1",
+      [selected.key]
+    );
+
+    const content = rows.length > 0 && rows[0].setting_value
+      ? rows[0].setting_value
+      : "This page will be updated soon.";
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${selected.title}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <style>
+            * {
+              box-sizing: border-box;
+            }
+
+            body {
+              margin: 0;
+              font-family: Arial, sans-serif;
+              background: #FFF8EC;
+              color: #546B41;
+            }
+
+            .simple-header {
+              position: sticky;
+              top: 0;
+              background: #FFF8EC;
+              border-bottom: 1px solid #DCCCAC;
+              padding: 12px 14px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              z-index: 50;
+            }
+
+            .simple-header a {
+              text-decoration: none;
+              color: #546B41;
+              font-weight: 700;
+              font-size: 14px;
+            }
+
+            .page-wrap {
+              max-width: 850px;
+              margin: auto;
+              padding: 18px 14px 40px;
+            }
+
+            .legal-card {
+              background: white;
+              border: 1px solid #DCCCAC;
+              border-radius: 18px;
+              padding: 18px;
+              box-shadow: 0 8px 24px rgba(84, 107, 65, 0.08);
+            }
+
+            h1 {
+              margin: 0 0 14px;
+              font-size: 24px;
+              color: #38472d;
+            }
+
+            .content {
+              white-space: pre-wrap;
+              line-height: 1.65;
+              font-size: 15px;
+              color: #4d5f3d;
+            }
+          </style>
+        </head>
+
+        <body>
+          <header class="simple-header">
+            <a href="/">← Back to Home</a>
+            <a href="/">Home</a>
+          </header>
+
+          <main class="page-wrap">
+            <div class="legal-card">
+              <h1>${selected.title}</h1>
+              <div class="content">${content}</div>
+            </div>
+          </main>
+        </body>
+      </html>
+    `);
+  } catch (error) {
+    res.status(500).send("Failed to load legal page: " + error.message);
+  }
+});
+
 app.get("/product/:slug", (req, res) => {
   const productSlug = req.params.slug;
 
