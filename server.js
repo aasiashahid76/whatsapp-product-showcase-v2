@@ -1371,8 +1371,22 @@ border-top: 1px solid #546B41;
   let html = "";
 
   sections.forEach(function(section) {
+    if (section.section_type === "banner") {
+      const banner = section.banner;
+
+      if (banner && banner.image_url) {
+        html += "<div class='fixed-banner-card' style='margin:6px 0 18px;'>";
+        html += "<img src='" + banner.image_url + "' alt='" + banner.banner_name + "' />";
+        html += "</div>";
+      }
+
+      return;
+    }
+
     const page = section.page;
     const products = section.products || [];
+
+    if (!page || products.length === 0) return;
 
     html += "<div class='section-head'>";
     html += "<h2>" + page.page_name + "</h2>";
@@ -1384,7 +1398,7 @@ border-top: 1px solid #546B41;
     html += "</div>";
   });
 
-  wrap.innerHTML = html;
+  wrap.innerHTML = html || '<div class="empty">No products found.</div>';
 }
 
 async function loadHeaderPages() {
@@ -1963,7 +1977,6 @@ let total = 0;
           loadSettings().then(function() {
   loadHeaderPages();
   loadHomeTopDesign();
-  loadFixedBanners();
   loadHomeSections();
   loadReviewsSection();
   updateListButton();
@@ -3246,34 +3259,78 @@ app.post("/api/admin/page-banner-position/reorder", verifyAdmin, async (req, res
 
 app.get("/api/home-sections", async (req, res) => {
   try {
-    const [pages] = await db.query(`
-      SELECT *
-      FROM pages
-      WHERE is_active = true
-      ORDER BY sort_order ASC, id DESC
+    await syncPageBannerPositionRows();
+
+    const [layoutRows] = await db.query(`
+      SELECT
+        h.id AS layout_id,
+        h.section_type,
+        h.reference_id,
+        h.sort_order,
+        p.id AS page_id,
+        p.page_name,
+        p.slug,
+        p.is_active AS page_is_active,
+        b.id AS banner_id,
+        b.banner_name,
+        b.image_url,
+        b.is_active AS banner_is_active
+      FROM home_layout_sections h
+      LEFT JOIN pages p
+        ON h.section_type = 'page'
+        AND h.reference_id = p.id
+      LEFT JOIN home_fixed_banners b
+        ON h.section_type = 'banner'
+        AND h.reference_id = b.id
+      WHERE h.is_active = true
+      ORDER BY h.sort_order ASC, h.id ASC
     `);
 
     const sections = [];
 
-    for (const page of pages) {
-      const [products] = await db.query(`
-        SELECT 
-          p.*,
-          GROUP_CONCAT(pg.page_name ORDER BY pg.page_name SEPARATOR ', ') AS page_names
-        FROM products p
-        INNER JOIN product_pages pp ON p.id = pp.product_id
-        INNER JOIN pages pg ON pp.page_id = pg.id
-        WHERE p.is_visible = true AND pp.page_id = ?
-        GROUP BY p.id
-        ORDER BY p.id DESC
-        LIMIT 12
-      `, [page.id]);
+    for (const row of layoutRows) {
+      if (row.section_type === "banner") {
+        if (row.banner_id && row.banner_is_active) {
+          sections.push({
+            section_type: "banner",
+            banner: {
+              id: row.banner_id,
+              banner_name: row.banner_name,
+              image_url: row.image_url
+            }
+          });
+        }
 
-      if (products.length > 0) {
-        sections.push({
-          page,
-          products
-        });
+        continue;
+      }
+
+      if (row.section_type === "page") {
+        if (!row.page_id || !row.page_is_active) continue;
+
+        const [products] = await db.query(`
+          SELECT 
+            p.*,
+            GROUP_CONCAT(pg.page_name ORDER BY pg.page_name SEPARATOR ', ') AS page_names
+          FROM products p
+          INNER JOIN product_pages pp ON p.id = pp.product_id
+          INNER JOIN pages pg ON pp.page_id = pg.id
+          WHERE p.is_visible = true AND pp.page_id = ?
+          GROUP BY p.id
+          ORDER BY p.id DESC
+          LIMIT 12
+        `, [row.page_id]);
+
+        if (products.length > 0) {
+          sections.push({
+            section_type: "page",
+            page: {
+              id: row.page_id,
+              page_name: row.page_name,
+              slug: row.slug
+            },
+            products
+          });
+        }
       }
     }
 
