@@ -2336,17 +2336,17 @@ app.get("/page/:slug", (req, res) => {
           }
 
           .site-header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background: #FFF8EC;
-            border-bottom: 1px solid #DCCCAC;
-            padding: 10px 12px;
-            display: grid;
-            grid-template-columns: 82px 1fr auto;
-            gap: 8px;
-            align-items: center;
-          }
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #FFF8EC;
+  border-bottom: 1px solid #DCCCAC;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 70px 1fr auto 38px;
+  gap: 8px;
+  align-items: center;
+}
 
           .logo-box {
             height: 38px;
@@ -2410,6 +2410,131 @@ app.get("/page/:slug", (req, res) => {
             color: #FFF8EC;
             border-color: #546B41;
           }
+
+		  .desktop-right-header {
+  display: none;
+}
+
+.desktop-pages-nav {
+  display: none;
+}
+
+.desktop-search-btn {
+  display: none;
+}
+
+.mobile-list-btn {
+  display: inline-block;
+}
+
+.pages-menu-btn {
+  border: 1px solid #DCCCAC;
+  background: white;
+  color: #546B41;
+  border-radius: 10px;
+  height: 38px;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.pages-menu-panel {
+  position: fixed;
+  top: 0;
+  right: -82%;
+  width: 82%;
+  max-width: 320px;
+  height: 100vh;
+  z-index: 100;
+  background: white;
+  border-left: 1px solid #DCCCAC;
+  box-shadow: -14px 0 34px rgba(84, 107, 65, 0.18);
+  padding: 14px;
+  transition: right 0.28s ease;
+  display: block;
+}
+
+.pages-menu-panel.show {
+  right: 0;
+}
+
+.desktop-search-panel {
+  display: none;
+  position: fixed;
+  top: 59px;
+  left: 10px;
+  right: 10px;
+  z-index: 70;
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+  padding: 10px;
+}
+
+.desktop-search-panel.show {
+  display: grid;
+  gap: 8px;
+}
+
+.menu-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.menu-head strong {
+  font-size: 15px;
+}
+
+.close-menu-btn {
+  border: none;
+  background: #DCCCAC;
+  color: #546B41;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.menu-links {
+  display: grid;
+  gap: 8px;
+}
+
+.pages-menu-panel a {
+  text-decoration: none;
+  background: #FFF8EC;
+  color: #546B41;
+  border: 1px solid #DCCCAC;
+  border-radius: 12px;
+  padding: 11px 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pages-menu-panel a.active {
+  background: #546B41;
+  color: #FFF8EC;
+}
+
+.desktop-search-panel input {
+  width: 100%;
+  border: 1px solid #DCCCAC;
+  background: #FFF8EC;
+  color: #546B41;
+  border-radius: 12px;
+  padding: 12px;
+  outline: none;
+}
 
           .page-wrap {
             padding: 14px 10px 28px;
@@ -2740,18 +2865,32 @@ app.get("/page/:slug", (req, res) => {
 
       <body>
         <header class="site-header">
-          <a href="/" class="logo-box">
-            <img id="siteLogoImg" src="" alt="Logo" />
-            <span id="siteLogoText">LOGO</span>
-          </a>
+  <a href="/" class="logo-box">
+    <img id="siteLogoImg" src="" alt="Logo" />
+    <span id="siteLogoText">LOGO</span>
+  </a>
 
-          <div class="search-box">
-            <span>🔍</span>
-            <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
-          </div>
+  <div class="desktop-right-header">
+    <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
+    <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
+    <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
+  </div>
 
-          <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
-        </header>
+  <div class="search-box mobile-search-box">
+    <span>🔍</span>
+    <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
+  </div>
+
+  <button class="list-btn mobile-list-btn" id="yourListBtnMobile" onclick="toggleYourList()">Your List (0)</button>
+
+  <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
+</header>
+
+<div id="pagesMenuPanel" class="pages-menu-panel"></div>
+
+<div id="desktopSearchPanel" class="desktop-search-panel">
+  <input id="desktopSearchInput" placeholder="Search products..." oninput="filterProductsFromDesktop()" />
+</div>
 
         <div id="yourListPanel" class="your-list-panel">
           <div class="list-head">
@@ -2844,6 +2983,73 @@ app.get("/page/:slug", (req, res) => {
             grid.className = "product-grid";
             grid.innerHTML = products.map(productCard).join("");
           }
+
+		  async function loadHeaderPages() {
+  const desktopNav = document.getElementById("desktopPagesNav");
+  const mobilePanel = document.getElementById("pagesMenuPanel");
+
+  try {
+    const res = await fetch("/api/header-pages");
+    const data = await res.json();
+    const pages = data.pages || [];
+
+    let desktopHtml = "";
+    let mobileLinks = "";
+
+    desktopHtml += "<a href='/'>Home</a>";
+    mobileLinks += "<a href='/'>Home</a>";
+
+    pages.forEach(function(page) {
+      const activeClass = page.slug === pageSlug ? " class='active'" : "";
+      desktopHtml += "<a" + activeClass + " href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+      mobileLinks += "<a" + activeClass + " href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+    });
+
+    const mobileHtml =
+      "<div class='menu-head'>" +
+        "<strong>Pages</strong>" +
+        "<button class='close-menu-btn' onclick='closePagesMenu()'>×</button>" +
+      "</div>" +
+      "<div class='menu-links'>" +
+        mobileLinks +
+      "</div>";
+
+    if (desktopNav) desktopNav.innerHTML = desktopHtml;
+    if (mobilePanel) mobilePanel.innerHTML = mobileHtml;
+  } catch (error) {
+    if (desktopNav) desktopNav.innerHTML = "";
+    if (mobilePanel) mobilePanel.innerHTML = "";
+  }
+}
+
+function togglePagesMenu() {
+  const panel = document.getElementById("pagesMenuPanel");
+  if (!panel) return;
+  panel.classList.toggle("show");
+}
+
+function closePagesMenu() {
+  const panel = document.getElementById("pagesMenuPanel");
+  if (!panel) return;
+  panel.classList.remove("show");
+}
+
+function toggleDesktopSearch() {
+  const panel = document.getElementById("desktopSearchPanel");
+  if (!panel) return;
+  panel.classList.toggle("show");
+}
+
+function filterProductsFromDesktop() {
+  const mobileInput = document.getElementById("searchInput");
+  const desktopInput = document.getElementById("desktopSearchInput");
+
+  if (mobileInput && desktopInput) {
+    mobileInput.value = desktopInput.value;
+  }
+
+  filterProducts();
+}
 
           async function loadSettings() {
             try {
@@ -2974,22 +3180,28 @@ function getQtyFromCard(button) {
 }
 
           function updateListButton() {
-            const list = getList();
-            const totalQty = list.reduce(function(sum, item) {
-              return sum + Number(item.qty || 0);
-            }, 0);
+  const list = getList();
+  const totalQty = list.reduce(function(sum, item) {
+    return sum + Number(item.qty || 0);
+  }, 0);
 
-            const btn = document.getElementById("yourListBtn");
-            if (!btn) return;
+  const buttons = [
+    document.getElementById("yourListBtn"),
+    document.getElementById("yourListBtnMobile")
+  ];
 
-            btn.textContent = "Your List (" + totalQty + ")";
+  buttons.forEach(function(btn) {
+    if (!btn) return;
 
-            if (totalQty > 0) {
-              btn.classList.add("active");
-            } else {
-              btn.classList.remove("active");
-            }
-          }
+    btn.textContent = "Your List (" + totalQty + ")";
+
+    if (totalQty > 0) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+}
 
           function toggleYourList() {
             const panel = document.getElementById("yourListPanel");
@@ -3112,10 +3324,11 @@ function getQtyFromCard(button) {
           }
 
           loadSettings().then(function() {
-            loadPageProducts();
-            updateListButton();
-            renderYourList();
-          });
+				  loadHeaderPages();
+				  loadPageProducts();
+				  updateListButton();
+				  renderYourList();
+				});
         </script>
       </body>
     </html>
