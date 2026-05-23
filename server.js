@@ -2868,6 +2868,119 @@ app.get("/api/reviews", async (req, res) => {
   }
 });
 
+app.post("/api/admin/reviews", verifyAdmin, async (req, res) => {
+  try {
+    const { customer_name, rating, review_body } = req.body;
+
+    if (!customer_name) {
+      return res.status(400).json({
+        status: "error",
+        message: "Customer name is required"
+      });
+    }
+
+    if (!review_body) {
+      return res.status(400).json({
+        status: "error",
+        message: "Review text is required"
+      });
+    }
+
+    const safeRating = Math.max(1, Math.min(5, Number(rating || 5)));
+
+    const [result] = await db.query(
+      `INSERT INTO reviews
+       (customer_name, rating, review_body, is_active)
+       VALUES (?, ?, ?, true)`,
+      [customer_name, safeRating, review_body]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Review added successfully",
+      review_id: result.insertId
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to add review",
+      error: error.message
+    });
+  }
+});
+
+app.put("/api/admin/reviews/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { customer_name, rating, review_body, is_active } = req.body;
+
+    if (!customer_name) {
+      return res.status(400).json({
+        status: "error",
+        message: "Customer name is required"
+      });
+    }
+
+    if (!review_body) {
+      return res.status(400).json({
+        status: "error",
+        message: "Review text is required"
+      });
+    }
+
+    const safeRating = Math.max(1, Math.min(5, Number(rating || 5)));
+
+    await db.query(
+      `UPDATE reviews
+       SET customer_name = ?,
+           rating = ?,
+           review_body = ?,
+           is_active = ?
+       WHERE id = ?`,
+      [
+        customer_name,
+        safeRating,
+        review_body,
+        is_active === false ? 0 : 1,
+        id
+      ]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Review updated successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update review",
+      error: error.message
+    });
+  }
+});
+
+app.delete("/api/admin/reviews/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await db.query(
+      "DELETE FROM reviews WHERE id = ?",
+      [id]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Review deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to delete review",
+      error: error.message
+    });
+  }
+});
+
 app.get("/api/home-sections", async (req, res) => {
   try {
     const [pages] = await db.query(`
