@@ -94,6 +94,546 @@ function verifyAdmin(req, res, next) {
   }
 }
 
+function globalHeaderFooterCss() {
+  return `
+/* =========================
+   GLOBAL HEADER FOOTER CSS
+   COMMON STYLE
+========================= */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #FFF8EC;
+  border-bottom: 1px solid #DCCCAC;
+  display: grid;
+  gap: 8px;
+  align-items: center;
+}
+
+.logo-box {
+  border-radius: 10px;
+  background: #546B41;
+  color: #FFF8EC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  overflow: hidden;
+  border: 1px solid #DCCCAC;
+}
+
+.logo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+  background: #FFF8EC;
+  padding: 3px;
+}
+
+.logo-box span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 999px;
+  padding: 8px 10px;
+}
+
+.search-box input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #546B41;
+  font-size: 13px;
+}
+
+.list-btn {
+  border: 1px solid #DCCCAC;
+  background: white;
+  color: #546B41;
+  border-radius: 999px;
+  padding: 9px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.list-btn.active {
+  background: #546B41;
+  color: #FFF8EC;
+  border-color: #546B41;
+}
+
+.pages-menu-btn {
+  border: 1px solid #DCCCAC;
+  background: white;
+  color: #546B41;
+  border-radius: 10px;
+  height: 38px;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.pages-menu-panel {
+  position: fixed;
+  top: 0;
+  right: -82%;
+  width: 82%;
+  max-width: 320px;
+  height: 100vh;
+  z-index: 100;
+  background: white;
+  border-left: 1px solid #DCCCAC;
+  box-shadow: -14px 0 34px rgba(84, 107, 65, 0.18);
+  padding: 14px;
+  transition: right 0.28s ease;
+  display: block;
+}
+
+.pages-menu-panel.show {
+  right: 0;
+}
+
+.menu-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.close-menu-btn {
+  border: none;
+  background: #DCCCAC;
+  color: #546B41;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.menu-links {
+  display: grid;
+  gap: 8px;
+}
+
+.pages-menu-panel a {
+  text-decoration: none;
+  background: #FFF8EC;
+  color: #546B41;
+  border: 1px solid #DCCCAC;
+  border-radius: 12px;
+  padding: 11px 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pages-menu-panel a.active {
+  background: #546B41;
+  color: #FFF8EC;
+}
+
+.desktop-search-panel {
+  display: none;
+  position: fixed;
+  top: 59px;
+  left: 10px;
+  right: 10px;
+  z-index: 70;
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+  padding: 10px;
+}
+
+.desktop-search-panel.show {
+  display: grid;
+  gap: 8px;
+}
+
+.desktop-search-panel input {
+  width: 100%;
+  border: 1px solid #DCCCAC;
+  background: #FFF8EC;
+  color: #546B41;
+  border-radius: 12px;
+  padding: 12px;
+  outline: none;
+}
+
+.your-list-panel {
+  display: none;
+  position: fixed;
+  top: 59px;
+  left: 10px;
+  right: 10px;
+  z-index: 60;
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.your-list-panel.show {
+  display: block;
+}
+
+.list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #546B41;
+  color: #FFF8EC;
+}
+
+.close-list-btn {
+  border: none;
+  background: #DCCCAC;
+  color: #546B41;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  font-weight: 700;
+}
+
+.list-body {
+  padding: 10px;
+}
+
+.site-footer {
+  margin-top: 34px;
+  background: #546B41;
+  color: #FFF8EC;
+  border-top: 1px solid #546B41;
+}
+
+.footer-main {
+  display: grid;
+  gap: 24px;
+  padding: 28px 14px;
+}
+
+.footer-logo-box {
+  width: 150px;
+  height: 56px;
+  border-radius: 12px;
+  background: #546B41;
+  color: #FFF8EC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  overflow: hidden;
+  border: 1px solid #DCCCAC;
+  margin-bottom: 12px;
+}
+
+.footer-logo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+  background: #FFF8EC;
+  padding: 4px;
+}
+
+.footer-logo-box span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.footer-brand p {
+  margin: 0;
+  color: #FFF8EC;
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 260px;
+}
+
+.footer-column h4 {
+  margin: 0 0 12px;
+  color: #FFF8EC;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.footer-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #FFF8EC;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.footer-contact-row a,
+.footer-legal-link,
+.footer-browse-link {
+  color: #FFF8EC;
+  text-decoration: none;
+}
+
+.footer-legal-list {
+  display: grid;
+  gap: 12px;
+}
+
+.footer-social-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.footer-social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 10px 16px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.footer-social-btn.instagram {
+  background: #f3f4f6;
+  color: #546B41;
+}
+
+.footer-social-btn.whatsapp {
+  background: #16a34a;
+  color: white;
+}
+
+.footer-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #16a34a;
+  color: white;
+  border-radius: 999px;
+  padding: 10px 18px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.footer-browse-link {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 248, 236, 0.35);
+  text-align: center;
+  padding: 18px 12px;
+  color: #FFF8EC;
+  font-size: 13px;
+}
+
+/* =========================
+   MOBILE HEADER FOOTER CSS
+========================= */
+
+.site-header {
+  grid-template-columns: 70px 1fr auto 38px;
+}
+
+.logo-box {
+  height: 38px;
+}
+
+.desktop-right-header,
+.desktop-pages-nav,
+.desktop-search-btn {
+  display: none;
+}
+
+.mobile-list-btn {
+  display: inline-block;
+}
+
+/* =========================
+   LAPTOP / DESKTOP HEADER FOOTER CSS
+========================= */
+
+@media (min-width: 768px) {
+  .site-header {
+    grid-template-columns: 140px 1fr;
+    padding: 12px 24px;
+  }
+
+  .mobile-list-btn,
+  .mobile-search-box,
+  .pages-menu-btn {
+    display: none;
+  }
+
+  .desktop-right-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+  }
+
+  .desktop-pages-nav {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    overflow-x: auto;
+  }
+
+  .desktop-pages-nav a {
+    flex: 0 0 auto;
+    text-decoration: none;
+    color: #546B41;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .desktop-pages-nav a.active {
+    color: #38472d;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .desktop-search-btn {
+    display: block;
+    border: none;
+    background: transparent;
+    color: #546B41;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .logo-box {
+    height: 44px;
+  }
+
+  .footer-main {
+    grid-template-columns: 1.3fr 1.2fr 1.2fr 1.4fr;
+    gap: 34px;
+    padding: 40px 24px;
+    max-width: 1180px;
+    margin: auto;
+  }
+}
+`;
+}
+
+function globalHeaderHtml() {
+  return `
+<header class="site-header">
+  <a href="/" class="logo-box">
+    <img id="siteLogoImg" src="" alt="Logo" />
+    <span id="siteLogoText">LOGO</span>
+  </a>
+
+  <div class="desktop-right-header">
+    <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
+    <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
+    <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
+  </div>
+
+  <div class="search-box mobile-search-box">
+    <span>🔍</span>
+    <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
+  </div>
+
+  <button class="list-btn mobile-list-btn" id="yourListBtnMobile" onclick="toggleYourList()">Your List (0)</button>
+
+  <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
+</header>
+
+<div id="pagesMenuPanel" class="pages-menu-panel"></div>
+
+<div id="desktopSearchPanel" class="desktop-search-panel">
+  <input id="desktopSearchInput" placeholder="Search products..." oninput="filterProductsFromDesktop()" />
+</div>
+
+<div id="yourListPanel" class="your-list-panel">
+  <div class="list-head">
+    <strong>Your List</strong>
+    <button class="close-list-btn" onclick="closeYourList()">×</button>
+  </div>
+
+  <div id="yourListBody" class="list-body"></div>
+</div>
+`;
+}
+
+function globalFooterHtml() {
+  return `
+<footer class="site-footer">
+  <div class="footer-main">
+    <div class="footer-brand">
+      <a href="/" class="footer-logo-box">
+        <img id="footerLogoImg" src="" alt="Logo" />
+        <span id="footerLogoText">LOGO</span>
+      </a>
+      <p>Shop quality products with simple WhatsApp ordering.</p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <div class="footer-contact-row" id="footerMobile"></div>
+      <div class="footer-contact-row" id="footerEmail"></div>
+      <div id="footerWhatsapp"></div>
+    </div>
+
+    <div class="footer-column">
+      <h4>Legal</h4>
+      <div class="footer-legal-list">
+        <a class="footer-legal-link" href="/legal/terms-condition">Terms & Conditions</a>
+        <a class="footer-legal-link" href="/legal/policies">Policies</a>
+        <a class="footer-legal-link" href="/legal/privacy-policy">Privacy Policy</a>
+        <a class="footer-legal-link" href="/legal/return-refund">Return & Refund Policy</a>
+      </div>
+    </div>
+
+    <div class="footer-column">
+      <h4>Follow</h4>
+      <div class="footer-social-row">
+        <span id="footerInstagram"></span>
+        <span id="footerWhatsappSocial"></span>
+      </div>
+      <a class="footer-browse-link" href="/page/all-products">Browse all products →</a>
+    </div>
+  </div>
+
+  <div class="footer-bottom">© 2026. All rights reserved.</div>
+</footer>
+`;
+}
+
 app.get("/", (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -112,6 +652,8 @@ app.get("/", (req, res) => {
             background: #FFF8EC;
             color: #546B41;
           }
+
+		  ${globalHeaderFooterCss()}
 
           .site-header {
             position: sticky;
@@ -1193,53 +1735,7 @@ border-top: 1px solid #546B41;
       </head>
 
       <body>
-        <header class="site-header">
-  <a href="/" class="logo-box">
-    <img id="siteLogoImg" src="" alt="Logo" />
-    <span id="siteLogoText">LOGO</span>
-  </a>
-
-  <div class="desktop-right-header">
-    <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
-    <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
-    <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
-  </div>
-
-  <div class="search-box mobile-search-box">
-    <span>🔍</span>
-    <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
-  </div>
-
-  <button class="list-btn mobile-list-btn" id="yourListBtnMobile" onclick="toggleYourList()">Your List (0)</button>
-
-	<button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
-</header>
-
-		<div id="pagesMenuPanel" class="pages-menu-panel"></div>
-		<div id="desktopSearchPanel" class="desktop-search-panel">
- 			 <input id="desktopSearchInput" placeholder="Search products..." oninput="filterProductsFromDesktop()" />
-		</div>
-		<div id="yourListPanel" class="your-list-panel">
-  <div class="list-head">
-    <strong>Your List</strong>
-    <button class="close-list-btn" onclick="closeYourList()">×</button>
-  </div>
-
-  <div id="yourListBody" class="list-body"></div>
-
-  <div class="list-footer">
-    <div class="total-line">
-      <span>Total</span>
-      <span id="yourListTotal">₹0</span>
-    </div>
-
-    <button class="send-wa-btn" onclick="sendToWhatsapp()">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;" />
-  Send to WhatsApp
-</button>
-  </div>
-</div>
-
+        ${globalHeaderHtml()}
         <main class="page-wrap">
           <section id="homeBannerWrap"></section>
 
@@ -1273,45 +1769,7 @@ border-top: 1px solid #546B41;
   <div id="reviewsGrid" class="reviews-grid"></div>
 </section>
 
-<footer class="site-footer">
-  <div class="footer-main">
-    <div class="footer-brand">
-      <a href="/" class="footer-logo-box">
-        <img id="footerLogoImg" src="" alt="Logo" />
-        <span id="footerLogoText">LOGO</span>
-      </a>
-      <p>Shop quality products with simple WhatsApp ordering.</p>
-    </div>
-
-    <div class="footer-column">
-      <h4>Contact</h4>
-      <div class="footer-contact-row" id="footerMobile"></div>
-      <div class="footer-contact-row" id="footerEmail"></div>
-      <div id="footerWhatsapp"></div>
-    </div>
-
-    <div class="footer-column">
-      <h4>Legal</h4>
-      <div class="footer-legal-list">
-        <a class="footer-legal-link" href="/legal/terms-condition">Terms & Conditions</a>
-        <a class="footer-legal-link" href="/legal/policies">Policies</a>
-        <a class="footer-legal-link" href="/legal/privacy-policy">Privacy Policy</a>
-        <a class="footer-legal-link" href="/legal/return-refund">Return & Refund Policy</a>
-      </div>
-    </div>
-
-    <div class="footer-column">
-      <h4>Follow</h4>
-      <div class="footer-social-row">
-        <span id="footerInstagram"></span>
-        <span id="footerWhatsappSocial"></span>
-      </div>
-      <a class="footer-browse-link" href="/page/all-products">Browse all products →</a>
-    </div>
-  </div>
-
-  <div class="footer-bottom">© 2026. All rights reserved.</div>
-</footer>
+${globalFooterHtml()}
         </main>
 
         <script>
