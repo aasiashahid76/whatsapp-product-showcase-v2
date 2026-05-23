@@ -909,6 +909,61 @@ app.get("/", (req, res) => {
   font-size: 14px;
 }
 
+.reviews-section {
+  margin: 26px 0 24px;
+}
+
+.reviews-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.reviews-head h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #38472d;
+}
+
+.reviews-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.review-card {
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 8px 20px rgba(84, 107, 65, 0.08);
+}
+
+.review-stars {
+  color: #546B41;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.review-text {
+  color: #38472d;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.review-name {
+  color: #546B41;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (min-width: 768px) {
+  .reviews-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .site-footer {
   margin-top: 34px;
   background: #546B41;
@@ -1209,6 +1264,13 @@ border-top: 1px solid #546B41;
 
           <section>
   <div id="homeSections"></div>
+</section>
+
+<section id="reviewsSection" class="reviews-section">
+  <div class="reviews-head">
+    <h2>Customer Reviews</h2>
+  </div>
+  <div id="reviewsGrid" class="reviews-grid"></div>
 </section>
 
 <footer class="site-footer">
@@ -1604,6 +1666,40 @@ async function loadFixedBanners() {
   }
 }
 
+async function loadReviewsSection() {
+  const section = document.getElementById("reviewsSection");
+  const grid = document.getElementById("reviewsGrid");
+
+  if (!section || !grid) return;
+
+  try {
+    const res = await fetch("/api/reviews");
+    const data = await res.json();
+    const reviews = data.reviews || [];
+
+    if (reviews.length === 0) {
+      section.style.display = "none";
+      return;
+    }
+
+    section.style.display = "block";
+
+    grid.innerHTML = reviews.map(function(review) {
+      const rating = Math.max(1, Math.min(5, Number(review.rating || 5)));
+      const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
+
+      return "" +
+        "<div class='review-card'>" +
+          "<div class='review-stars'>" + stars + "</div>" +
+          "<div class='review-text'>" + review.review_body + "</div>" +
+          "<div class='review-name'>— " + review.customer_name + "</div>" +
+        "</div>";
+    }).join("");
+  } catch (error) {
+    section.style.display = "none";
+  }
+}
+
 async function loadHomeSections() {
   try {
     const res = await fetch("/api/home-sections");
@@ -1869,6 +1965,7 @@ let total = 0;
   loadHomeTopDesign();
   loadFixedBanners();
   loadHomeSections();
+  loadReviewsSection();
   updateListButton();
   renderYourList();
 });
@@ -2743,6 +2840,29 @@ app.delete("/api/admin/fixed-banners/:id", verifyAdmin, async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Failed to delete fixed banner",
+      error: error.message
+    });
+  }
+});
+
+app.get("/api/reviews", async (req, res) => {
+  try {
+    const [reviews] = await db.query(`
+      SELECT id, customer_name, rating, review_body, created_at
+      FROM reviews
+      WHERE is_active = true
+      ORDER BY id DESC
+      LIMIT 12
+    `);
+
+    res.json({
+      status: "ok",
+      reviews
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to load reviews",
       error: error.message
     });
   }
