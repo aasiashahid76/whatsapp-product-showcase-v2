@@ -2248,6 +2248,37 @@ app.put("/api/admin/products/:id/quantity", verifyAdmin, async (req, res) => {
   }
 });
 
+app.put("/api/admin/products/:id/image", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { product_image_url } = req.body;
+
+    if (!product_image_url) {
+      return res.status(400).json({
+        status: "error",
+        message: "Product image URL is required"
+      });
+    }
+
+    await db.query(
+      "UPDATE products SET product_image_url = ? WHERE id = ?",
+      [product_image_url, id]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Product image saved successfully",
+      product_image_url
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to save product image",
+      error: error.message
+    });
+  }
+});
+
 app.put("/api/admin/products/:id/visibility", verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -6070,6 +6101,44 @@ app.get("/all-products", (req, res) => {
     }
 
     hiddenInput.value = data.file_url;
+
+    if (hiddenInputId === "editProductImageUrl") {
+      const productIdInput = document.getElementById("editProductId");
+      const productId = productIdInput ? productIdInput.value : "";
+
+      if (productId) {
+        if (statusBox) {
+          statusBox.textContent = "Saving image to product...";
+        }
+
+        const saveRes = await fetch("/api/admin/products/" + productId + "/image", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("admin_token")
+          },
+          body: JSON.stringify({
+            product_image_url: data.file_url
+          })
+        });
+
+        const saveData = await saveRes.json();
+
+        if (!saveRes.ok) {
+          if (statusBox) statusBox.textContent = saveData.message || "Image uploaded but not saved";
+          alert(saveData.message || "Image uploaded but not saved");
+          return;
+        }
+
+        if (statusBox) {
+          statusBox.textContent = "Uploaded and saved successfully";
+        }
+
+        alert("Image uploaded and saved successfully");
+        loadAdminProducts();
+        return;
+      }
+    }
 
     if (statusBox) {
       statusBox.textContent = "Uploaded successfully";
