@@ -1624,6 +1624,106 @@ app.post("/api/admin/products", verifyAdmin, async (req, res) => {
   }
 });
 
+app.put("/api/admin/products/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      sku,
+      product_name,
+      product_image_url,
+      show_price,
+      crossed_price,
+      tag,
+      dealer_name,
+      dealer_price,
+      qty_in_stock,
+      demand_color,
+      is_visible,
+      page_ids
+    } = req.body;
+
+    if (!product_name) {
+      return res.status(400).json({
+        status: "error",
+        message: "Product name is required"
+      });
+    }
+
+    const slugBase = createSlug(product_name);
+    let slug = slugBase;
+
+    const [existingSlug] = await db.query(
+      "SELECT id FROM products WHERE slug = ? AND id != ? LIMIT 1",
+      [slug, id]
+    );
+
+    if (existingSlug.length > 0) {
+      slug = slugBase + "-" + id;
+    }
+
+    if (sku) {
+      const [existingSku] = await db.query(
+        "SELECT id FROM products WHERE sku = ? AND id != ? LIMIT 1",
+        [sku, id]
+      );
+
+      if (existingSku.length > 0) {
+        return res.status(409).json({
+          status: "error",
+          message: "Product SKU already exists"
+        });
+      }
+    }
+
+    await db.query(
+      `UPDATE products
+       SET sku = ?,
+           product_name = ?,
+           slug = ?,
+           product_image_url = ?,
+           show_price = ?,
+           crossed_price = ?,
+           tag = ?,
+           dealer_name = ?,
+           dealer_price = ?,
+           qty_in_stock = ?,
+           demand_color = ?,
+           is_visible = ?
+       WHERE id = ?`,
+      [
+        sku || null,
+        product_name,
+        slug,
+        product_image_url || null,
+        show_price || 0,
+        crossed_price || null,
+        tag || "None",
+        dealer_name || null,
+        dealer_price || 0,
+        qty_in_stock || 0,
+        demand_color || "Green",
+        is_visible === false ? 0 : 1,
+        id
+      ]
+    );
+
+    await replaceProductPages(id, page_ids);
+
+    res.json({
+      status: "ok",
+      message: "Product updated successfully",
+      slug
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update product",
+      error: error.message
+    });
+  }
+});
+
 app.put("/api/admin/products/:id/quantity", verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
