@@ -1556,6 +1556,52 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
+app.get("/api/home-sections", async (req, res) => {
+  try {
+    const [pages] = await db.query(`
+      SELECT *
+      FROM pages
+      WHERE is_active = true
+      ORDER BY sort_order ASC, id DESC
+    `);
+
+    const sections = [];
+
+    for (const page of pages) {
+      const [products] = await db.query(`
+        SELECT 
+          p.*,
+          GROUP_CONCAT(pg.page_name ORDER BY pg.page_name SEPARATOR ', ') AS page_names
+        FROM products p
+        INNER JOIN product_pages pp ON p.id = pp.product_id
+        INNER JOIN pages pg ON pp.page_id = pg.id
+        WHERE p.is_visible = true AND pp.page_id = ?
+        GROUP BY p.id
+        ORDER BY p.id DESC
+        LIMIT 12
+      `, [page.id]);
+
+      if (products.length > 0) {
+        sections.push({
+          page,
+          products
+        });
+      }
+    }
+
+    res.json({
+      status: "ok",
+      sections
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to load homepage sections",
+      error: error.message
+    });
+  }
+});
+
 app.get("/api/admin/products", verifyAdmin, async (req, res) => {
   try {
     const [products] = await db.query(`
