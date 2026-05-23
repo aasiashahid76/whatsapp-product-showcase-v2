@@ -2617,6 +2617,81 @@ app.delete("/api/admin/pages/:id", verifyAdmin, async (req, res) => {
   }
 });
 
+app.post("/api/admin/pages/:id/move", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { direction } = req.body;
+
+    if (!["up", "down"].includes(direction)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Direction must be up or down"
+      });
+    }
+
+    const [currentRows] = await db.query(
+      "SELECT id, sort_order FROM pages WHERE id = ? LIMIT 1",
+      [id]
+    );
+
+    if (currentRows.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Page not found"
+      });
+    }
+
+    const current = currentRows[0];
+
+    const [targetRows] = await db.query(
+      direction === "up"
+        ? "SELECT id, sort_order FROM pages WHERE sort_order < ? ORDER BY sort_order DESC LIMIT 1"
+        : "SELECT id, sort_order FROM pages WHERE sort_order > ? ORDER BY sort_order ASC LIMIT 1",
+      [current.sort_order]
+    );
+
+    if (targetRows.length === 0) {
+      return res.json({
+        status: "ok",
+        message: "No movement needed"
+      });
+    }
+
+    const target = targetRows[0];
+
+    await db.query(
+      "UPDATE pages SET sort_order = ? WHERE id = ?",
+      [target.sort_order, current.id]
+    );
+
+    await db.query(
+      "UPDATE pages SET sort_order = ? WHERE id = ?",
+      [current.sort_order, target.id]
+    );
+
+    await db.query(
+      "UPDATE home_layout_sections SET sort_order = ? WHERE section_type = 'page' AND reference_id = ?",
+      [target.sort_order, current.id]
+    );
+
+    await db.query(
+      "UPDATE home_layout_sections SET sort_order = ? WHERE section_type = 'page' AND reference_id = ?",
+      [current.sort_order, target.id]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Page moved successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to move page",
+      error: error.message
+    });
+  }
+});
+
 /* =========================
    PRODUCT API
 ========================= */
@@ -2840,6 +2915,71 @@ app.delete("/api/admin/fixed-banners/:id", verifyAdmin, async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Failed to delete fixed banner",
+      error: error.message
+    });
+  }
+});
+
+app.post("/api/admin/fixed-banners/:id/move", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { direction } = req.body;
+
+    if (!["up", "down"].includes(direction)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Direction must be up or down"
+      });
+    }
+
+    const [currentRows] = await db.query(
+      "SELECT id, sort_order FROM home_fixed_banners WHERE id = ? LIMIT 1",
+      [id]
+    );
+
+    if (currentRows.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Fixed banner not found"
+      });
+    }
+
+    const current = currentRows[0];
+
+    const [targetRows] = await db.query(
+      direction === "up"
+        ? "SELECT id, sort_order FROM home_fixed_banners WHERE sort_order < ? ORDER BY sort_order DESC LIMIT 1"
+        : "SELECT id, sort_order FROM home_fixed_banners WHERE sort_order > ? ORDER BY sort_order ASC LIMIT 1",
+      [current.sort_order]
+    );
+
+    if (targetRows.length === 0) {
+      return res.json({
+        status: "ok",
+        message: "No movement needed"
+      });
+    }
+
+    const target = targetRows[0];
+
+    await db.query(
+      "UPDATE home_fixed_banners SET sort_order = ? WHERE id = ?",
+      [target.sort_order, current.id]
+    );
+
+    await db.query(
+      "UPDATE home_fixed_banners SET sort_order = ? WHERE id = ?",
+      [current.sort_order, target.id]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Fixed banner moved successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to move fixed banner",
       error: error.message
     });
   }
