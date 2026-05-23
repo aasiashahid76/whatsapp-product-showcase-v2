@@ -648,6 +648,55 @@ app.get("/", (req, res) => {
   font-size: 14px;
 }
 
+.site-footer {
+  margin-top: 24px;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 18px 18px 0 0;
+  padding: 18px 14px;
+}
+
+.footer-title {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.footer-contact {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.footer-contact a {
+  color: #FFF8EC;
+  text-decoration: none;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.footer-links a {
+  color: #FFF8EC;
+  background: rgba(255, 248, 236, 0.12);
+  border: 1px solid rgba(255, 248, 236, 0.25);
+  border-radius: 10px;
+  padding: 9px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.footer-bottom {
+  margin-top: 14px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
           @media (min-width: 768px) {
             .page-wrap {
               max-width: 1100px;
@@ -790,6 +839,26 @@ app.get("/", (req, res) => {
           <section>
   <div id="homeSections"></div>
 </section>
+
+<footer class="site-footer">
+  <div class="footer-title">Contact Us</div>
+
+  <div class="footer-contact">
+    <div id="footerMobile"></div>
+    <div id="footerEmail"></div>
+    <div id="footerInstagram"></div>
+  </div>
+
+  <div class="footer-links">
+    <a href="/legal/policies">Policies</a>
+    <a href="/legal/privacy-policy">Privacy Policy</a>
+    <a href="/legal/return-refund">Return & Refund</a>
+    <a href="/legal/terms-condition">Terms & Conditions</a>
+  </div>
+
+  <div class="footer-bottom">© All rights reserved.</div>
+</footer>
+
         </main>
 
         <script>
@@ -949,6 +1018,28 @@ function filterProductsFromDesktop() {
       logoImg.style.display = "none";
       logoText.style.display = "block";
     }
+const footerMobile = document.getElementById("footerMobile");
+const footerEmail = document.getElementById("footerEmail");
+const footerInstagram = document.getElementById("footerInstagram");
+
+if (footerMobile) {
+  footerMobile.innerHTML = siteSettings.mobile_number
+    ? "📞 <a href='tel:" + siteSettings.mobile_number + "'>" + siteSettings.mobile_number + "</a>"
+    : "";
+}
+
+if (footerEmail) {
+  footerEmail.innerHTML = siteSettings.email
+    ? "✉️ <a href='mailto:" + siteSettings.email + "'>" + siteSettings.email + "</a>"
+    : "";
+}
+
+if (footerInstagram) {
+  footerInstagram.innerHTML = siteSettings.instagram_link
+    ? "📷 <a href='" + siteSettings.instagram_link + "' target='_blank'>Instagram</a>"
+    : "";
+}
+	
   } catch (error) {
     siteSettings = {};
   }
