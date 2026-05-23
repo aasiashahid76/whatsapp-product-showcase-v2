@@ -5629,10 +5629,11 @@ app.get("/manage-ui", (req, res) => {
         <div class="container">
           <div class="tabs">
             <button class="tab-btn active" onclick="showTab('pagesTab', this)">Create & Manage Page</button>
-            <button class="tab-btn" onclick="showTab('productsTab', this)">Add Product</button>
-            <button class="tab-btn" onclick="showTab('logoBannerTab', this)">Logo & Banner</button>
-            <button class="tab-btn" onclick="showTab('reviewsTab', this)">Reviews</button>
-            <button class="tab-btn" onclick="showTab('settingsTab', this)">Header & Footer</button>
+			<button class="tab-btn" onclick="showTab('productsTab', this)">Add Product</button>
+			<button class="tab-btn" onclick="showTab('logoBannerTab', this)">Logo & Banner</button>
+			<button class="tab-btn" onclick="showTab('fixedBannersTab', this)">Fixed Banners</button>
+			<button class="tab-btn" onclick="showTab('reviewsTab', this)">Reviews</button>
+			<button class="tab-btn" onclick="showTab('settingsTab', this)">Header & Footer</button>
           </div>
 
           <div id="pagesTab" class="tab-content active">
@@ -5751,6 +5752,33 @@ app.get("/manage-ui", (req, res) => {
               <p>This tab will manage homepage fixed banners and homepage layout order. Logo upload will be inside Header & Footer only.</p>
             </div>
           </div>
+
+		  <div id="fixedBannersTab" class="tab-content">
+  <div class="grid">
+    <div class="card">
+      <h2>Add Fixed Promotional Banner</h2>
+
+      <label>Banner Name</label>
+      <input id="fixedBannerName" placeholder="Example: Festival Offer" />
+
+      <label>Banner Image</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="fixedBannerImageFile" type="file" accept="image/*" />
+        <button type="button" onclick="uploadImageFile('fixedBannerImageFile', 'fixedBannerImageUrl', 'fixedBannerUploadStatus')" style="width:auto;margin-top:0;background:#546B41;color:#FFF8EC;border:none;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;">Upload</button>
+      </div>
+
+      <input id="fixedBannerImageUrl" type="hidden" />
+      <div id="fixedBannerUploadStatus" style="font-size:13px;color:#6f7a5f;margin-top:6px;">No fixed banner image uploaded yet.</div>
+
+      <button class="primary" onclick="addFixedBanner()">Add Fixed Banner</button>
+    </div>
+
+    <div class="card">
+      <h2>Manage Fixed Banners</h2>
+      <div id="fixedBannersList">Loading fixed banners...</div>
+    </div>
+  </div>
+</div>
 
           <div id="reviewsTab" class="tab-content">
             <div class="card">
@@ -6343,14 +6371,136 @@ async function deletePage(pageId, pageName) {
   }
 }
 
+async function loadFixedBannersAdmin() {
+  const box = document.getElementById("fixedBannersList");
+
+  if (!box) return;
+
+  if (!token) {
+    box.innerHTML = "Please login first.";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/fixed-banners");
+    const data = await res.json();
+
+    const banners = data.banners || [];
+
+    if (banners.length === 0) {
+      box.innerHTML = "<div style='color:#6f7a5f;font-size:14px;'>No fixed banners added yet.</div>";
+      return;
+    }
+
+    let html = "";
+
+    banners.forEach(function(banner) {
+      html += "<div style='border:1px solid #DCCCAC;border-radius:14px;padding:10px;margin-bottom:10px;background:#FFF8EC;'>";
+      html += "<img src='" + banner.image_url + "' style='width:100%;max-height:150px;object-fit:cover;border-radius:10px;border:1px solid #DCCCAC;' />";
+      html += "<div style='font-weight:700;margin-top:8px;color:#38472d;'>" + banner.banner_name + "</div>";
+      html += "<div style='font-size:12px;color:#6f7a5f;margin-top:4px;'>Sort Order: " + banner.sort_order + "</div>";
+      html += "<button onclick='deleteFixedBanner(" + banner.id + ")' style='margin-top:8px;background:#fee2e2;color:#991b1b;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;'>Delete</button>";
+      html += "</div>";
+    });
+
+    box.innerHTML = html;
+  } catch (error) {
+    box.innerHTML = error.message;
+  }
+}
+
+async function addFixedBanner() {
+  if (!token) {
+    alert("Please login first");
+    return;
+  }
+
+  const bannerName = document.getElementById("fixedBannerName").value.trim();
+  const imageUrl = document.getElementById("fixedBannerImageUrl").value.trim();
+
+  if (!bannerName) {
+    alert("Banner name is required");
+    return;
+  }
+
+  if (!imageUrl) {
+    alert("Please upload fixed banner image first");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/fixed-banners", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        banner_name: bannerName,
+        image_url: imageUrl
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Fixed banner add failed");
+      return;
+    }
+
+    alert("Fixed banner added successfully");
+
+    document.getElementById("fixedBannerName").value = "";
+    document.getElementById("fixedBannerImageFile").value = "";
+    document.getElementById("fixedBannerImageUrl").value = "";
+    document.getElementById("fixedBannerUploadStatus").textContent = "No fixed banner image uploaded yet.";
+
+    loadFixedBannersAdmin();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function deleteFixedBanner(bannerId) {
+  if (!token) {
+    alert("Please login first");
+    return;
+  }
+
+  const ok = confirm("Delete this fixed banner?");
+  if (!ok) return;
+
+  try {
+    const res = await fetch("/api/admin/fixed-banners/" + bannerId, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Fixed banner delete failed");
+      return;
+    }
+
+    alert("Fixed banner deleted successfully");
+    loadFixedBannersAdmin();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
           const token = localStorage.getItem("admin_token");
 
           if (!token) {
-			window.location.href = "/admin";
-						} else {
+  window.location.href = "/admin";
+} else {
   loadPages();
   loadProductPageCheckboxes();
   loadSettings();
+  loadFixedBannersAdmin();
 }
 
         </script>
