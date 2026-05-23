@@ -1461,6 +1461,30 @@ let total = 0;
     </html>
   `);
 });
+
+app.get("/api/media-debug", async (req, res) => {
+  const testFile = path.join(MEDIA_DIR, "test-write.txt");
+
+  let canWrite = false;
+  let writeError = "";
+
+  try {
+    fs.writeFileSync(testFile, "media test " + new Date().toISOString());
+    canWrite = true;
+  } catch (error) {
+    writeError = error.message;
+  }
+
+  res.json({
+    status: "ok",
+    process_cwd: process.cwd(),
+    media_upload_path_env: process.env.MEDIA_UPLOAD_PATH || "",
+    final_media_dir_used_by_app: MEDIA_DIR,
+    media_dir_exists: fs.existsSync(MEDIA_DIR),
+    can_write_to_media_dir: canWrite,
+    write_error: writeError
+  });
+});
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
