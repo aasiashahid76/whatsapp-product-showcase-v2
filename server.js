@@ -7134,7 +7134,29 @@ async function deleteReview(reviewId) {
   }
 }
 
-          const token = localStorage.getItem("admin_token");
+          var token = localStorage.getItem("admin_token");
+
+window.showTab = showTab;
+window.logoutAdmin = logoutAdmin;
+window.uploadImageFile = uploadImageFile;
+
+window.createPage = createPage;
+window.openEditPageBox = openEditPageBox;
+window.closeEditPageBox = closeEditPageBox;
+window.updatePage = updatePage;
+window.deletePage = deletePage;
+window.movePage = movePage;
+
+window.createProduct = createProduct;
+
+window.addFixedBanner = addFixedBanner;
+window.deleteFixedBanner = deleteFixedBanner;
+window.moveFixedBanner = moveFixedBanner;
+
+window.addReview = addReview;
+window.deleteReview = deleteReview;
+
+window.saveSettings = saveSettings;
 
           if (!token) {
   window.location.href = "/admin";
