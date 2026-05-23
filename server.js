@@ -2838,9 +2838,62 @@ app.get("/page/:slug", (req, res) => {
             }
 
             .site-header {
-              grid-template-columns: 110px 1fr auto;
-              padding: 12px 24px;
-            }
+  grid-template-columns: 140px 1fr;
+  padding: 12px 24px;
+}
+
+.mobile-list-btn {
+  display: none;
+}
+
+.mobile-search-box {
+  display: none;
+}
+
+.pages-menu-btn {
+  display: none;
+}
+
+.desktop-right-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+.desktop-pages-nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  overflow-x: auto;
+}
+
+.desktop-pages-nav a {
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: #546B41;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.desktop-pages-nav a.active {
+  color: #38472d;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.desktop-search-btn {
+  display: block;
+  border: none;
+  background: transparent;
+  color: #546B41;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  cursor: pointer;
+}
 
             .logo-box {
               height: 44px;
