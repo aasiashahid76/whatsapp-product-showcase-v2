@@ -121,7 +121,7 @@ app.get("/", (req, res) => {
             border-bottom: 1px solid #DCCCAC;
             padding: 10px 12px;
             display: grid;
-            grid-template-columns: 82px 1fr auto;
+            grid-template-columns: 70px 1fr 38px auto;
             gap: 8px;
             align-items: center;
           }
@@ -187,31 +187,51 @@ app.get("/", (req, res) => {
   white-space: nowrap;
 }
 
-.header-pages-nav {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 8px 10px;
-  background: #FFF8EC;
-  border-bottom: 1px solid #DCCCAC;
-}
-
-.header-pages-nav a {
-  flex: 0 0 auto;
-  text-decoration: none;
+.pages-menu-btn {
+  border: 1px solid #DCCCAC;
   background: white;
   color: #546B41;
+  border-radius: 10px;
+  height: 38px;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.pages-menu-panel {
+  display: none;
+  position: fixed;
+  top: 59px;
+  left: 10px;
+  right: 10px;
+  z-index: 70;
+  background: white;
   border: 1px solid #DCCCAC;
-  border-radius: 999px;
-  padding: 7px 11px;
-  font-size: 12px;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+  padding: 10px;
+}
+
+.pages-menu-panel.show {
+  display: grid;
+  gap: 8px;
+}
+
+.pages-menu-panel a {
+  text-decoration: none;
+  background: #FFF8EC;
+  color: #546B41;
+  border: 1px solid #DCCCAC;
+  border-radius: 12px;
+  padding: 11px 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 
-.header-pages-nav a.active {
+.pages-menu-panel a.active {
   background: #546B41;
   color: #FFF8EC;
-  border-color: #546B41;
 }
 
           .page-wrap {
@@ -548,7 +568,7 @@ app.get("/", (req, res) => {
             }
 
             .site-header {
-              grid-template-columns: 110px 1fr auto;
+              grid-template-columns: 110px 1fr 44px auto;
               padding: 12px 24px;
             }
 
@@ -585,11 +605,11 @@ app.get("/", (req, res) => {
             <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
           </div>
 
-          <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
+          <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
+		  <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
         </header>
 
-		<nav id="headerPagesNav" class="header-pages-nav"></nav>
-
+		<div id="pagesMenuPanel" class="pages-menu-panel"></div>
 		<div id="yourListPanel" class="your-list-panel">
   <div class="list-head">
     <strong>Your List</strong>
@@ -696,19 +716,14 @@ app.get("/", (req, res) => {
 }
 
 async function loadHeaderPages() {
-  const nav = document.getElementById("headerPagesNav");
+  const panel = document.getElementById("pagesMenuPanel");
 
-  if (!nav) return;
+  if (!panel) return;
 
   try {
     const res = await fetch("/api/header-pages");
     const data = await res.json();
     const pages = data.pages || [];
-
-    if (pages.length === 0) {
-      nav.style.display = "none";
-      return;
-    }
 
     let html = "";
     html += "<a class='active' href='/'>Home</a>";
@@ -717,10 +732,17 @@ async function loadHeaderPages() {
       html += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
     });
 
-    nav.innerHTML = html;
+    panel.innerHTML = html;
   } catch (error) {
-    nav.style.display = "none";
+    panel.innerHTML = "";
   }
+}
+
+function togglePagesMenu() {
+  const panel = document.getElementById("pagesMenuPanel");
+  if (!panel) return;
+
+  panel.classList.toggle("show");
 }
 
           async function loadSettings() {
