@@ -278,11 +278,39 @@ app.get("/", (req, res) => {
           }
 
           .product-price {
-            font-size: 11px;
-            font-weight: 700;
-            color: #546B41;
-            white-space: nowrap;
-          }
+  font-size: 11px;
+  font-weight: 700;
+  color: #546B41;
+  white-space: nowrap;
+}
+
+.price-stack {
+  text-align: right;
+  line-height: 1.1;
+}
+
+.crossed-price {
+  font-size: 10px;
+  color: #8a8a8a;
+  text-decoration: line-through;
+  margin-top: 2px;
+}
+
+.product-image-wrap {
+  position: relative;
+}
+
+.product-tag {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 999px;
+  padding: 3px 6px;
+  font-size: 9px;
+  font-weight: 700;
+}
 
           .card-action-row {
             display: grid;
@@ -570,34 +598,50 @@ app.get("/", (req, res) => {
 			let siteSettings = {};
 
           function productCard(product) {
-            const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
-            const price = Number(product.show_price || 0).toFixed(0);
+  const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
+  const price = Number(product.show_price || 0).toFixed(0);
+  const crossedPrice = Number(product.crossed_price || 0);
+  const tag = String(product.tag || "None");
 
-            return \`
-              <div class="product-card">
-                <a href="/product/\${product.slug}">
-                  <img class="product-img" src="\${image}" alt="\${product.product_name}" />
-                </a>
+  const tagHtml = tag && tag !== "None"
+    ? "<div class='product-tag'>" + tag + "</div>"
+    : "";
 
-                <div class="product-info">
-                  <div class="name-price-row">
-                    <div class="product-name">\${product.product_name}</div>
-                    <div class="product-price">₹\${price}</div>
-                  </div>
+  const crossedPriceHtml = crossedPrice > 0
+    ? "<div class='crossed-price'>₹" + crossedPrice.toFixed(0) + "</div>"
+    : "";
 
-                  <div class="card-action-row">
-                    <div class="qty-row">
-                      <button onclick="changeQtyFromCard(this, -1)">-</button>
-				      <input class="qty-input-card" type="number" min="1" value="1" />
-					  <button onclick="changeQtyFromCard(this, 1)">+</button>
-                    </div>
+  return `
+    <div class="product-card">
+      <a href="/product/${product.slug}">
+        <div class="product-image-wrap">
+          ${tagHtml}
+          <img class="product-img" src="${image}" alt="${product.product_name}" />
+        </div>
+      </a>
 
-                    <button class="add-btn" onclick="addToListFromCard('\${product.id}', this)">Add</button>
-                  </div>
-                </div>
-              </div>
-            \`;
-          }
+      <div class="product-info">
+        <div class="name-price-row">
+          <div class="product-name">${product.product_name}</div>
+          <div class="price-stack">
+            <div class="product-price">₹${price}</div>
+            ${crossedPriceHtml}
+          </div>
+        </div>
+
+        <div class="card-action-row">
+          <div class="qty-row">
+            <button onclick="changeQtyFromCard(this, -1)">-</button>
+            <input class="qty-input-card" type="number" min="1" value="1" />
+            <button onclick="changeQtyFromCard(this, 1)">+</button>
+          </div>
+
+          <button class="add-btn" onclick="addToListFromCard('${product.id}', this)">Add</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
           function renderHomeSections(sections) {
   const wrap = document.getElementById("homeSections");
@@ -2146,11 +2190,39 @@ app.get("/page/:slug", (req, res) => {
           }
 
           .product-price {
-            font-size: 11px;
-            font-weight: 700;
-            color: #546B41;
-            white-space: nowrap;
-          }
+  font-size: 11px;
+  font-weight: 700;
+  color: #546B41;
+  white-space: nowrap;
+}
+
+.price-stack {
+  text-align: right;
+  line-height: 1.1;
+}
+
+.crossed-price {
+  font-size: 10px;
+  color: #8a8a8a;
+  text-decoration: line-through;
+  margin-top: 2px;
+}
+
+.product-image-wrap {
+  position: relative;
+}
+
+.product-tag {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 999px;
+  padding: 3px 6px;
+  font-size: 9px;
+  font-weight: 700;
+}
 
           .card-action-row {
             display: grid;
@@ -2429,30 +2501,46 @@ app.get("/page/:slug", (req, res) => {
           let siteSettings = {};
 
           function productCard(product) {
-            const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
-            const price = Number(product.show_price || 0).toFixed(0);
+  const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
+  const price = Number(product.show_price || 0).toFixed(0);
+  const crossedPrice = Number(product.crossed_price || 0);
+  const tag = String(product.tag || "None");
 
-            return "" +
-              "<div class='product-card'>" +
-                "<a href='/product/" + product.slug + "'>" +
-                  "<img class='product-img' src='" + image + "' alt='" + product.product_name + "' />" +
-                "</a>" +
-                "<div class='product-info'>" +
-                  "<div class='name-price-row'>" +
-                    "<div class='product-name'>" + product.product_name + "</div>" +
-                    "<div class='product-price'>₹" + price + "</div>" +
-                  "</div>" +
-                  "<div class='card-action-row'>" +
-                    "<div class='qty-row'>" +
-                      "<button onclick='changeQtyFromCard(this, -1)'>-</button>" +
-						"<input class='qty-input-card' type='number' min='1' value='1' />" +
-						"<button onclick='changeQtyFromCard(this, 1)'>+</button>" +
-                    "</div>" +
-                    "<button class='add-btn' onclick='addToListFromCard(" + product.id + ", this)'>Add</button>" +
-                  "</div>" +
-                "</div>" +
-              "</div>";
-          }
+  const tagHtml = tag && tag !== "None"
+    ? "<div class='product-tag'>" + tag + "</div>"
+    : "";
+
+  const crossedPriceHtml = crossedPrice > 0
+    ? "<div class='crossed-price'>₹" + crossedPrice.toFixed(0) + "</div>"
+    : "";
+
+  return "" +
+    "<div class='product-card'>" +
+      "<a href='/product/" + product.slug + "'>" +
+        "<div class='product-image-wrap'>" +
+          tagHtml +
+          "<img class='product-img' src='" + image + "' alt='" + product.product_name + "' />" +
+        "</div>" +
+      "</a>" +
+      "<div class='product-info'>" +
+        "<div class='name-price-row'>" +
+          "<div class='product-name'>" + product.product_name + "</div>" +
+          "<div class='price-stack'>" +
+            "<div class='product-price'>₹" + price + "</div>" +
+            crossedPriceHtml +
+          "</div>" +
+        "</div>" +
+        "<div class='card-action-row'>" +
+          "<div class='qty-row'>" +
+            "<button onclick='changeQtyFromCard(this, -1)'>-</button>" +
+            "<input class='qty-input-card' type='number' min='1' value='1' />" +
+            "<button onclick='changeQtyFromCard(this, 1)'>+</button>" +
+          "</div>" +
+          "<button class='add-btn' onclick='addToListFromCard(" + product.id + ", this)'>Add</button>" +
+        "</div>" +
+      "</div>" +
+    "</div>";
+}
 
           function renderProducts(products) {
             const grid = document.getElementById("productsGrid");
