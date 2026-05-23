@@ -6139,6 +6139,7 @@ app.get("/manage-ui", (req, res) => {
 			<button class="tab-btn" onclick="showTab('productsTab', this)">Add Product</button>
 			<button class="tab-btn" onclick="showTab('logoBannerTab', this)">Logo & Banner</button>
 			<button class="tab-btn" onclick="showTab('fixedBannersTab', this)">Fixed Banners</button>
+			<button class="tab-btn" onclick="showTab('pageBannerPositionTab', this)">Page & Banners Position</button>
 			<button class="tab-btn" onclick="showTab('reviewsTab', this)">Reviews</button>
 			<button class="tab-btn" onclick="showTab('settingsTab', this)">Header & Footer</button>
           </div>
@@ -6284,6 +6285,19 @@ app.get("/manage-ui", (req, res) => {
       <h2>Manage Fixed Banners</h2>
       <div id="fixedBannersList">Loading fixed banners...</div>
     </div>
+  </div>
+</div>
+
+<div id="pageBannerPositionTab" class="tab-content">
+  <div class="card">
+    <h2>Page & Banners Position</h2>
+    <p style="color:#6f7a5f;font-size:14px;margin-top:0;">
+      Set the homepage order of product pages and fixed banners together.
+    </p>
+
+    <div id="pageBannerPositionList">Loading position list...</div>
+
+    <button class="primary" onclick="savePageBannerPosition()">Save Position</button>
   </div>
 </div>
 
@@ -7021,6 +7035,124 @@ function renderStars(rating) {
   return "★".repeat(safeRating) + "☆".repeat(5 - safeRating);
 }
 
+let pageBannerPositionItems = [];
+
+async function loadPageBannerPosition() {
+  const box = document.getElementById("pageBannerPositionList");
+
+  if (!box) return;
+
+  if (!token) {
+    box.innerHTML = "Please login first.";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/page-banner-position", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      box.innerHTML = data.message || "Failed to load position list.";
+      return;
+    }
+
+    pageBannerPositionItems = data.items || [];
+
+    renderPageBannerPositionList();
+  } catch (error) {
+    box.innerHTML = error.message;
+  }
+}
+
+function renderPageBannerPositionList() {
+  const box = document.getElementById("pageBannerPositionList");
+
+  if (!box) return;
+
+  if (pageBannerPositionItems.length === 0) {
+    box.innerHTML = "<div style='color:#6f7a5f;font-size:14px;'>No pages or banners found.</div>";
+    return;
+  }
+
+  let html = "";
+
+  pageBannerPositionItems.forEach(function(item, index) {
+    const isPage = item.section_type === "page";
+    const title = isPage ? item.page_name : item.banner_name;
+    const label = isPage ? "Page" : "Fixed Banner";
+    const bg = isPage ? "#FFF8EC" : "#f3f4f6";
+
+    html += "<div style='display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;border:1px solid #DCCCAC;border-radius:14px;padding:10px;margin-bottom:10px;background:" + bg + ";'>";
+    html += "<div style='font-weight:800;color:#546B41;text-align:center;'>" + (index + 1) + "</div>";
+    html += "<div>";
+    html += "<div style='font-size:12px;color:#6f7a5f;font-weight:700;'>" + label + "</div>";
+    html += "<div style='font-size:15px;color:#38472d;font-weight:800;'>" + title + "</div>";
+    html += "</div>";
+    html += "<div style='display:flex;gap:6px;'>";
+    html += "<button type='button' onclick='movePageBannerItem(" + index + ", -1)' style='background:#DCCCAC;color:#546B41;border:none;border-radius:8px;padding:7px 9px;font-weight:700;cursor:pointer;'>↑</button>";
+    html += "<button type='button' onclick='movePageBannerItem(" + index + ", 1)' style='background:#DCCCAC;color:#546B41;border:none;border-radius:8px;padding:7px 9px;font-weight:700;cursor:pointer;'>↓</button>";
+    html += "</div>";
+    html += "</div>";
+  });
+
+  box.innerHTML = html;
+}
+
+function movePageBannerItem(index, direction) {
+  const newIndex = index + direction;
+
+  if (newIndex < 0 || newIndex >= pageBannerPositionItems.length) {
+    return;
+  }
+
+  const temp = pageBannerPositionItems[index];
+  pageBannerPositionItems[index] = pageBannerPositionItems[newIndex];
+  pageBannerPositionItems[newIndex] = temp;
+
+  renderPageBannerPositionList();
+}
+
+async function savePageBannerPosition() {
+  if (!token) {
+    alert("Please login first");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/page-banner-position/reorder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        items: pageBannerPositionItems.map(function(item) {
+          return {
+            layout_id: item.layout_id
+          };
+        })
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Position save failed");
+      return;
+    }
+
+    alert("Page & Banners Position saved successfully");
+    loadPageBannerPosition();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
 async function loadReviewsAdmin() {
   const box = document.getElementById("reviewsList");
 
@@ -7156,7 +7288,8 @@ if (!token) {
   loadProductPageCheckboxes();
   loadSettings();
   loadFixedBannersAdmin();
-  loadReviewsAdmin();
+loadPageBannerPosition();
+loadReviewsAdmin();
 }
 
         </script>
