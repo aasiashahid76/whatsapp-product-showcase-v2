@@ -3744,15 +3744,398 @@ app.get("/dashboard", (req, res) => {
     <html>
       <head>
         <title>Dashboard</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #FFF8EC;
+            color: #546B41;
+          }
+
+          .topbar {
+            background: #546B41;
+            color: #FFF8EC;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+          }
+
+          .topbar h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+          }
+
+          .admin-nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+          }
+
+          .admin-nav a,
+          .admin-nav button {
+            background: #99AD7A;
+            color: #FFF8EC;
+            border: none;
+            border-radius: 10px;
+            padding: 9px 13px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+          }
+
+          .admin-nav a.active {
+            background: #DCCCAC;
+            color: #546B41;
+          }
+
+          .container {
+            max-width: 1280px;
+            margin: auto;
+            padding: 24px;
+          }
+
+          .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 18px;
+          }
+
+          .summary-card {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 8px 24px rgba(84, 107, 65, 0.08);
+          }
+
+          .summary-card .label {
+            color: #6f7a5f;
+            font-size: 14px;
+            margin-bottom: 8px;
+          }
+
+          .summary-card .value {
+            color: #546B41;
+            font-size: 26px;
+            font-weight: 700;
+          }
+
+          .panel {
+            background: white;
+            border: 1px solid #DCCCAC;
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 8px 24px rgba(84, 107, 65, 0.08);
+          }
+
+          .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+          }
+
+          .panel-head h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+          }
+
+          .filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+          }
+
+          select {
+            padding: 10px;
+            border-radius: 11px;
+            border: 1px solid #DCCCAC;
+            background: #FFF8EC;
+            color: #546B41;
+            outline: none;
+          }
+
+          .copy-btn {
+            border: none;
+            background: #546B41;
+            color: #FFF8EC;
+            border-radius: 11px;
+            padding: 10px 13px;
+            font-weight: 700;
+            cursor: pointer;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          th {
+            background: #DCCCAC;
+            color: #546B41;
+            text-align: left;
+            font-size: 13px;
+            padding: 12px;
+            font-weight: 700;
+          }
+
+          td {
+            border-top: 1px solid #f0e4ce;
+            padding: 11px 12px;
+            font-size: 13px;
+            vertical-align: middle;
+          }
+
+          .product-img-small {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid #DCCCAC;
+            background: #FFF8EC;
+          }
+
+          .product-title {
+            font-weight: 700;
+            color: #38472d;
+            margin-bottom: 4px;
+          }
+
+          .muted {
+            color: #6f7a5f;
+            font-size: 12px;
+          }
+
+          .empty {
+            background: #FFF8EC;
+            border: 1px dashed #DCCCAC;
+            border-radius: 14px;
+            padding: 16px;
+            color: #6f7a5f;
+          }
+
+          .loading {
+            padding: 18px;
+            color: #6f7a5f;
+          }
+        </style>
       </head>
+
       <body>
+        <div class="topbar">
+          <h1>Dashboard</h1>
+
+          <div class="admin-nav">
+            <a href="/manage-ui">Manage UI</a>
+            <a href="/all-products">All Products</a>
+            <a class="active" href="/dashboard">Dashboard</a>
+            <button onclick="logoutAdmin()">Logout</button>
+          </div>
+        </div>
+
+        <div class="container">
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="label">Total SKU Count</div>
+              <div class="value" id="totalSku">0</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="label">Total Quantity</div>
+              <div class="value" id="totalQuantity">0</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="label">Total Inventory Cost</div>
+              <div class="value" id="totalCost">₹0</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Low Stock Products</h2>
+
+              <div class="filters">
+                <select id="dealerFilter" onchange="renderLowStockProducts()">
+                  <option value="">All Dealers</option>
+                </select>
+
+                <button class="copy-btn" onclick="copyLowStockForExcel()">Copy for Excel</button>
+              </div>
+            </div>
+
+            <div id="lowStockBox">
+              <div class="loading">Loading dashboard...</div>
+            </div>
+          </div>
+        </div>
+
         <script>
           const token = localStorage.getItem("admin_token");
+          let dashboardData = {
+            summary: {},
+            low_stock_products: [],
+            dealers: []
+          };
+
           if (!token) {
             window.location.href = "/admin";
-          } else {
-            document.body.innerHTML = "<h1>Dashboard Panel</h1><p>Fresh Version 2 dashboard placeholder.</p><p><a href='/manage-ui'>Manage UI</a> | <a href='/all-products'>All Products</a></p>";
           }
+
+          function logoutAdmin() {
+            localStorage.removeItem("admin_token");
+            window.location.href = "/admin";
+          }
+
+          async function loadDashboard() {
+            try {
+              const res = await fetch("/api/admin/dashboard", {
+                headers: {
+                  "Authorization": "Bearer " + localStorage.getItem("admin_token")
+                }
+              });
+
+              const data = await res.json();
+
+              if (!res.ok) {
+                document.getElementById("lowStockBox").innerHTML =
+                  '<div class="empty">' + (data.message || "Dashboard load failed") + '</div>';
+                return;
+              }
+
+              dashboardData = data;
+
+              document.getElementById("totalSku").textContent = data.summary.total_sku || 0;
+              document.getElementById("totalQuantity").textContent = data.summary.total_quantity || 0;
+              document.getElementById("totalCost").textContent = "₹" + Number(data.summary.total_inventory_cost || 0).toFixed(0);
+
+              renderDealerFilter();
+              renderLowStockProducts();
+            } catch (error) {
+              document.getElementById("lowStockBox").innerHTML =
+                '<div class="empty">' + error.message + '</div>';
+            }
+          }
+
+          function renderDealerFilter() {
+            const select = document.getElementById("dealerFilter");
+            const currentValue = select.value;
+
+            select.innerHTML = '<option value="">All Dealers</option>';
+
+            (dashboardData.dealers || []).forEach(function(dealer) {
+              const option = document.createElement("option");
+              option.value = dealer;
+              option.textContent = dealer;
+              select.appendChild(option);
+            });
+
+            select.value = currentValue;
+          }
+
+          function getFilteredLowStockProducts() {
+            const dealer = document.getElementById("dealerFilter").value;
+
+            let products = dashboardData.low_stock_products || [];
+
+            if (dealer) {
+              products = products.filter(function(product) {
+                return String(product.dealer_name || "") === dealer;
+              });
+            }
+
+            return products;
+          }
+
+          function renderLowStockProducts() {
+            const box = document.getElementById("lowStockBox");
+            const products = getFilteredLowStockProducts();
+
+            if (!products || products.length === 0) {
+              box.innerHTML = '<div class="empty">No low stock products found.</div>';
+              return;
+            }
+
+            let html = "";
+            html += "<table>";
+            html += "<thead>";
+            html += "<tr>";
+            html += "<th>Image</th>";
+            html += "<th>Product</th>";
+            html += "<th>SKU</th>";
+            html += "<th>Dealer</th>";
+            html += "<th>Dealer Price</th>";
+            html += "<th>Stock Qty</th>";
+            html += "<th>Demand Color</th>";
+            html += "</tr>";
+            html += "</thead>";
+            html += "<tbody>";
+
+            products.forEach(function(product) {
+              const image = product.product_image_url || "https://via.placeholder.com/100x100?text=Product";
+
+              html += "<tr>";
+              html += "<td><img class='product-img-small' src='" + image + "' /></td>";
+              html += "<td>";
+              html += "<div class='product-title'>" + (product.product_name || "") + "</div>";
+              html += "</td>";
+              html += "<td>" + (product.sku || "-") + "</td>";
+              html += "<td>" + (product.dealer_name || "-") + "</td>";
+              html += "<td>₹" + Number(product.dealer_price || 0).toFixed(0) + "</td>";
+              html += "<td>" + Number(product.qty_in_stock || 0) + "</td>";
+              html += "<td>" + (product.demand_color || "-") + "</td>";
+              html += "</tr>";
+            });
+
+            html += "</tbody>";
+            html += "</table>";
+
+            box.innerHTML = html;
+          }
+
+          function copyLowStockForExcel() {
+            const products = getFilteredLowStockProducts();
+
+            if (!products || products.length === 0) {
+              alert("No low stock products to copy.");
+              return;
+            }
+
+            let text = "Product Name\\tSKU\\tDealer Name\\tDealer Price\\tQuantity\\tDemand Color\\n";
+
+            products.forEach(function(product) {
+              text +=
+                (product.product_name || "") + "\\t" +
+                (product.sku || "") + "\\t" +
+                (product.dealer_name || "") + "\\t" +
+                Number(product.dealer_price || 0).toFixed(0) + "\\t" +
+                Number(product.qty_in_stock || 0) + "\\t" +
+                (product.demand_color || "") + "\\n";
+            });
+
+            navigator.clipboard.writeText(text).then(function() {
+              alert("Low stock list copied. You can paste it into Excel.");
+            }).catch(function(error) {
+              alert(error.message);
+            });
+          }
+
+          loadDashboard();
         </script>
       </body>
     </html>
