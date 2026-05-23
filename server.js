@@ -611,36 +611,32 @@ app.get("/", (req, res) => {
     ? "<div class='crossed-price'>₹" + crossedPrice.toFixed(0) + "</div>"
     : "";
 
-  return `
-    <div class="product-card">
-      <a href="/product/${product.slug}">
-        <div class="product-image-wrap">
-          ${tagHtml}
-          <img class="product-img" src="${image}" alt="${product.product_name}" />
-        </div>
-      </a>
-
-      <div class="product-info">
-        <div class="name-price-row">
-          <div class="product-name">${product.product_name}</div>
-          <div class="price-stack">
-            <div class="product-price">₹${price}</div>
-            ${crossedPriceHtml}
-          </div>
-        </div>
-
-        <div class="card-action-row">
-          <div class="qty-row">
-            <button onclick="changeQtyFromCard(this, -1)">-</button>
-            <input class="qty-input-card" type="number" min="1" value="1" />
-            <button onclick="changeQtyFromCard(this, 1)">+</button>
-          </div>
-
-          <button class="add-btn" onclick="addToListFromCard('${product.id}', this)">Add</button>
-        </div>
-      </div>
-    </div>
-  `;
+  return "" +
+    "<div class='product-card'>" +
+      "<a href='/product/" + product.slug + "'>" +
+        "<div class='product-image-wrap'>" +
+          tagHtml +
+          "<img class='product-img' src='" + image + "' alt='" + product.product_name + "' />" +
+        "</div>" +
+      "</a>" +
+      "<div class='product-info'>" +
+        "<div class='name-price-row'>" +
+          "<div class='product-name'>" + product.product_name + "</div>" +
+          "<div class='price-stack'>" +
+            "<div class='product-price'>₹" + price + "</div>" +
+            crossedPriceHtml +
+          "</div>" +
+        "</div>" +
+        "<div class='card-action-row'>" +
+          "<div class='qty-row'>" +
+            "<button onclick='changeQtyFromCard(this, -1)'>-</button>" +
+            "<input class='qty-input-card' type='number' min='1' value='1' />" +
+            "<button onclick='changeQtyFromCard(this, 1)'>+</button>" +
+          "</div>" +
+          "<button class='add-btn' onclick='addToListFromCard(" + product.id + ", this)'>Add</button>" +
+        "</div>" +
+      "</div>" +
+    "</div>";
 }
 
           function renderHomeSections(sections) {
