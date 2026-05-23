@@ -1274,6 +1274,50 @@ app.get("/api/pages", async (req, res) => {
   }
 });
 
+app.get("/api/page/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const [pages] = await db.query(
+      "SELECT * FROM pages WHERE slug = ? AND is_active = true LIMIT 1",
+      [slug]
+    );
+
+    if (pages.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Page not found"
+      });
+    }
+
+    const page = pages[0];
+
+    const [products] = await db.query(`
+      SELECT 
+        p.*,
+        GROUP_CONCAT(pg.page_name ORDER BY pg.page_name SEPARATOR ', ') AS page_names
+      FROM products p
+      INNER JOIN product_pages pp ON p.id = pp.product_id
+      INNER JOIN pages pg ON pp.page_id = pg.id
+      WHERE p.is_visible = true AND pp.page_id = ?
+      GROUP BY p.id
+      ORDER BY p.id DESC
+    `, [page.id]);
+
+    res.json({
+      status: "ok",
+      page,
+      products
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to load page products",
+      error: error.message
+    });
+  }
+});
+
 app.post("/api/admin/pages", verifyAdmin, async (req, res) => {
   try {
     const {
