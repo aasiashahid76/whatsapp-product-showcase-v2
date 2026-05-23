@@ -518,14 +518,20 @@ app.get("/", (req, res) => {
 
 .fixed-banner-card img {
   width: 100%;
-  height: auto;
+  height: 190px;
   display: block;
   object-fit: cover;
 }
 
 @media (min-width: 768px) {
+  .fixed-banner-card img {
+    height: 310px;
+  }
+}
+
+@media (min-width: 768px) {
   .fixed-banners-wrap {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 16px;
   }
 }
