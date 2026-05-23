@@ -2624,6 +2624,119 @@ app.get("/api/fixed-banners", async (req, res) => {
   }
 });
 
+app.post("/api/admin/fixed-banners", verifyAdmin, async (req, res) => {
+  try {
+    const { banner_name, image_url } = req.body;
+
+    if (!banner_name) {
+      return res.status(400).json({
+        status: "error",
+        message: "Banner name is required"
+      });
+    }
+
+    if (!image_url) {
+      return res.status(400).json({
+        status: "error",
+        message: "Banner image is required"
+      });
+    }
+
+    const [maxOrderRows] = await db.query(
+      "SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM home_fixed_banners"
+    );
+
+    const nextOrder = Number(maxOrderRows[0].max_order || 0) + 1;
+
+    const [result] = await db.query(
+      `INSERT INTO home_fixed_banners
+       (banner_name, image_url, sort_order, is_active)
+       VALUES (?, ?, ?, true)`,
+      [banner_name, image_url, nextOrder]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Fixed banner added successfully",
+      banner_id: result.insertId
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to add fixed banner",
+      error: error.message
+    });
+  }
+});
+
+app.put("/api/admin/fixed-banners/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { banner_name, image_url, is_active } = req.body;
+
+    if (!banner_name) {
+      return res.status(400).json({
+        status: "error",
+        message: "Banner name is required"
+      });
+    }
+
+    if (!image_url) {
+      return res.status(400).json({
+        status: "error",
+        message: "Banner image is required"
+      });
+    }
+
+    await db.query(
+      `UPDATE home_fixed_banners
+       SET banner_name = ?,
+           image_url = ?,
+           is_active = ?
+       WHERE id = ?`,
+      [
+        banner_name,
+        image_url,
+        is_active === false ? 0 : 1,
+        id
+      ]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Fixed banner updated successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update fixed banner",
+      error: error.message
+    });
+  }
+});
+
+app.delete("/api/admin/fixed-banners/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await db.query(
+      "DELETE FROM home_fixed_banners WHERE id = ?",
+      [id]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Fixed banner deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to delete fixed banner",
+      error: error.message
+    });
+  }
+});
+
 app.get("/api/home-sections", async (req, res) => {
   try {
     const [pages] = await db.query(`
