@@ -1931,6 +1931,42 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
+app.get("/api/product/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const [products] = await db.query(`
+      SELECT 
+        p.*,
+        GROUP_CONCAT(pg.page_name ORDER BY pg.page_name SEPARATOR ', ') AS page_names
+      FROM products p
+      LEFT JOIN product_pages pp ON p.id = pp.product_id
+      LEFT JOIN pages pg ON pp.page_id = pg.id
+      WHERE p.slug = ? AND p.is_visible = true
+      GROUP BY p.id
+      LIMIT 1
+    `, [slug]);
+
+    if (products.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Product not found"
+      });
+    }
+
+    res.json({
+      status: "ok",
+      product: products[0]
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to load product detail",
+      error: error.message
+    });
+  }
+});
+
 app.get("/api/home-sections", async (req, res) => {
   try {
     const [pages] = await db.query(`
