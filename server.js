@@ -118,8 +118,8 @@ app.get("/", (req, res) => {
             top: 0;
             z-index: 50;
             background: #546B41;
-			border-bottom: 1px solid #546B41;
-            padding: 10px 12px;
+			background: #FFF8EC;
+			border-bottom: 1px solid #DCCCAC;
             display: grid;
             grid-template-columns: 70px 1fr auto 38px;
             gap: 8px;
@@ -2767,7 +2767,7 @@ app.get("/product/:slug", (req, res) => {
             top: 0;
             z-index: 50;
             background: #FFF8EC;
-            border-bottom: 1px solid #DCCCAC;
+			border-bottom: 1px solid #DCCCAC;
             padding: 10px 12px;
             display: grid;
             grid-template-columns: 70px 1fr auto 38px;
