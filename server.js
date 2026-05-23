@@ -526,6 +526,12 @@ app.get("/", (req, res) => {
 
 @media (min-width: 768px) {
   .fixed-banner-card img {
+    height: 260px;
+  }
+}
+
+@media (min-width: 768px) {
+  .fixed-banner-card img {
     height: 340px;
   }
 }
