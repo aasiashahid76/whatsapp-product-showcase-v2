@@ -587,12 +587,12 @@ app.get("/", (req, res) => {
 
                   <div class="card-action-row">
                     <div class="qty-row">
-                      <button onclick="changeQty('\${product.id}', -1)">-</button>
-                      <input id="qty-\${product.id}" type="number" min="1" value="1" />
-                      <button onclick="changeQty('\${product.id}', 1)">+</button>
+                      <button onclick="changeQtyFromCard(this, -1)">-</button>
+				      <input class="qty-input-card" type="number" min="1" value="1" />
+					  <button onclick="changeQtyFromCard(this, 1)">+</button>
                     </div>
 
-                    <button class="add-btn" onclick="addToList('\${product.id}')">Add</button>
+                    <button class="add-btn" onclick="addToListFromCard('\${product.id}', this)">Add</button>
                   </div>
                 </div>
               </div>
@@ -705,12 +705,22 @@ async function loadHomeSections() {
   wrap.innerHTML = html;
 }
 
-          function changeQty(productId, delta) {
-            const input = document.getElementById("qty-" + productId);
-            const current = Number(input.value || 1);
-            const next = Math.max(1, current + delta);
-            input.value = next;
-          }
+          function changeQtyFromCard(button, delta) {
+  const card = button.closest(".product-card");
+  const input = card.querySelector(".qty-input-card");
+
+  const current = Number(input.value || 1);
+  const next = Math.max(1, current + delta);
+
+  input.value = next;
+}
+
+function getQtyFromCard(button) {
+  const card = button.closest(".product-card");
+  const input = card.querySelector(".qty-input-card");
+
+  return Math.max(1, Number(input ? input.value : 1));
+}
 
          function getList() {
   try {
@@ -726,15 +736,14 @@ function saveList(list) {
   renderYourList();
 }
 
-function addToList(productId) {
+function addToListFromCard(productId, button) {
   const product = allProducts.find(function(item) {
     return String(item.id) === String(productId);
   });
 
   if (!product) return;
 
-  const qtyInput = document.getElementById("qty-" + productId);
-  const qty = Math.max(1, Number(qtyInput ? qtyInput.value : 1));
+  const qty = getQtyFromCard(button);
 
   const list = getList();
   const existing = list.find(function(item) {
@@ -2435,11 +2444,11 @@ app.get("/page/:slug", (req, res) => {
                   "</div>" +
                   "<div class='card-action-row'>" +
                     "<div class='qty-row'>" +
-                      "<button onclick='changeQty(" + product.id + ", -1)'>-</button>" +
-                      "<input id='qty-" + product.id + "' type='number' min='1' value='1' />" +
-                      "<button onclick='changeQty(" + product.id + ", 1)'>+</button>" +
+                      "<button onclick='changeQtyFromCard(this, -1)'>-</button>" +
+						"<input class='qty-input-card' type='number' min='1' value='1' />" +
+						"<button onclick='changeQtyFromCard(this, 1)'>+</button>" +
                     "</div>" +
-                    "<button class='add-btn' onclick='addToList(" + product.id + ")'>Add</button>" +
+                    "<button class='add-btn' onclick='addToListFromCard(" + product.id + ", this)'>Add</button>" +
                   "</div>" +
                 "</div>" +
               "</div>";
@@ -2525,12 +2534,22 @@ app.get("/page/:slug", (req, res) => {
             renderProducts(filtered);
           }
 
-          function changeQty(productId, delta) {
-            const input = document.getElementById("qty-" + productId);
-            const current = Number(input.value || 1);
-            const next = Math.max(1, current + delta);
-            input.value = next;
-          }
+          function changeQtyFromCard(button, delta) {
+  const card = button.closest(".product-card");
+  const input = card.querySelector(".qty-input-card");
+
+  const current = Number(input.value || 1);
+  const next = Math.max(1, current + delta);
+
+  input.value = next;
+}
+
+function getQtyFromCard(button) {
+  const card = button.closest(".product-card");
+  const input = card.querySelector(".qty-input-card");
+
+  return Math.max(1, Number(input ? input.value : 1));
+}
 
           function getList() {
             try {
@@ -2546,36 +2565,35 @@ app.get("/page/:slug", (req, res) => {
             renderYourList();
           }
 
-          function addToList(productId) {
-            const product = allProducts.find(function(item) {
-              return String(item.id) === String(productId);
-            });
+          function addToListFromCard(productId, button) {
+  const product = allProducts.find(function(item) {
+    return String(item.id) === String(productId);
+  });
 
-            if (!product) return;
+  if (!product) return;
 
-            const qtyInput = document.getElementById("qty-" + productId);
-            const qty = Math.max(1, Number(qtyInput ? qtyInput.value : 1));
+  const qty = getQtyFromCard(button);
 
-            const list = getList();
-            const existing = list.find(function(item) {
-              return String(item.id) === String(product.id);
-            });
+  const list = getList();
+  const existing = list.find(function(item) {
+    return String(item.id) === String(product.id);
+  });
 
-            if (existing) {
-              existing.qty += qty;
-            } else {
-              list.push({
-                id: product.id,
-                name: product.product_name,
-                price: Number(product.show_price || 0),
-                image: product.product_image_url || "https://via.placeholder.com/300x300?text=Product",
-                slug: product.slug,
-                qty: qty
-              });
-            }
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    list.push({
+      id: product.id,
+      name: product.product_name,
+      price: Number(product.show_price || 0),
+      image: product.product_image_url || "https://via.placeholder.com/300x300?text=Product",
+      slug: product.slug,
+      qty: qty
+    });
+  }
 
-            saveList(list);
-          }
+  saveList(list);
+}
 
           function updateListButton() {
             const list = getList();
