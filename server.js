@@ -1789,6 +1789,66 @@ app.delete("/api/admin/products/:id", verifyAdmin, async (req, res) => {
   }
 });
 
+/* =========================
+   DASHBOARD API
+========================= */
+
+app.get("/api/admin/dashboard", verifyAdmin, async (req, res) => {
+  try {
+    const [summaryRows] = await db.query(`
+      SELECT
+        COUNT(*) AS total_sku,
+        COALESCE(SUM(qty_in_stock), 0) AS total_quantity,
+        COALESCE(SUM(dealer_price * qty_in_stock), 0) AS total_inventory_cost
+      FROM products
+    `);
+
+    const [lowStockProducts] = await db.query(`
+      SELECT
+        id,
+        sku,
+        product_name,
+        product_image_url,
+        dealer_name,
+        dealer_price,
+        qty_in_stock,
+        demand_color
+      FROM products
+      WHERE
+        (demand_color = 'Green' AND qty_in_stock < 10)
+        OR (demand_color = 'Yellow' AND qty_in_stock < 5)
+        OR (demand_color = 'Red' AND qty_in_stock < 2)
+      ORDER BY qty_in_stock ASC, product_name ASC
+    `);
+
+    const [dealers] = await db.query(`
+      SELECT DISTINCT dealer_name
+      FROM products
+      WHERE dealer_name IS NOT NULL AND dealer_name != ''
+      ORDER BY dealer_name ASC
+    `);
+
+    res.json({
+      status: "ok",
+      summary: {
+        total_sku: Number(summaryRows[0].total_sku || 0),
+        total_quantity: Number(summaryRows[0].total_quantity || 0),
+        total_inventory_cost: Number(summaryRows[0].total_inventory_cost || 0)
+      },
+      low_stock_products: lowStockProducts,
+      dealers: dealers.map(function(row) {
+        return row.dealer_name;
+      })
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to load dashboard",
+      error: error.message
+    });
+  }
+});
+
 app.get("/admin", (req, res) => {
   res.send(`
     <!DOCTYPE html>
