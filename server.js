@@ -215,7 +215,26 @@ app.get("/", (req, res) => {
   line-height: 1;
 }
 
-.pages-menu-panel,
+.pages-menu-panel {
+  position: fixed;
+  top: 0;
+  right: -82%;
+  width: 82%;
+  max-width: 320px;
+  height: 100vh;
+  z-index: 100;
+  background: white;
+  border-left: 1px solid #DCCCAC;
+  box-shadow: -14px 0 34px rgba(84, 107, 65, 0.18);
+  padding: 14px;
+  transition: right 0.28s ease;
+  display: block;
+}
+
+.pages-menu-panel.show {
+  right: 0;
+}
+
 .desktop-search-panel {
   display: none;
   position: fixed;
@@ -230,8 +249,39 @@ app.get("/", (req, res) => {
   padding: 10px;
 }
 
-.pages-menu-panel.show,
 .desktop-search-panel.show {
+  display: grid;
+  gap: 8px;
+}
+
+.menu-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.menu-head strong {
+  font-size: 15px;
+}
+
+.close-menu-btn {
+  border: none;
+  background: #DCCCAC;
+  color: #546B41;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.menu-links {
   display: grid;
   gap: 8px;
 }
@@ -826,15 +876,24 @@ async function loadHeaderPages() {
     const pages = data.pages || [];
 
     let desktopHtml = "";
-    let mobileHtml = "";
+    let mobileLinks = "";
 
     desktopHtml += "<a class='active' href='/'>Home</a>";
-    mobileHtml += "<a class='active' href='/'>Home</a>";
+    mobileLinks += "<a class='active' href='/'>Home</a>";
 
     pages.forEach(function(page) {
       desktopHtml += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
-      mobileHtml += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
+      mobileLinks += "<a href='/page/" + page.slug + "'>" + page.page_name + "</a>";
     });
+
+    const mobileHtml =
+      "<div class='menu-head'>" +
+        "<strong>Pages</strong>" +
+        "<button class='close-menu-btn' onclick='closePagesMenu()'>×</button>" +
+      "</div>" +
+      "<div class='menu-links'>" +
+        mobileLinks +
+      "</div>";
 
     if (desktopNav) desktopNav.innerHTML = desktopHtml;
     if (mobilePanel) mobilePanel.innerHTML = mobileHtml;
@@ -848,6 +907,12 @@ function togglePagesMenu() {
   const panel = document.getElementById("pagesMenuPanel");
   if (!panel) return;
   panel.classList.toggle("show");
+}
+
+function closePagesMenu() {
+  const panel = document.getElementById("pagesMenuPanel");
+  if (!panel) return;
+  panel.classList.remove("show");
 }
 
 function toggleDesktopSearch() {
