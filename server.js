@@ -2937,9 +2937,54 @@ app.get("/all-products", (req, res) => {
           }
 
           .loading {
-            padding: 18px;
-            color: #6f7a5f;
-          }
+  padding: 18px;
+  color: #6f7a5f;
+}
+
+.qty-input {
+  width: 70px;
+  padding: 8px;
+  border: 1px solid #DCCCAC;
+  border-radius: 9px;
+  background: #FFF8EC;
+  color: #546B41;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 9px;
+  padding: 7px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.update-btn {
+  background: #546B41;
+  color: #FFF8EC;
+}
+
+.hide-btn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.show-btn {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.delete-btn {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
         </style>
       </head>
 
@@ -3025,8 +3070,9 @@ app.get("/all-products", (req, res) => {
             html += "<th>Dealer</th>";
             html += "<th>Stock</th>";
             html += "<th>Pages</th>";
-            html += "<th>Status</th>";
-            html += "</tr>";
+			html += "<th>Status</th>";
+			html += "<th>Actions</th>";
+			html += "</tr>";
             html += "</thead>";
             html += "<tbody>";
 
@@ -3050,10 +3096,22 @@ app.get("/all-products", (req, res) => {
               html += "<div>" + (product.dealer_name || "-") + "</div>";
               html += "<div class='muted'>Dealer Price: ₹" + Number(product.dealer_price || 0).toFixed(0) + "</div>";
               html += "</td>";
-              html += "<td>" + Number(product.qty_in_stock || 0) + "</td>";
-              html += "<td>" + (product.page_names || "-") + "</td>";
-              html += "<td><span class='badge " + visibleBadge + "'>" + visibleText + "</span></td>";
-              html += "</tr>";
+              html += "<td>";
+				html += "<input class='qty-input' id='qty-admin-" + product.id + "' type='number' value='" + Number(product.qty_in_stock || 0) + "' />";
+				html += "</td>";
+				
+				html += "<td>" + (product.page_names || "-") + "</td>";
+				
+				html += "<td><span class='badge " + visibleBadge + "'>" + visibleText + "</span></td>";
+
+				html += "<td>";
+				html += "<div class='action-row'>";
+				html += "<button class='action-btn update-btn' onclick='updateProductQty(" + product.id + ")'>Update Qty</button>";
+				html += "<button class='action-btn " + (product.is_visible ? "hide-btn" : "show-btn") + "' onclick='toggleProductVisibility(" + product.id + ", " + (product.is_visible ? "false" : "true") + ")'>" + (product.is_visible ? "Hide" : "Show") + "</button>";
+				html += "<button class='action-btn delete-btn' onclick='deleteProduct(" + product.id + ", " + JSON.stringify(product.product_name || "") + ")'>Delete</button>";
+				html += "</div>";
+				html += "</td>";
+				html += "</tr>";
             });
 
             html += "</tbody>";
@@ -3061,6 +3119,90 @@ app.get("/all-products", (req, res) => {
 
             box.innerHTML = html;
           }
+
+					  async function updateProductQty(productId) {
+			  const input = document.getElementById("qty-admin-" + productId);
+			  const qty = Number(input ? input.value : 0);
+			
+			  try {
+			    const res = await fetch("/api/admin/products/" + productId + "/quantity", {
+			      method: "PUT",
+			      headers: {
+			        "Content-Type": "application/json",
+			        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+			      },
+			      body: JSON.stringify({
+			        qty_in_stock: qty
+			      })
+			    });
+			
+			    const data = await res.json();
+			
+			    if (!res.ok) {
+			      alert(data.message || "Quantity update failed");
+			      return;
+			    }
+			
+			    alert("Quantity updated successfully");
+			    loadAdminProducts();
+			  } catch (error) {
+			    alert(error.message);
+			  }
+			}
+			
+			async function toggleProductVisibility(productId, nextVisible) {
+			  try {
+			    const res = await fetch("/api/admin/products/" + productId + "/visibility", {
+			      method: "PUT",
+			      headers: {
+			        "Content-Type": "application/json",
+			        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+			      },
+			      body: JSON.stringify({
+			        is_visible: nextVisible
+			      })
+			    });
+			
+			    const data = await res.json();
+			
+			    if (!res.ok) {
+			      alert(data.message || "Visibility update failed");
+			      return;
+			    }
+			
+			    alert("Product visibility updated");
+			    loadAdminProducts();
+			  } catch (error) {
+			    alert(error.message);
+			  }
+			}
+			
+			async function deleteProduct(productId, productName) {
+			  const ok = confirm("Delete this product permanently? Product: " + productName);
+			
+			  if (!ok) return;
+			
+			  try {
+			    const res = await fetch("/api/admin/products/" + productId, {
+			      method: "DELETE",
+			      headers: {
+			        "Authorization": "Bearer " + localStorage.getItem("admin_token")
+			      }
+			    });
+			
+			    const data = await res.json();
+			
+			    if (!res.ok) {
+			      alert(data.message || "Product delete failed");
+			      return;
+			    }
+			
+			    alert("Product deleted successfully");
+			    loadAdminProducts();
+			  } catch (error) {
+			    alert(error.message);
+			  }
+			}
 
           function filterAdminProducts() {
             const q = document.getElementById("productSearchInput").value.toLowerCase().trim();
