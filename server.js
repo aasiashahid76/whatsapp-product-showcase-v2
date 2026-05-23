@@ -4315,6 +4315,8 @@ app.get("/product/:slug", (req, res) => {
             color: #546B41;
           }
 
+		  ${globalHeaderFooterCss()}
+
           .site-header {
             position: sticky;
             top: 0;
@@ -4834,57 +4836,15 @@ app.get("/product/:slug", (req, res) => {
       </head>
 
       <body>
-        <header class="site-header">
-          <a href="/" class="logo-box">
-            <img id="siteLogoImg" src="" alt="Logo" />
-            <span id="siteLogoText">LOGO</span>
-          </a>
-
-          <div class="desktop-right-header">
-            <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
-            <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
-            <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
-          </div>
-
-          <div class="search-box mobile-search-box">
-            <span>🔍</span>
-            <input id="searchInput" placeholder="Search products..." onkeydown="searchFromInput(event)" />
-          </div>
-
-          <button class="list-btn mobile-list-btn" id="yourListBtnMobile" onclick="toggleYourList()">Your List (0)</button>
-
-          <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
-        </header>
-
-        <div id="pagesMenuPanel" class="pages-menu-panel"></div>
-
-        <div id="desktopSearchPanel" class="desktop-search-panel">
-          <input id="desktopSearchInput" placeholder="Search products..." onkeydown="searchFromInput(event)" />
-        </div>
-
-        <div id="yourListPanel" class="your-list-panel">
-          <div class="list-head">
-            <strong>Your List</strong>
-            <button class="close-list-btn" onclick="closeYourList()">×</button>
-          </div>
-
-          <div id="yourListBody" class="list-body"></div>
-
-          <div class="list-footer">
-            <div class="total-line">
-              <span>Total</span>
-              <span id="yourListTotal">₹0</span>
-            </div>
-
-            <button class="send-wa-btn" onclick="sendToWhatsapp()">Send to WhatsApp</button>
-          </div>
-        </div>
+        ${globalHeaderHtml()}
 
         <main class="page-wrap">
-          <div id="productDetail"></div>
-        </main>
+  <div id="productDetail"></div>
+</main>
 
-        <script>
+${globalFooterHtml()}
+
+<script>
           const productSlug = ${JSON.stringify(productSlug)};
           let currentProduct = null;
           let siteSettings = {};
