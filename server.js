@@ -502,6 +502,7 @@ app.get("/", (req, res) => {
 
 .fixed-banners-wrap {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 12px;
   margin: 6px 0 18px;
   width: 100%;
@@ -520,13 +521,13 @@ app.get("/", (req, res) => {
   width: 100%;
   height: auto;
   display: block;
-  object-fit: cover;
 }
 
 @media (min-width: 768px) {
   .fixed-banners-wrap {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     gap: 16px;
+    width: 100%;
   }
 }
 
