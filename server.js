@@ -13,7 +13,7 @@ app.set("trust proxy", true);
 app.use(express.json());
 
 const MEDIA_DIR = process.env.MEDIA_UPLOAD_PATH || path.join(process.cwd(), "media");
-//kgkhkhk
+
 if (!fs.existsSync(MEDIA_DIR)) {
   fs.mkdirSync(MEDIA_DIR, { recursive: true });
 }
