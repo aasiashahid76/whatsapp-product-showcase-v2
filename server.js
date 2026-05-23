@@ -117,8 +117,8 @@ app.get("/", (req, res) => {
             position: sticky;
             top: 0;
             z-index: 50;
-            background: #FFF8EC;
-            border-bottom: 1px solid #DCCCAC;
+            background: #546B41;
+			border-bottom: 1px solid #546B41;
             padding: 10px 12px;
             display: grid;
             grid-template-columns: 70px 1fr auto 38px;
@@ -650,9 +650,9 @@ app.get("/", (req, res) => {
 
 .site-footer {
   margin-top: 34px;
-  background: white;
-  color: #38472d;
-  border-top: 1px solid #DCCCAC;
+  background: #546B41;
+color: #FFF8EC;
+border-top: 1px solid #546B41;
 }
 
 .footer-main {
@@ -692,7 +692,7 @@ app.get("/", (req, res) => {
 
 .footer-brand p {
   margin: 0;
-  color: #4b5563;
+  color: #FFF8EC;
   font-size: 14px;
   line-height: 1.55;
   max-width: 260px;
@@ -700,7 +700,7 @@ app.get("/", (req, res) => {
 
 .footer-column h4 {
   margin: 0 0 12px;
-  color: #111827;
+  color: #FFF8EC;
   font-size: 18px;
   font-weight: 800;
 }
@@ -709,7 +709,7 @@ app.get("/", (req, res) => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #4b5563;
+  color: #FFF8EC;
   font-size: 14px;
   margin-bottom: 10px;
 }
@@ -717,7 +717,7 @@ app.get("/", (req, res) => {
 .footer-contact-row a,
 .footer-legal-link,
 .footer-browse-link {
-  color: #4b5563;
+  color: #FFF8EC;
   text-decoration: none;
 }
 
@@ -745,7 +745,7 @@ app.get("/", (req, res) => {
 
 .footer-social-btn.instagram {
   background: #f3f4f6;
-  color: #111827;
+  color: #FFF8EC;
 }
 
 .footer-social-btn.whatsapp {
@@ -774,10 +774,10 @@ app.get("/", (req, res) => {
 }
 
 .footer-bottom {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid rgba(255, 248, 236, 0.35);
   text-align: center;
   padding: 18px 12px;
-  color: #4b5563;
+  color: #FFF8EC;
   font-size: 13px;
 }
 
