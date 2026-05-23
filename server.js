@@ -518,15 +518,9 @@ app.get("/", (req, res) => {
 
 .fixed-banner-card img {
   width: 100%;
-  height: 190px;
+  height: auto;
   display: block;
   object-fit: cover;
-}
-
-@media (min-width: 768px) {
-  .fixed-banner-card img {
-    height: 310px;
-  }
 }
 
 @media (min-width: 768px) {
