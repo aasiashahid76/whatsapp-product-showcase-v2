@@ -586,6 +586,14 @@ function globalHeaderHtml() {
   </div>
 
   <div id="yourListBody" class="list-body"></div>
+
+  <div class="list-footer">
+    <div class="total-line">
+      <span>Total</span>
+      <strong id="yourListTotal">₹0</strong>
+    </div>
+    <button class="send-wa-btn" onclick="sendToWhatsapp()">Send on WhatsApp</button>
+  </div>
 </div>
 `;
 }
