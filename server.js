@@ -975,10 +975,11 @@ app.get("/", (req, res) => {
     font-size: 16px;
   }
 
-  .circular-pages-wrap {
+   .circular-pages-wrap {
+    justify-content: center;
     gap: 22px;
   }
-
+  
   .circular-page-item {
     width: 96px;
   }
