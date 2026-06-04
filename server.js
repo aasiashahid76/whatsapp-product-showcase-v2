@@ -157,6 +157,88 @@ function globalHeaderFooterCss() {
   font-size: 13px;
 }
 
+.search-shell {
+  position: relative;
+}
+
+.search-icon-btn {
+  border: none;
+  background: transparent;
+  color: #546B41;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.search-suggestions-box {
+  display: none;
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  right: 0;
+  z-index: 120;
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(84, 107, 65, 0.18);
+  overflow: hidden;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.search-suggestions-box.show {
+  display: block;
+}
+
+.search-suggestion-item {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 10px;
+  border-bottom: 1px solid #f0e4ce;
+  text-decoration: none;
+  color: #38472d;
+}
+
+.search-suggestion-item img {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #DCCCAC;
+}
+
+.search-suggestion-name {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.search-suggestion-price {
+  font-size: 12px;
+  font-weight: 800;
+  color: #546B41;
+  white-space: nowrap;
+}
+
+.search-no-result {
+  padding: 12px;
+  font-size: 13px;
+  color: #6f7a5f;
+}
+
+.search-view-all-btn {
+  width: 100%;
+  border: none;
+  background: #FFF8EC;
+  color: #546B41;
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .list-btn {
   border: 1px solid #DCCCAC;
   background: white;
@@ -678,9 +760,10 @@ function globalHeaderHtml() {
     <span id="siteLogoText">LOGO</span>
   </a>
 
-  <div class="search-box mobile-search-box">
-  <span>🔍</span>
-  <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
+  <div class="search-box mobile-search-box search-shell">
+  <button class="search-icon-btn" type="button" onclick="showSearchSuggestions('searchInput', 'searchSuggestionsBox')">🔍</button>
+  <input id="searchInput" placeholder="Search products..." oninput="showSearchSuggestions('searchInput', 'searchSuggestionsBox')" onkeydown="handleSearchKey(event, 'searchInput', 'searchSuggestionsBox')" />
+  <div id="searchSuggestionsBox" class="search-suggestions-box"></div>
 </div>
 
 <div class="desktop-right-header">
@@ -720,6 +803,131 @@ function globalHeaderHtml() {
 
   <button class="mobile-bottom-whatsapp-btn" onclick="sendToWhatsapp()">Send to WhatsApp</button>
 </div>
+
+<script>
+function getSearchProductsForBox() {
+  try {
+    if (typeof allProducts !== "undefined" && Array.isArray(allProducts)) {
+      return allProducts;
+    }
+  } catch (error) {}
+
+  return [];
+}
+
+function syncSearchValue(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return "";
+
+  const value = input.value || "";
+  const headerInput = document.getElementById("searchInput");
+  const homeInput = document.getElementById("homeSearchInput");
+
+  if (inputId === "homeSearchInput" && headerInput) {
+    headerInput.value = value;
+  }
+
+  if (inputId === "searchInput" && homeInput) {
+    homeInput.value = value;
+  }
+
+  return value.toLowerCase().trim();
+}
+
+function getSearchMatches(q) {
+  const products = getSearchProductsForBox();
+  const seen = {};
+
+  return products.filter(function(product) {
+    const productKey = String(product.id);
+
+    if (seen[productKey]) return false;
+
+    const matched =
+      String(product.product_name || "").toLowerCase().includes(q) ||
+      String(product.sku || "").toLowerCase().includes(q) ||
+      String(product.dealer_name || "").toLowerCase().includes(q) ||
+      String(product.page_names || "").toLowerCase().includes(q);
+
+    if (matched) {
+      seen[productKey] = true;
+      return true;
+    }
+
+    return false;
+  }).slice(0, 8);
+}
+
+function showSearchSuggestions(inputId, boxId) {
+  const q = syncSearchValue(inputId);
+  const box = document.getElementById(boxId);
+
+  if (!box) return;
+
+  if (!q) {
+    box.innerHTML = "";
+    box.classList.remove("show");
+    return;
+  }
+
+  const matches = getSearchMatches(q);
+
+  if (matches.length === 0) {
+    box.innerHTML = "<div class='search-no-result'>No result found</div>";
+    box.classList.add("show");
+    return;
+  }
+
+  let html = "";
+
+  matches.forEach(function(product) {
+    const image = product.product_image_url || "https://via.placeholder.com/80x80?text=Product";
+    const price = Number(product.show_price || 0).toFixed(0);
+
+    html +=
+      "<a class='search-suggestion-item' href='/product/" + product.slug + "'>" +
+        "<img src='" + image + "' alt='" + product.product_name + "' />" +
+        "<div class='search-suggestion-name'>" + product.product_name + "</div>" +
+        "<div class='search-suggestion-price'>₹" + price + "</div>" +
+      "</a>";
+  });
+
+  html += "<button class='search-view-all-btn' onclick='runSearchInPage(\\"" + inputId + "\\", \\"" + boxId + "\\")'>View all results</button>";
+
+  box.innerHTML = html;
+  box.classList.add("show");
+}
+
+function handleSearchKey(event, inputId, boxId) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    runSearchInPage(inputId, boxId);
+  }
+}
+
+function runSearchInPage(inputId, boxId) {
+  syncSearchValue(inputId);
+
+  const box = document.getElementById(boxId);
+  if (box) {
+    box.innerHTML = "";
+    box.classList.remove("show");
+  }
+
+  if (typeof filterProducts === "function") {
+    filterProducts();
+  }
+}
+
+document.addEventListener("click", function(event) {
+  if (!event.target.closest(".search-shell")) {
+    document.querySelectorAll(".search-suggestions-box").forEach(function(box) {
+      box.innerHTML = "";
+      box.classList.remove("show");
+    });
+  }
+});
+</script>
 `;
 }
 
@@ -1513,9 +1721,10 @@ app.get("/", (req, res) => {
           <section id="homeBannerWrap"></section>
 
 <section class="home-mobile-search-wrap">
-  <div class="home-mobile-search-box">
-    <span>🔍</span>
-    <input id="homeSearchInput" placeholder="Search products..." oninput="syncHomeSearch()" />
+  <div class="home-mobile-search-box search-shell">
+    <button class="search-icon-btn" type="button" onclick="showSearchSuggestions('homeSearchInput', 'homeSearchSuggestionsBox')">🔍</button>
+    <input id="homeSearchInput" placeholder="Search products..." oninput="showSearchSuggestions('homeSearchInput', 'homeSearchSuggestionsBox')" onkeydown="handleSearchKey(event, 'homeSearchInput', 'homeSearchSuggestionsBox')" />
+    <div id="homeSearchSuggestionsBox" class="search-suggestions-box"></div>
   </div>
 </section>
 
