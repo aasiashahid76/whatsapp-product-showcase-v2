@@ -1877,6 +1877,45 @@ async function loadHomeTopDesign() {
     if (circularWrap) {
       if (circularPages.length === 0) {
         circularWrap.style.display = "none";
+      } else {
+        circularWrap.style.display = "flex";
+        circularWrap.innerHTML = circularPages.map(function(page) {
+          return "" +
+            "<a class='circular-page-item' href='/page/" + page.slug + "'>" +
+              "<img class='circular-img' src='" + page.circular_image_url + "' alt='" + page.page_name + "' />" +
+              "<div class='circular-page-name'>" + page.page_name + "</div>" +
+            "</a>";
+        }).join("");
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
+        startBannerSlider();
+      } else {
+        bannerWrap.innerHTML =
+          "<div class='home-banner-slider'>" +
+            "<div class='home-banner-slide active'>" +
+              "<div class='home-banner-content'>" +
+                "<h1>Shop quality products easily</h1>" +
+                "<p>Select products, add them to Your List, and send your order on WhatsApp.</p>" +
+              "</div>" +
+            "</div>" +
+          "</div>";
+      }
+    }
+
+    const circularPages = activePages.filter(function(page) {
+      return (page.create_circular_icon === 1 || page.create_circular_icon === true) && page.circular_image_url;
+    });
+
+    const circularWrap = document.getElementById("circularPagesWrap");
+
+    if (circularWrap) {
+      if (circularPages.length === 0) {
+        circularWrap.style.display = "none";
         stopCircularRailMovement();
       } else {
         circularWrap.style.display = "flex";
@@ -2378,6 +2417,7 @@ let total = 0;
           loadSettings().then(function() {
   loadHeaderPages();
   loadHomeTopDesign();
+  loadFixedBanners();
   loadHomeSections();
   loadReviewsSection();
   updateListButton();
