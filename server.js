@@ -761,8 +761,8 @@ function globalHeaderHtml() {
   </a>
 
   <div class="search-box mobile-search-box search-shell">
-  <button class="search-icon-btn" type="button" onclick="showSearchSuggestions('searchInput', 'searchSuggestionsBox')">🔍</button>
-  <input id="searchInput" placeholder="Search products..." oninput="showSearchSuggestions('searchInput', 'searchSuggestionsBox')" onkeydown="handleSearchKey(event, 'searchInput', 'searchSuggestionsBox')" />
+<button class="search-icon-btn" type="button" onclick="runSearchInPage('searchInput', 'searchSuggestionsBox')">🔍</button>  
+<input id="searchInput" placeholder="Search products..." oninput="showSearchSuggestions('searchInput', 'searchSuggestionsBox')" onkeydown="handleSearchKey(event, 'searchInput', 'searchSuggestionsBox')" />
   <div id="searchSuggestionsBox" class="search-suggestions-box"></div>
 </div>
 
@@ -906,6 +906,11 @@ function handleSearchKey(event, inputId, boxId) {
 }
 
 function runSearchInPage(inputId, boxId) {
+  const input = document.getElementById(inputId);
+  const q = input ? input.value.trim() : "";
+
+  if (!q) return;
+
   syncSearchValue(inputId);
 
   const box = document.getElementById(boxId);
@@ -914,8 +919,18 @@ function runSearchInPage(inputId, boxId) {
     box.classList.remove("show");
   }
 
+  if (window.location.pathname !== "/") {
+    window.location.href = "/?search=" + encodeURIComponent(q);
+    return;
+  }
+
   if (typeof filterProducts === "function") {
     filterProducts();
+  }
+
+  const wrap = document.getElementById("homeSections");
+  if (wrap) {
+    wrap.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
@@ -1722,8 +1737,8 @@ app.get("/", (req, res) => {
 
 <section class="home-mobile-search-wrap">
   <div class="home-mobile-search-box search-shell">
-    <button class="search-icon-btn" type="button" onclick="showSearchSuggestions('homeSearchInput', 'homeSearchSuggestionsBox')">🔍</button>
-    <input id="homeSearchInput" placeholder="Search products..." oninput="showSearchSuggestions('homeSearchInput', 'homeSearchSuggestionsBox')" onkeydown="handleSearchKey(event, 'homeSearchInput', 'homeSearchSuggestionsBox')" />
+<button class="search-icon-btn" type="button" onclick="runSearchInPage('homeSearchInput', 'homeSearchSuggestionsBox')">🔍</button>
+<input id="homeSearchInput" placeholder="Search products..." oninput="showSearchSuggestions('homeSearchInput', 'homeSearchSuggestionsBox')" onkeydown="handleSearchKey(event, 'homeSearchInput', 'homeSearchSuggestionsBox')" />
     <div id="homeSearchSuggestionsBox" class="search-suggestions-box"></div>
   </div>
 </section>
@@ -2288,39 +2303,88 @@ async function loadHomeSections() {
   }
 }
 
-          function filterProducts() {
-  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+          function getCurrentSearchQuery() {
+  const headerInput = document.getElementById("searchInput");
+  const homeInput = document.getElementById("homeSearchInput");
+
+  const headerValue = headerInput ? headerInput.value.trim() : "";
+  const homeValue = homeInput ? homeInput.value.trim() : "";
+
+  return homeValue || headerValue;
+}
+
+function syncSearchInputs(value) {
+  const headerInput = document.getElementById("searchInput");
+  const homeInput = document.getElementById("homeSearchInput");
+
+  if (headerInput) headerInput.value = value;
+  if (homeInput) homeInput.value = value;
+}
+
+function setHomeSearchMode(isSearchMode) {
+  const idsToHide = [
+    "homeBannerWrap",
+    "circularPagesWrap",
+    "fixedBannersWrap",
+    "reviewsSection"
+  ];
+
+  idsToHide.forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = isSearchMode ? "none" : "";
+    }
+  });
+
+  document.querySelectorAll(".feature-strip").forEach(function(el) {
+    el.style.display = isSearchMode ? "none" : "";
+  });
+
+  document.querySelectorAll(".home-mobile-search-wrap").forEach(function(el) {
+    el.style.display = isSearchMode ? "none" : "";
+  });
+}
+
+function filterProducts() {
+  const q = getCurrentSearchQuery().toLowerCase().trim();
   const wrap = document.getElementById("homeSections");
 
+  if (!wrap) return;
+
   if (!q) {
+    setHomeSearchMode(false);
+    loadHomeTopDesign();
     loadHomeSections();
+    loadReviewsSection();
     return;
   }
 
+  setHomeSearchMode(true);
+
   const matchedProducts = allProducts.filter(function(product) {
-  return (
-    String(product.product_name || "").toLowerCase().includes(q) ||
-    String(product.sku || "").toLowerCase().includes(q) ||
-    String(product.dealer_name || "").toLowerCase().includes(q) ||
-    String(product.page_names || "").toLowerCase().includes(q)
-  );
-});
+    return (
+      String(product.product_name || "").toLowerCase().includes(q) ||
+      String(product.sku || "").toLowerCase().includes(q) ||
+      String(product.dealer_name || "").toLowerCase().includes(q) ||
+      String(product.page_names || "").toLowerCase().includes(q)
+    );
+  });
 
-const seenProductIds = {};
+  const seenProductIds = {};
 
-const filtered = matchedProducts.filter(function(product) {
-  const productKey = String(product.id);
+  const filtered = matchedProducts.filter(function(product) {
+    const productKey = String(product.id);
 
-  if (seenProductIds[productKey]) {
-    return false;
-  }
+    if (seenProductIds[productKey]) {
+      return false;
+    }
 
-  seenProductIds[productKey] = true;
-  return true;
-});
+    seenProductIds[productKey] = true;
+    return true;
+  });
 
   if (filtered.length === 0) {
-    wrap.innerHTML = '<div class="empty">No products found.</div>';
+    wrap.innerHTML = '<div class="empty">No result found.</div>';
     return;
   }
 
@@ -2333,6 +2397,16 @@ const filtered = matchedProducts.filter(function(product) {
   html += "</div>";
 
   wrap.innerHTML = html;
+}
+
+function applySearchFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get("search");
+
+  if (!q) return;
+
+  syncSearchInputs(q);
+  filterProducts();
 }
 
           function findProductById(productId) {
@@ -2601,13 +2675,14 @@ let total = 0;
 
   window.open(url, "_blank");
 }
-          loadSettings().then(function() {
+          loadSettings().then(async function() {
   loadHeaderPages();
   loadHomeTopDesign();
-  loadHomeSections();
+  await loadHomeSections();
   loadReviewsSection();
   updateListButton();
   renderYourList();
+  applySearchFromUrl();
 });
         </script>
       </body>
