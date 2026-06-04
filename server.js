@@ -805,14 +805,27 @@ function globalHeaderHtml() {
 </div>
 
 <script>
-function getSearchProductsForBox() {
-  try {
-    if (typeof allProducts !== "undefined" && Array.isArray(allProducts)) {
-      return allProducts;
-    }
-  } catch (error) {}
+window.globalSearchProducts = window.globalSearchProducts || [];
 
-  return [];
+async function loadGlobalSearchProducts() {
+  if (window.globalSearchProducts.length > 0) {
+    return window.globalSearchProducts;
+  }
+
+  try {
+    const res = await fetch("/api/products");
+    const data = await res.json();
+
+    window.globalSearchProducts = data.products || [];
+    return window.globalSearchProducts;
+  } catch (error) {
+    window.globalSearchProducts = [];
+    return [];
+  }
+}
+
+function getSearchProductsForBox() {
+  return window.globalSearchProducts || [];
 }
 
 function syncSearchValue(inputId) {
@@ -858,7 +871,7 @@ function getSearchMatches(q) {
   }).slice(0, 8);
 }
 
-function showSearchSuggestions(inputId, boxId) {
+async function showSearchSuggestions(inputId, boxId) {
   const q = syncSearchValue(inputId);
   const box = document.getElementById(boxId);
 
@@ -869,6 +882,8 @@ function showSearchSuggestions(inputId, boxId) {
     box.classList.remove("show");
     return;
   }
+
+  await loadGlobalSearchProducts();
 
   const matches = getSearchMatches(q);
 
@@ -905,7 +920,7 @@ function handleSearchKey(event, inputId, boxId) {
   }
 }
 
-function runSearchInPage(inputId, boxId) {
+async function runSearchInPage(inputId, boxId) {
   const input = document.getElementById(inputId);
   const q = input ? input.value.trim() : "";
 
@@ -924,6 +939,12 @@ function runSearchInPage(inputId, boxId) {
     return;
   }
 
+  const globalProducts = await loadGlobalSearchProducts();
+
+  if (typeof allProducts !== "undefined") {
+    allProducts = globalProducts;
+  }
+
   if (typeof filterProducts === "function") {
     filterProducts();
   }
@@ -932,18 +953,6 @@ function runSearchInPage(inputId, boxId) {
   if (wrap) {
     wrap.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-}
-
-document.addEventListener("click", function(event) {
-  if (!event.target.closest(".search-shell")) {
-    document.querySelectorAll(".search-suggestions-box").forEach(function(box) {
-      box.innerHTML = "";
-      box.classList.remove("show");
-    });
-  }
-});
-</script>
-`;
 }
 
 function globalFooterHtml() {
@@ -2399,13 +2408,20 @@ function filterProducts() {
   wrap.innerHTML = html;
 }
 
-function applySearchFromUrl() {
+async function applySearchFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const q = params.get("search");
 
   if (!q) return;
 
   syncSearchInputs(q);
+
+  const globalProducts = await loadGlobalSearchProducts();
+
+  if (typeof allProducts !== "undefined") {
+    allProducts = globalProducts;
+  }
+
   filterProducts();
 }
 
@@ -2682,7 +2698,7 @@ let total = 0;
   loadReviewsSection();
   updateListButton();
   renderYourList();
-  applySearchFromUrl();
+  await applySearchFromUrl();
 });
         </script>
       </body>
