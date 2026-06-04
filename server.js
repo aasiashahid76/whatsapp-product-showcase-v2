@@ -2105,14 +2105,27 @@ async function loadHomeSections() {
     return;
   }
 
-  const filtered = allProducts.filter(function(product) {
-    return (
-      String(product.product_name || "").toLowerCase().includes(q) ||
-      String(product.sku || "").toLowerCase().includes(q) ||
-      String(product.dealer_name || "").toLowerCase().includes(q) ||
-      String(product.page_names || "").toLowerCase().includes(q)
-    );
-  });
+  const matchedProducts = allProducts.filter(function(product) {
+  return (
+    String(product.product_name || "").toLowerCase().includes(q) ||
+    String(product.sku || "").toLowerCase().includes(q) ||
+    String(product.dealer_name || "").toLowerCase().includes(q) ||
+    String(product.page_names || "").toLowerCase().includes(q)
+  );
+});
+
+const seenProductIds = {};
+
+const filtered = matchedProducts.filter(function(product) {
+  const productKey = String(product.id);
+
+  if (seenProductIds[productKey]) {
+    return false;
+  }
+
+  seenProductIds[productKey] = true;
+  return true;
+});
 
   if (filtered.length === 0) {
     wrap.innerHTML = '<div class="empty">No products found.</div>';
@@ -5762,14 +5775,27 @@ function syncHomeSearch() {
               return;
             }
 
-            const filtered = allProducts.filter(function(product) {
-              return (
-                String(product.product_name || "").toLowerCase().includes(q) ||
-                String(product.sku || "").toLowerCase().includes(q) ||
-                String(product.dealer_name || "").toLowerCase().includes(q) ||
-                String(product.page_names || "").toLowerCase().includes(q)
-              );
-            });
+            const matchedProducts = allProducts.filter(function(product) {
+  return (
+    String(product.product_name || "").toLowerCase().includes(q) ||
+    String(product.sku || "").toLowerCase().includes(q) ||
+    String(product.dealer_name || "").toLowerCase().includes(q) ||
+    String(product.page_names || "").toLowerCase().includes(q)
+  );
+});
+
+const seenProductIds = {};
+
+const filtered = matchedProducts.filter(function(product) {
+  const productKey = String(product.id);
+
+  if (seenProductIds[productKey]) {
+    return false;
+  }
+
+  seenProductIds[productKey] = true;
+  return true;
+});
 
             renderProducts(filtered);
           }
