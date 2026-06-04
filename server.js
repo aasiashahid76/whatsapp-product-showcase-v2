@@ -500,15 +500,27 @@ function globalHeaderFooterCss() {
 }
 
 .desktop-search-btn {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #DCCCAC;
   background: white;
   color: #546B41;
-  width: 38px;
+  min-width: 70px;
   height: 38px;
+  padding: 0 12px;
   border-radius: 10px;
-  font-size: 17px;
+  font-size: 13px;
+  font-weight: 800;
   cursor: pointer;
+}
+
+.search-icon-symbol {
+  display: none;
+}
+
+.search-text-mobile {
+  display: inline;
 }
 
 .pages-menu-btn {
@@ -641,15 +653,27 @@ function globalHeaderFooterCss() {
   }
 
   .desktop-search-btn {
-    display: block;
-    border: none;
-    background: transparent;
-    color: #546B41;
-    width: 32px;
-    height: 32px;
-    font-size: 18px;
-    cursor: pointer;
-  }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #546B41;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.search-icon-symbol {
+  display: inline;
+}
+
+.search-text-mobile {
+  display: none;
+}
 
     .logo-box {
     height: 44px;
@@ -694,7 +718,10 @@ function globalHeaderHtml() {
 
   <div class="desktop-right-header">
     <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
-    <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
+    <button class="desktop-search-btn" onclick="toggleDesktopSearch()">
+  <span class="search-icon-symbol">🔍</span>
+  <span class="search-text-mobile">Search</span>
+</button>
     <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
   </div>
 
