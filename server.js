@@ -2334,7 +2334,6 @@ let total = 0;
           loadSettings().then(function() {
   loadHeaderPages();
   loadHomeTopDesign();
-  loadFixedBanners();
   loadHomeSections();
   loadReviewsSection();
   updateListButton();
