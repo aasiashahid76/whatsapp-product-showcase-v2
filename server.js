@@ -692,7 +692,6 @@ function globalHeaderHtml() {
 
   <div class="desktop-right-header">
     <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
-    <button class="desktop-search-btn" onclick="toggleDesktopSearch()">🔍</button>
     <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
   </div>
 
