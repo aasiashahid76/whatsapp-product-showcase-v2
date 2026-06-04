@@ -584,17 +584,22 @@ function globalHeaderFooterCss() {
 
 @media (min-width: 768px) {
   .site-header {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    padding: 12px 24px;
-    justify-items: stretch;
-  }
+  display: grid;
+  grid-template-columns: 140px 280px 1fr;
+  padding: 12px 24px;
+  justify-items: stretch;
+  align-items: center;
+}
 
   .mobile-list-btn,
-  .mobile-search-box,
-  .pages-menu-btn {
-    display: none;
-  }
+.pages-menu-btn {
+  display: none;
+}
+
+.mobile-search-box {
+  display: flex !important;
+  width: 100%;
+}
 
   .desktop-right-header {
     display: flex;
@@ -667,15 +672,15 @@ function globalHeaderHtml() {
     <span id="siteLogoText">LOGO</span>
   </a>
 
-  <div class="desktop-right-header">
-    <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
-    <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
-  </div>
-
   <div class="search-box mobile-search-box">
-    <span>🔍</span>
-    <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
-  </div>
+  <span>🔍</span>
+  <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
+</div>
+
+<div class="desktop-right-header">
+  <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
+  <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
+</div>
 
   <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
 </header>
