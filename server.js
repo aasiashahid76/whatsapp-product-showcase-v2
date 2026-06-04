@@ -515,10 +515,11 @@ function globalHeaderFooterCss() {
   background: transparent;
   color: #546B41;
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2px 8px;
+  grid-template-columns: auto auto;
+  gap: 2px 14px;
   text-align: left;
   align-items: center;
+  justify-content: start;
   padding: 4px 0;
 }
 
@@ -554,6 +555,10 @@ function globalHeaderFooterCss() {
   font-size: 14px;
   font-weight: 900;
   cursor: pointer;
+}
+
+.your-list-panel .list-footer {
+  display: none;
 }
 
 /* =========================
@@ -619,6 +624,10 @@ function globalHeaderFooterCss() {
 
   .mobile-bottom-list-bar {
     display: none !important;
+  }
+
+    .your-list-panel .list-footer {
+    display: block;
   }
 
   .footer-main {
