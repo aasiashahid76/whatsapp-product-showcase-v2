@@ -955,6 +955,18 @@ async function runSearchInPage(inputId, boxId) {
   }
 }
 
+document.addEventListener("click", function(event) {
+  if (!event.target.closest(".search-shell")) {
+    document.querySelectorAll(".search-suggestions-box").forEach(function(box) {
+      box.innerHTML = "";
+      box.classList.remove("show");
+    });
+  }
+});
+</script>
+`;
+}
+
 function globalFooterHtml() {
   return `
 <footer class="site-footer">
