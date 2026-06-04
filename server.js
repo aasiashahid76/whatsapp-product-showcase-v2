@@ -473,9 +473,7 @@ function globalHeaderFooterCss() {
 ========================= */
 
 .site-header {
-  grid-template-columns: 1fr;
-  justify-items: center;
-  padding: 8px 12px;
+  display: none;
 }
 
 .logo-box {
@@ -576,6 +574,7 @@ function globalHeaderFooterCss() {
 
 @media (min-width: 768px) {
   .site-header {
+    display: grid;
     grid-template-columns: 140px 1fr;
     padding: 12px 24px;
     justify-items: stretch;
