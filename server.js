@@ -3825,26 +3825,6 @@ app.get("/legal/:type", async (req, res) => {
             }
 
 			${globalHeaderFooterCss()}
-
-            .simple-header {
-              position: sticky;
-              top: 0;
-              background: #FFF8EC;
-              border-bottom: 1px solid #DCCCAC;
-              padding: 12px 14px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              z-index: 50;
-            }
-
-            .simple-header a {
-              text-decoration: none;
-              color: #546B41;
-              font-weight: 700;
-              font-size: 14px;
-            }
-
             .page-wrap {
               max-width: 850px;
               margin: auto;
