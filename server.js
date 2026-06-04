@@ -971,10 +971,10 @@ app.get("/", (req, res) => {
           }
 
           .product-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-          }
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
 
           .product-card {
             background: white;
@@ -1050,50 +1050,50 @@ app.get("/", (req, res) => {
 }
 
           .card-action-row {
-            display: grid;
-            grid-template-columns: 1fr 38px;
-            gap: 4px;
-            margin-top: 6px;
-            align-items: center;
-          }
+  margin-top: 6px;
+}
 
-          .qty-row {
-            display: grid;
-            grid-template-columns: 18px 1fr 18px;
-            gap: 2px;
-          }
+.add-btn {
+  width: 100%;
+  border: none;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 8px;
+  height: 26px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
 
-          .qty-row button {
-            border: none;
-            background: #DCCCAC;
-            color: #546B41;
-            border-radius: 6px;
-            height: 24px;
-            font-size: 12px;
-            font-weight: 700;
-          }
+.card-qty-control {
+  display: grid;
+  grid-template-columns: 24px 1fr 24px;
+  gap: 4px;
+  width: 100%;
+}
 
-          .qty-row input {
-            width: 100%;
-            border: 1px solid #DCCCAC;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 11px;
-            color: #546B41;
-            height: 24px;
-            padding: 0;
-          }
+.card-qty-control button {
+  border: none;
+  background: #DCCCAC;
+  color: #546B41;
+  border-radius: 7px;
+  height: 26px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
 
-          .add-btn {
-            border: none;
-            background: #546B41;
-            color: #FFF8EC;
-            border-radius: 7px;
-            height: 24px;
-            font-size: 10px;
-            font-weight: 700;
-          }
-
+.card-qty-control input {
+  width: 100%;
+  border: 1px solid #DCCCAC;
+  border-radius: 7px;
+  text-align: center;
+  font-size: 12px;
+  color: #546B41;
+  height: 26px;
+  padding: 0;
+  font-weight: 700;
+}
           .empty {
   background: white;
   border: 1px solid #DCCCAC;
@@ -1371,7 +1371,27 @@ ${globalFooterHtml()}
           let allProducts = [];
 			let siteSettings = {};
 
-          function productCard(product) {
+          function productCardActionHtml(productId) {
+  const list = getList();
+  const existing = list.find(function(item) {
+    return String(item.id) === String(productId);
+  });
+
+  if (!existing) {
+    return "<button class='add-btn' onclick='addOneToListFromCard(" + productId + ")'>Add</button>";
+  }
+
+  const qty = Math.max(1, Number(existing.qty || 1));
+
+  return "" +
+    "<div class='card-qty-control'>" +
+      "<button onclick='changeCardListQty(" + productId + ", -1)'>-</button>" +
+      "<input type='number' min='1' value='" + qty + "' onchange='setCardListQty(" + productId + ", this.value)' />" +
+      "<button onclick='changeCardListQty(" + productId + ", 1)'>+</button>" +
+    "</div>";
+}
+
+function productCard(product) {
   const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
   const price = Number(product.show_price || 0).toFixed(0);
   const crossedPrice = Number(product.crossed_price || 0);
@@ -1386,7 +1406,7 @@ ${globalFooterHtml()}
     : "";
 
   return "" +
-    "<div class='product-card'>" +
+    "<div class='product-card' data-product-id='" + product.id + "'>" +
       "<a href='/product/" + product.slug + "'>" +
         "<div class='product-image-wrap'>" +
           tagHtml +
@@ -1401,18 +1421,12 @@ ${globalFooterHtml()}
             crossedPriceHtml +
           "</div>" +
         "</div>" +
-        "<div class='card-action-row'>" +
-          "<div class='qty-row'>" +
-            "<button onclick='changeQtyFromCard(this, -1)'>-</button>" +
-            "<input class='qty-input-card' type='number' min='1' value='1' />" +
-            "<button onclick='changeQtyFromCard(this, 1)'>+</button>" +
-          "</div>" +
-          "<button class='add-btn' onclick='addToListFromCard(" + product.id + ", this)'>Add</button>" +
+        "<div class='card-action-row' data-product-id='" + product.id + "'>" +
+          productCardActionHtml(product.id) +
         "</div>" +
       "</div>" +
     "</div>";
 }
-
           function renderHomeSections(sections) {
   const wrap = document.getElementById("homeSections");
 
@@ -1823,24 +1837,13 @@ async function loadHomeSections() {
   wrap.innerHTML = html;
 }
 
-          function changeQtyFromCard(button, delta) {
-  const card = button.closest(".product-card");
-  const input = card.querySelector(".qty-input-card");
-
-  const current = Number(input.value || 1);
-  const next = Math.max(1, current + delta);
-
-  input.value = next;
+          function findProductById(productId) {
+  return allProducts.find(function(item) {
+    return String(item.id) === String(productId);
+  });
 }
 
-function getQtyFromCard(button) {
-  const card = button.closest(".product-card");
-  const input = card.querySelector(".qty-input-card");
-
-  return Math.max(1, Number(input ? input.value : 1));
-}
-
-         function getList() {
+function getList() {
   try {
     return JSON.parse(localStorage.getItem("your_list") || "[]");
   } catch (error) {
@@ -1852,24 +1855,31 @@ function saveList(list) {
   localStorage.setItem("your_list", JSON.stringify(list));
   updateListButton();
   renderYourList();
+  syncProductCardButtons();
 }
 
-function addToListFromCard(productId, button) {
-  const product = allProducts.find(function(item) {
-    return String(item.id) === String(productId);
+function syncProductCardButtons() {
+  const rows = document.querySelectorAll(".card-action-row[data-product-id]");
+
+  rows.forEach(function(row) {
+    const productId = row.getAttribute("data-product-id");
+    row.innerHTML = productCardActionHtml(productId);
   });
+}
+
+function addOneToListFromCard(productId) {
+  const product = findProductById(productId);
 
   if (!product) return;
 
-  const qty = getQtyFromCard(button);
-
   const list = getList();
+
   const existing = list.find(function(item) {
     return String(item.id) === String(product.id);
   });
 
   if (existing) {
-    existing.qty += qty;
+    existing.qty = Number(existing.qty || 1) + 1;
   } else {
     list.push({
       id: product.id,
@@ -1877,11 +1887,23 @@ function addToListFromCard(productId, button) {
       price: Number(product.show_price || 0),
       image: product.product_image_url || "https://via.placeholder.com/300x300?text=Product",
       slug: product.slug,
-      qty: qty
+      qty: 1
     });
   }
 
   saveList(list);
+}
+
+function addToListFromCard(productId, button) {
+  addOneToListFromCard(productId);
+}
+
+function changeCardListQty(productId, delta) {
+  changeListQty(productId, delta);
+}
+
+function setCardListQty(productId, value) {
+  setListQty(productId, value);
 }
 
 function updateListButton() {
@@ -1971,7 +1993,14 @@ function changeListQty(productId, delta) {
 
   if (!item) return;
 
-  item.qty = Math.max(1, Number(item.qty || 1) + delta);
+  const nextQty = Number(item.qty || 1) + Number(delta || 0);
+
+  if (nextQty < 1) {
+    removeFromList(productId);
+    return;
+  }
+
+  item.qty = nextQty;
   saveList(list);
 }
 
@@ -1984,7 +2013,14 @@ function setListQty(productId, value) {
 
   if (!item) return;
 
-  item.qty = Math.max(1, Number(value || 1));
+  const qty = Number(value || 0);
+
+  if (qty < 1) {
+    removeFromList(productId);
+    return;
+  }
+
+  item.qty = qty;
   saveList(list);
 }
 
@@ -4525,30 +4561,44 @@ ${globalFooterHtml()}
           }
 
           function changeListQty(productId, delta) {
-            const list = getList();
+  const list = getList();
 
-            const item = list.find(function(row) {
-              return String(row.id) === String(productId);
-            });
+  const item = list.find(function(row) {
+    return String(row.id) === String(productId);
+  });
 
-            if (!item) return;
+  if (!item) return;
 
-            item.qty = Math.max(1, Number(item.qty || 1) + delta);
-            saveList(list);
-          }
+  const nextQty = Number(item.qty || 1) + Number(delta || 0);
+
+  if (nextQty < 1) {
+    removeFromList(productId);
+    return;
+  }
+
+  item.qty = nextQty;
+  saveList(list);
+}
 
           function setListQty(productId, value) {
-            const list = getList();
+  const list = getList();
 
-            const item = list.find(function(row) {
-              return String(row.id) === String(productId);
-            });
+  const item = list.find(function(row) {
+    return String(row.id) === String(productId);
+  });
 
-            if (!item) return;
+  if (!item) return;
 
-            item.qty = Math.max(1, Number(value || 1));
-            saveList(list);
-          }
+  const qty = Number(value || 0);
+
+  if (qty < 1) {
+    removeFromList(productId);
+    return;
+  }
+
+  item.qty = qty;
+  saveList(list);
+}
 
           function removeFromList(productId) {
             const list = getList().filter(function(item) {
@@ -4723,10 +4773,10 @@ app.get("/page/:slug", (req, res) => {
           }
 
           .product-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-          }
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
 
           .product-card {
             background: white;
@@ -4802,49 +4852,50 @@ app.get("/page/:slug", (req, res) => {
 }
 
           .card-action-row {
-            display: grid;
-            grid-template-columns: 1fr 38px;
-            gap: 4px;
-            margin-top: 6px;
-            align-items: center;
-          }
+  margin-top: 6px;
+}
 
-          .qty-row {
-            display: grid;
-            grid-template-columns: 18px 1fr 18px;
-            gap: 2px;
-          }
+.add-btn {
+  width: 100%;
+  border: none;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 8px;
+  height: 26px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
 
-          .qty-row button {
-            border: none;
-            background: #DCCCAC;
-            color: #546B41;
-            border-radius: 6px;
-            height: 24px;
-            font-size: 12px;
-            font-weight: 700;
-          }
+.card-qty-control {
+  display: grid;
+  grid-template-columns: 24px 1fr 24px;
+  gap: 4px;
+  width: 100%;
+}
 
-          .qty-row input {
-            width: 100%;
-            border: 1px solid #DCCCAC;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 11px;
-            color: #546B41;
-            height: 24px;
-            padding: 0;
-          }
+.card-qty-control button {
+  border: none;
+  background: #DCCCAC;
+  color: #546B41;
+  border-radius: 7px;
+  height: 26px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
 
-          .add-btn {
-            border: none;
-            background: #546B41;
-            color: #FFF8EC;
-            border-radius: 7px;
-            height: 24px;
-            font-size: 10px;
-            font-weight: 700;
-          }
+.card-qty-control input {
+  width: 100%;
+  border: 1px solid #DCCCAC;
+  border-radius: 7px;
+  text-align: center;
+  font-size: 12px;
+  color: #546B41;
+  height: 26px;
+  padding: 0;
+  font-weight: 700;
+}
 
           .empty {
             background: white;
@@ -5038,7 +5089,27 @@ app.get("/page/:slug", (req, res) => {
           let allProducts = [];
           let siteSettings = {};
 
-          function productCard(product) {
+          function productCardActionHtml(productId) {
+  const list = getList();
+  const existing = list.find(function(item) {
+    return String(item.id) === String(productId);
+  });
+
+  if (!existing) {
+    return "<button class='add-btn' onclick='addOneToListFromCard(" + productId + ")'>Add</button>";
+  }
+
+  const qty = Math.max(1, Number(existing.qty || 1));
+
+  return "" +
+    "<div class='card-qty-control'>" +
+      "<button onclick='changeCardListQty(" + productId + ", -1)'>-</button>" +
+      "<input type='number' min='1' value='" + qty + "' onchange='setCardListQty(" + productId + ", this.value)' />" +
+      "<button onclick='changeCardListQty(" + productId + ", 1)'>+</button>" +
+    "</div>";
+}
+
+function productCard(product) {
   const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
   const price = Number(product.show_price || 0).toFixed(0);
   const crossedPrice = Number(product.crossed_price || 0);
@@ -5053,7 +5124,7 @@ app.get("/page/:slug", (req, res) => {
     : "";
 
   return "" +
-    "<div class='product-card'>" +
+    "<div class='product-card' data-product-id='" + product.id + "'>" +
       "<a href='/product/" + product.slug + "'>" +
         "<div class='product-image-wrap'>" +
           tagHtml +
@@ -5068,18 +5139,12 @@ app.get("/page/:slug", (req, res) => {
             crossedPriceHtml +
           "</div>" +
         "</div>" +
-        "<div class='card-action-row'>" +
-          "<div class='qty-row'>" +
-            "<button onclick='changeQtyFromCard(this, -1)'>-</button>" +
-            "<input class='qty-input-card' type='number' min='1' value='1' />" +
-            "<button onclick='changeQtyFromCard(this, 1)'>+</button>" +
-          "</div>" +
-          "<button class='add-btn' onclick='addToListFromCard(" + product.id + ", this)'>Add</button>" +
+        "<div class='card-action-row' data-product-id='" + product.id + "'>" +
+          productCardActionHtml(product.id) +
         "</div>" +
       "</div>" +
     "</div>";
 }
-
           function renderProducts(products) {
             const grid = document.getElementById("productsGrid");
 
@@ -5280,53 +5345,49 @@ function filterProductsFromDesktop() {
             renderProducts(filtered);
           }
 
-          function changeQtyFromCard(button, delta) {
-  const card = button.closest(".product-card");
-  const input = card.querySelector(".qty-input-card");
-
-  const current = Number(input.value || 1);
-  const next = Math.max(1, current + delta);
-
-  input.value = next;
-}
-
-function getQtyFromCard(button) {
-  const card = button.closest(".product-card");
-  const input = card.querySelector(".qty-input-card");
-
-  return Math.max(1, Number(input ? input.value : 1));
-}
-
-          function getList() {
-            try {
-              return JSON.parse(localStorage.getItem("your_list") || "[]");
-            } catch (error) {
-              return [];
-            }
-          }
-
-          function saveList(list) {
-            localStorage.setItem("your_list", JSON.stringify(list));
-            updateListButton();
-            renderYourList();
-          }
-
-          function addToListFromCard(productId, button) {
-  const product = allProducts.find(function(item) {
+          function findProductById(productId) {
+  return allProducts.find(function(item) {
     return String(item.id) === String(productId);
   });
+}
+
+function getList() {
+  try {
+    return JSON.parse(localStorage.getItem("your_list") || "[]");
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveList(list) {
+  localStorage.setItem("your_list", JSON.stringify(list));
+  updateListButton();
+  renderYourList();
+  syncProductCardButtons();
+}
+
+function syncProductCardButtons() {
+  const rows = document.querySelectorAll(".card-action-row[data-product-id]");
+
+  rows.forEach(function(row) {
+    const productId = row.getAttribute("data-product-id");
+    row.innerHTML = productCardActionHtml(productId);
+  });
+}
+
+function addOneToListFromCard(productId) {
+  const product = findProductById(productId);
 
   if (!product) return;
 
-  const qty = getQtyFromCard(button);
-
   const list = getList();
+
   const existing = list.find(function(item) {
     return String(item.id) === String(product.id);
   });
 
   if (existing) {
-    existing.qty += qty;
+    existing.qty = Number(existing.qty || 1) + 1;
   } else {
     list.push({
       id: product.id,
@@ -5334,11 +5395,23 @@ function getQtyFromCard(button) {
       price: Number(product.show_price || 0),
       image: product.product_image_url || "https://via.placeholder.com/300x300?text=Product",
       slug: product.slug,
-      qty: qty
+      qty: 1
     });
   }
 
   saveList(list);
+}
+
+function addToListFromCard(productId, button) {
+  addOneToListFromCard(productId);
+}
+
+function changeCardListQty(productId, delta) {
+  changeListQty(productId, delta);
+}
+
+function setCardListQty(productId, value) {
+  setListQty(productId, value);
 }
 
           function updateListButton() {
@@ -5420,30 +5493,44 @@ function getQtyFromCard(button) {
           }
 
           function changeListQty(productId, delta) {
-            const list = getList();
+  const list = getList();
 
-            const item = list.find(function(row) {
-              return String(row.id) === String(productId);
-            });
+  const item = list.find(function(row) {
+    return String(row.id) === String(productId);
+  });
 
-            if (!item) return;
+  if (!item) return;
 
-            item.qty = Math.max(1, Number(item.qty || 1) + delta);
-            saveList(list);
-          }
+  const nextQty = Number(item.qty || 1) + Number(delta || 0);
+
+  if (nextQty < 1) {
+    removeFromList(productId);
+    return;
+  }
+
+  item.qty = nextQty;
+  saveList(list);
+}
 
           function setListQty(productId, value) {
-            const list = getList();
+  const list = getList();
 
-            const item = list.find(function(row) {
-              return String(row.id) === String(productId);
-            });
+  const item = list.find(function(row) {
+    return String(row.id) === String(productId);
+  });
 
-            if (!item) return;
+  if (!item) return;
 
-            item.qty = Math.max(1, Number(value || 1));
-            saveList(list);
-          }
+  const qty = Number(value || 0);
+
+  if (qty < 1) {
+    removeFromList(productId);
+    return;
+  }
+
+  item.qty = qty;
+  saveList(list);
+}
 
           function removeFromList(productId) {
             const list = getList().filter(function(item) {
