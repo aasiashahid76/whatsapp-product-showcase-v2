@@ -585,7 +585,7 @@ function globalHeaderFooterCss() {
 @media (min-width: 768px) {
   .site-header {
   display: grid;
-  grid-template-columns: 140px 280px 1fr;
+  grid-template-columns: 140px minmax(240px, 340px) minmax(0, 1fr);
   padding: 12px 24px;
   justify-items: stretch;
   align-items: center;
@@ -599,22 +599,28 @@ function globalHeaderFooterCss() {
 .mobile-search-box {
   display: flex !important;
   width: 100%;
+  max-width: 340px;
+  justify-self: center;
 }
 
   .desktop-right-header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 18px;
-    min-width: 0;
-  }
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  overflow: hidden;
+}
 
   .desktop-pages-nav {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    overflow-x: auto;
-  }
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  overflow-x: auto;
+  min-width: 0;
+  flex: 1;
+  justify-content: flex-end;
+}
 
   .desktop-pages-nav a {
     flex: 0 0 auto;
