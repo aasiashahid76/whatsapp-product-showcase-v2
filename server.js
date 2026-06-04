@@ -1807,6 +1807,8 @@ let currentBannerIndex = 0;
 let bannerTimer = null;
 let circularRailTimer = null;
 let circularRailDirection = 1;
+let circularRailUserPaused = false;
+let circularRailPauseTimer = null;
 
 async function loadHomeTopDesign() {
   try {
@@ -1875,8 +1877,9 @@ async function loadHomeTopDesign() {
     const circularWrap = document.getElementById("circularPagesWrap");
 
     if (circularWrap) {
-      if (circularPages.length === 0) {
+           if (circularPages.length === 0) {
         circularWrap.style.display = "none";
+        stopCircularRailMovement();
       } else {
         circularWrap.style.display = "flex";
         circularWrap.innerHTML = circularPages.map(function(page) {
@@ -1885,7 +1888,9 @@ async function loadHomeTopDesign() {
               "<img class='circular-img' src='" + page.circular_image_url + "' alt='" + page.page_name + "' />" +
               "<div class='circular-page-name'>" + page.page_name + "</div>" +
             "</a>";
-        }).join("");
+                }).join("");
+
+        startCircularRailMovement();
       }
     }
   } catch (error) {
@@ -1928,10 +1933,40 @@ function startCircularRailMovement() {
 
   stopCircularRailMovement();
 
+  if (window.innerWidth >= 768) {
+    return;
+  }
+
+  function pauseCircularRail() {
+    circularRailUserPaused = true;
+
+    if (circularRailPauseTimer) {
+      clearTimeout(circularRailPauseTimer);
+    }
+
+    circularRailPauseTimer = setTimeout(function() {
+      circularRailUserPaused = false;
+    }, 1500);
+  }
+
+  if (!wrap.dataset.railListenersAdded) {
+    wrap.addEventListener("touchstart", pauseCircularRail);
+    wrap.addEventListener("mousedown", pauseCircularRail);
+    wrap.addEventListener("wheel", pauseCircularRail);
+    wrap.dataset.railListenersAdded = "true";
+  }
+
   setTimeout(function() {
-    if (wrap.scrollWidth <= wrap.clientWidth + 2) return;
+    if (!wrap || wrap.scrollWidth <= wrap.clientWidth + 2) return;
 
     circularRailTimer = setInterval(function() {
+      if (window.innerWidth >= 768) {
+        stopCircularRailMovement();
+        return;
+      }
+
+      if (circularRailUserPaused) return;
+
       const maxScroll = wrap.scrollWidth - wrap.clientWidth;
 
       if (wrap.scrollLeft >= maxScroll - 2) {
@@ -1944,7 +1979,7 @@ function startCircularRailMovement() {
 
       wrap.scrollLeft += circularRailDirection;
     }, 35);
-  }, 500);
+  }, 700);
 }
 
 async function loadFixedBanners() {
