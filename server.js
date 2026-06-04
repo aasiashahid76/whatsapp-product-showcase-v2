@@ -2206,49 +2206,10 @@ app.get("/api/setup", async (req, res) => {
 });
 
 app.get("/api/admin/init", async (req, res) => {
-  try {
-    const name = process.env.ADMIN_NAME;
-    const email = process.env.ADMIN_EMAIL;
-    const password = process.env.ADMIN_PASSWORD;
-
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        status: "error",
-        message: "ADMIN_NAME, ADMIN_EMAIL, and ADMIN_PASSWORD are required"
-      });
-    }
-
-    const [existingAdmins] = await db.query(
-      "SELECT id FROM admin_users WHERE email = ? LIMIT 1",
-      [email]
-    );
-
-    if (existingAdmins.length > 0) {
-      return res.json({
-        status: "ok",
-        message: "Admin user already exists"
-      });
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    await db.query(
-      "INSERT INTO admin_users (name, email, password_hash) VALUES (?, ?, ?)",
-      [name, email, passwordHash]
-    );
-
-    res.json({
-      status: "ok",
-      message: "Admin user created successfully",
-      admin_email: email
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: "Admin creation failed",
-      error: error.message
-    });
-  }
+  return res.status(403).json({
+    status: "error",
+    message: "Admin init is disabled after setup"
+  });
 });
 
 app.post("/api/auth/login", async (req, res) => {
