@@ -1499,14 +1499,14 @@ app.get("/", (req, res) => {
         <main class="page-wrap">
           <section id="homeBannerWrap"></section>
 
-<section id="circularPagesWrap" class="circular-pages-wrap"></section>
-
 <section class="home-mobile-search-wrap">
   <div class="home-mobile-search-box">
     <span>🔍</span>
     <input id="homeSearchInput" placeholder="Search products..." oninput="syncHomeSearch()" />
   </div>
 </section>
+
+<section id="circularPagesWrap" class="circular-pages-wrap"></section>
 
 <section class="feature-strip">
   <div class="feature-card">
