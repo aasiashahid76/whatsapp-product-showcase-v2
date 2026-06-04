@@ -473,28 +473,52 @@ function globalHeaderFooterCss() {
 ========================= */
 
 .site-header {
-  display: none;
+  display: grid;
+  grid-template-columns: 90px 1fr 38px;
+  justify-items: stretch;
+  padding: 8px 12px;
 }
 
 .logo-box {
   height: 38px;
   width: 90px;
-  justify-self: center;
+  justify-self: start;
 }
 
-.desktop-right-header,
+.desktop-right-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  justify-self: end;
+}
+
 .desktop-pages-nav,
-.desktop-search-btn {
-  display: none;
-}
-
-.mobile-list-btn {
-  display: none;
-}
-
+.mobile-list-btn,
 .mobile-search-box,
+.desktop-right-header .list-btn {
+  display: none;
+}
+
+.desktop-search-btn {
+  display: block;
+  border: 1px solid #DCCCAC;
+  background: white;
+  color: #546B41;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 17px;
+  cursor: pointer;
+}
+
 .pages-menu-btn {
-  display: none !important;
+  display: block;
+  width: 38px;
+  justify-self: end;
+}
+
+.home-page .site-header {
+  display: none;
 }
 
 .mobile-bottom-list-bar {
@@ -639,6 +663,14 @@ function globalHeaderFooterCss() {
 
     .your-list-panel .list-footer {
     display: block;
+  }
+
+  .home-page .site-header {
+    display: grid;
+  }
+
+  .desktop-right-header .list-btn {
+    display: inline-block;
   }
 
   .footer-main {
@@ -1494,7 +1526,7 @@ app.get("/", (req, res) => {
         </style>
       </head>
 
-      <body>
+      <body class="home-page">
         ${globalHeaderHtml()}
         <main class="page-wrap">
           <section id="homeBannerWrap"></section>
@@ -1507,6 +1539,19 @@ app.get("/", (req, res) => {
 </section>
 
 <section id="circularPagesWrap" class="circular-pages-wrap"></section>
+
+<section id="fixedBannersWrap" class="fixed-banners-wrap"></section>
+
+          <section>
+  <div id="homeSections"></div>
+</section>
+
+<section id="reviewsSection" class="reviews-section">
+  <div class="reviews-head">
+    <h2>Customer Reviews</h2>
+  </div>
+  <div id="reviewsGrid" class="reviews-grid"></div>
+</section>
 
 <section class="feature-strip">
   <div class="feature-card">
@@ -1521,19 +1566,6 @@ app.get("/", (req, res) => {
     <span>💰</span>
     <strong>Best Price</strong>
   </div>
-</section>
-
-<section id="fixedBannersWrap" class="fixed-banners-wrap"></section>
-
-          <section>
-  <div id="homeSections"></div>
-</section>
-
-<section id="reviewsSection" class="reviews-section">
-  <div class="reviews-head">
-    <h2>Customer Reviews</h2>
-  </div>
-  <div id="reviewsGrid" class="reviews-grid"></div>
 </section>
 
 ${globalFooterHtml()}
