@@ -5838,7 +5838,6 @@ app.get("/manage-ui", (req, res) => {
           <div class="tabs">
             <button class="tab-btn active" onclick="showTab('pagesTab', this)">Create & Manage Page</button>
 			<button class="tab-btn" onclick="showTab('productsTab', this)">Add Product</button>
-			<button class="tab-btn" onclick="showTab('logoBannerTab', this)">Logo & Banner</button>
 			<button class="tab-btn" onclick="showTab('fixedBannersTab', this)">Fixed Banners</button>
 			<button class="tab-btn" onclick="showTab('pageBannerPositionTab', this)">Page & Banners Position</button>
 			<button class="tab-btn" onclick="showTab('reviewsTab', this)">Reviews</button>
@@ -5953,14 +5952,7 @@ app.get("/manage-ui", (req, res) => {
 
     <button class="primary" onclick="createProduct()">Create Product</button>
   </div>
-</div>
-
-          <div id="logoBannerTab" class="tab-content">
-            <div class="card">
-              <h2>Logo & Banner</h2>
-              <p>This tab will manage homepage fixed banners and homepage layout order. Logo upload will be inside Header & Footer only.</p>
-            </div>
-          </div>
+</div>          
 
 		  <div id="fixedBannersTab" class="tab-content">
   <div class="grid">
