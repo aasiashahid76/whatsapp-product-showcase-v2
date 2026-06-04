@@ -907,8 +907,8 @@ app.get("/", (req, res) => {
   justify-content: flex-start;
   gap: 14px;
   overflow-x: auto;
-  padding: 8px 2px 18px;
-  margin-bottom: 8px;
+  padding: 6px 2px 8px;
+  margin-bottom: 0;
   text-align: center;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
