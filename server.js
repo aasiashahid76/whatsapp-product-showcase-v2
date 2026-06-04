@@ -283,20 +283,33 @@ function globalHeaderFooterCss() {
 .your-list-panel {
   display: none;
   position: fixed;
-  top: 59px;
   left: 10px;
   right: 10px;
-  z-index: 60;
+  bottom: 72px;
+  z-index: 90;
   background: white;
   border: 1px solid #DCCCAC;
-  border-radius: 0 0 18px 18px;
-  box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
-  max-height: 70vh;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -14px 34px rgba(84, 107, 65, 0.18);
+  max-height: 55vh;
   overflow: auto;
 }
 
 .your-list-panel.show {
   display: block;
+}
+
+@media (min-width: 768px) {
+  .your-list-panel {
+    top: 59px;
+    bottom: auto;
+    left: 10px;
+    right: 10px;
+    z-index: 60;
+    border-radius: 0 0 18px 18px;
+    box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+    max-height: 70vh;
+  }
 }
 
 .list-head {
@@ -460,7 +473,7 @@ function globalHeaderFooterCss() {
 ========================= */
 
 .site-header {
-  grid-template-columns: 70px 1fr auto 38px;
+  grid-template-columns: 70px 1fr 38px;
 }
 
 .logo-box {
@@ -474,7 +487,73 @@ function globalHeaderFooterCss() {
 }
 
 .mobile-list-btn {
-  display: inline-block;
+  display: none;
+}
+
+.mobile-bottom-list-bar {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  background: white;
+  border-top: 1px solid #DCCCAC;
+  box-shadow: 0 -8px 24px rgba(84, 107, 65, 0.16);
+  padding: 10px 12px;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.mobile-bottom-list-bar.show {
+  display: grid;
+}
+
+.mobile-bottom-list-left {
+  border: none;
+  background: transparent;
+  color: #546B41;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  text-align: left;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.mobile-bottom-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6f7a5f;
+}
+
+#mobileBottomTotal {
+  font-size: 18px;
+  font-weight: 900;
+  color: #38472d;
+}
+
+#mobileBottomCount {
+  font-size: 12px;
+  color: #6f7a5f;
+}
+
+.mobile-bottom-arrow {
+  font-size: 18px;
+  color: #6f7a5f;
+  grid-row: span 2;
+}
+
+.mobile-bottom-whatsapp-btn {
+  border: none;
+  background: #546B41;
+  color: #FFF8EC;
+  border-radius: 999px;
+  padding: 13px 10px;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 /* =========================
@@ -538,6 +617,10 @@ function globalHeaderFooterCss() {
     height: 44px;
   }
 
+  .mobile-bottom-list-bar {
+    display: none !important;
+  }
+
   .footer-main {
     grid-template-columns: 1.3fr 1.2fr 1.2fr 1.4fr;
     gap: 34px;
@@ -568,8 +651,6 @@ function globalHeaderHtml() {
     <input id="searchInput" placeholder="Search products..." oninput="filterProducts()" />
   </div>
 
-  <button class="list-btn mobile-list-btn" id="yourListBtnMobile" onclick="toggleYourList()">Your List (0)</button>
-
   <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
 </header>
 
@@ -587,13 +668,24 @@ function globalHeaderHtml() {
 
   <div id="yourListBody" class="list-body"></div>
 
-  <div class="list-footer">
+    <div class="list-footer">
     <div class="total-line">
       <span>Total</span>
       <strong id="yourListTotal">₹0</strong>
     </div>
     <button class="send-wa-btn" onclick="sendToWhatsapp()">Send on WhatsApp</button>
   </div>
+</div>
+
+<div id="mobileBottomListBar" class="mobile-bottom-list-bar">
+  <button class="mobile-bottom-list-left" onclick="toggleYourList()">
+    <span class="mobile-bottom-title">Your List</span>
+    <strong id="mobileBottomTotal">₹0</strong>
+    <span id="mobileBottomCount">0 items</span>
+    <span id="mobileBottomArrow" class="mobile-bottom-arrow">⌃</span>
+  </button>
+
+  <button class="mobile-bottom-whatsapp-btn" onclick="sendToWhatsapp()">Send to WhatsApp</button>
 </div>
 `;
 }
@@ -1112,20 +1204,33 @@ app.get("/", (req, res) => {
 .your-list-panel {
   display: none;
   position: fixed;
-  top: 59px;
   left: 10px;
   right: 10px;
-  z-index: 60;
+  bottom: 72px;
+  z-index: 90;
   background: white;
   border: 1px solid #DCCCAC;
-  border-radius: 0 0 18px 18px;
-  box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
-  max-height: 70vh;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -14px 34px rgba(84, 107, 65, 0.18);
+  max-height: 55vh;
   overflow: auto;
 }
 
 .your-list-panel.show {
   display: block;
+}
+
+@media (min-width: 768px) {
+  .your-list-panel {
+    top: 59px;
+    bottom: auto;
+    left: 10px;
+    right: 10px;
+    z-index: 60;
+    border-radius: 0 0 18px 18px;
+    box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+    max-height: 70vh;
+  }
 }
 
 .list-head {
@@ -1908,36 +2013,76 @@ function setCardListQty(productId, value) {
 
 function updateListButton() {
   const list = getList();
+
   const totalQty = list.reduce(function(sum, item) {
     return sum + Number(item.qty || 0);
   }, 0);
 
-  const buttons = [
-    document.getElementById("yourListBtn"),
-    document.getElementById("yourListBtnMobile")
-  ];
+  const totalAmount = list.reduce(function(sum, item) {
+    return sum + (Number(item.price || 0) * Number(item.qty || 1));
+  }, 0);
 
-  buttons.forEach(function(btn) {
-    if (!btn) return;
+  const desktopBtn = document.getElementById("yourListBtn");
 
-    btn.textContent = "Your List (" + totalQty + ")";
+  if (desktopBtn) {
+    desktopBtn.textContent = "Your List (" + totalQty + ")";
 
     if (totalQty > 0) {
-      btn.classList.add("active");
+      desktopBtn.classList.add("active");
     } else {
-      btn.classList.remove("active");
+      desktopBtn.classList.remove("active");
     }
-  });
+  }
+
+  const bottomBar = document.getElementById("mobileBottomListBar");
+  const bottomTotal = document.getElementById("mobileBottomTotal");
+  const bottomCount = document.getElementById("mobileBottomCount");
+
+  if (bottomTotal) {
+    bottomTotal.textContent = "₹" + totalAmount.toFixed(0);
+  }
+
+  if (bottomCount) {
+    bottomCount.textContent = totalQty + (totalQty === 1 ? " item" : " items");
+  }
+
+  if (bottomBar) {
+    if (totalQty > 0) {
+      bottomBar.classList.add("show");
+    } else {
+      bottomBar.classList.remove("show");
+
+      const panel = document.getElementById("yourListPanel");
+      if (panel) panel.classList.remove("show");
+    }
+  }
+
+  updateMobileBottomArrow();
 }
 
+function updateMobileBottomArrow() {
+  const panel = document.getElementById("yourListPanel");
+  const arrow = document.getElementById("mobileBottomArrow");
+
+  if (!panel || !arrow) return;
+
+  arrow.textContent = panel.classList.contains("show") ? "⌄" : "⌃";
+}
 function toggleYourList() {
   const panel = document.getElementById("yourListPanel");
+  if (!panel) return;
+
   renderYourList();
   panel.classList.toggle("show");
+  updateMobileBottomArrow();
 }
 
 function closeYourList() {
-  document.getElementById("yourListPanel").classList.remove("show");
+  const panel = document.getElementById("yourListPanel");
+  if (!panel) return;
+
+  panel.classList.remove("show");
+  updateMobileBottomArrow();
 }
 
 function renderYourList() {
@@ -3920,15 +4065,20 @@ app.get("/legal/:type", async (req, res) => {
   function filterProducts() {}
   function filterProductsFromDesktop() {}
   function toggleYourList() {
-    const panel = document.getElementById("yourListPanel");
-    if (!panel) return;
-    panel.classList.toggle("show");
-  }
+  const panel = document.getElementById("yourListPanel");
+  if (!panel) return;
+
+  renderYourList();
+  panel.classList.toggle("show");
+  updateMobileBottomArrow();
+}
   function closeYourList() {
-    const panel = document.getElementById("yourListPanel");
-    if (!panel) return;
-    panel.classList.remove("show");
-  }
+  const panel = document.getElementById("yourListPanel");
+  if (!panel) return;
+
+  panel.classList.remove("show");
+  updateMobileBottomArrow();
+}
 
   async function loadSettings() {
     try {
@@ -4148,23 +4298,36 @@ app.get("/product/:slug", (req, res) => {
           }
 
           .your-list-panel {
-            display: none;
-            position: fixed;
-            top: 59px;
-            left: 10px;
-            right: 10px;
-            z-index: 60;
-            background: white;
-            border: 1px solid #DCCCAC;
-            border-radius: 0 0 18px 18px;
-            box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
-            max-height: 70vh;
-            overflow: auto;
-          }
+  display: none;
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: 72px;
+  z-index: 90;
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -14px 34px rgba(84, 107, 65, 0.18);
+  max-height: 55vh;
+  overflow: auto;
+}
 
-          .your-list-panel.show {
-            display: block;
-          }
+.your-list-panel.show {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .your-list-panel {
+    top: 59px;
+    bottom: auto;
+    left: 10px;
+    right: 10px;
+    z-index: 60;
+    border-radius: 0 0 18px 18px;
+    box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+    max-height: 70vh;
+  }
+}
 
           .list-head {
             display: flex;
@@ -4483,39 +4646,79 @@ ${globalFooterHtml()}
           }
 
           function updateListButton() {
-            const list = getList();
-            const totalQty = list.reduce(function(sum, item) {
-              return sum + Number(item.qty || 0);
-            }, 0);
+  const list = getList();
 
-            const buttons = [
-              document.getElementById("yourListBtn"),
-              document.getElementById("yourListBtnMobile")
-            ];
+  const totalQty = list.reduce(function(sum, item) {
+    return sum + Number(item.qty || 0);
+  }, 0);
 
-            buttons.forEach(function(btn) {
-              if (!btn) return;
+  const totalAmount = list.reduce(function(sum, item) {
+    return sum + (Number(item.price || 0) * Number(item.qty || 1));
+  }, 0);
 
-              btn.textContent = "Your List (" + totalQty + ")";
+  const desktopBtn = document.getElementById("yourListBtn");
 
-              if (totalQty > 0) {
-                btn.classList.add("active");
-              } else {
-                btn.classList.remove("active");
-              }
-            });
-          }
+  if (desktopBtn) {
+    desktopBtn.textContent = "Your List (" + totalQty + ")";
+
+    if (totalQty > 0) {
+      desktopBtn.classList.add("active");
+    } else {
+      desktopBtn.classList.remove("active");
+    }
+  }
+
+  const bottomBar = document.getElementById("mobileBottomListBar");
+  const bottomTotal = document.getElementById("mobileBottomTotal");
+  const bottomCount = document.getElementById("mobileBottomCount");
+
+  if (bottomTotal) {
+    bottomTotal.textContent = "₹" + totalAmount.toFixed(0);
+  }
+
+  if (bottomCount) {
+    bottomCount.textContent = totalQty + (totalQty === 1 ? " item" : " items");
+  }
+
+  if (bottomBar) {
+    if (totalQty > 0) {
+      bottomBar.classList.add("show");
+    } else {
+      bottomBar.classList.remove("show");
+
+      const panel = document.getElementById("yourListPanel");
+      if (panel) panel.classList.remove("show");
+    }
+  }
+
+  updateMobileBottomArrow();
+}
+
+function updateMobileBottomArrow() {
+  const panel = document.getElementById("yourListPanel");
+  const arrow = document.getElementById("mobileBottomArrow");
+
+  if (!panel || !arrow) return;
+
+  arrow.textContent = panel.classList.contains("show") ? "⌄" : "⌃";
+}
 
           function toggleYourList() {
-            const panel = document.getElementById("yourListPanel");
-            renderYourList();
-            panel.classList.toggle("show");
-          }
+  const panel = document.getElementById("yourListPanel");
+  if (!panel) return;
+
+  renderYourList();
+  panel.classList.toggle("show");
+  updateMobileBottomArrow();
+}
 
           function closeYourList() {
-            document.getElementById("yourListPanel").classList.remove("show");
-          }
+  const panel = document.getElementById("yourListPanel");
+  if (!panel) return;
 
+  panel.classList.remove("show");
+  updateMobileBottomArrow();
+}
           function renderYourList() {
             const body = document.getElementById("yourListBody");
             const totalBox = document.getElementById("yourListTotal");
@@ -4907,23 +5110,36 @@ app.get("/page/:slug", (req, res) => {
           }
 
           .your-list-panel {
-            display: none;
-            position: fixed;
-            top: 59px;
-            left: 10px;
-            right: 10px;
-            z-index: 60;
-            background: white;
-            border: 1px solid #DCCCAC;
-            border-radius: 0 0 18px 18px;
-            box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
-            max-height: 70vh;
-            overflow: auto;
-          }
+  display: none;
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: 72px;
+  z-index: 90;
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -14px 34px rgba(84, 107, 65, 0.18);
+  max-height: 55vh;
+  overflow: auto;
+}
 
-          .your-list-panel.show {
-            display: block;
-          }
+.your-list-panel.show {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .your-list-panel {
+    top: 59px;
+    bottom: auto;
+    left: 10px;
+    right: 10px;
+    z-index: 60;
+    border-radius: 0 0 18px 18px;
+    box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
+    max-height: 70vh;
+  }
+}
 
           .list-head {
             display: flex;
@@ -5416,37 +5632,77 @@ function setCardListQty(productId, value) {
 
           function updateListButton() {
   const list = getList();
+
   const totalQty = list.reduce(function(sum, item) {
     return sum + Number(item.qty || 0);
   }, 0);
 
-  const buttons = [
-    document.getElementById("yourListBtn"),
-    document.getElementById("yourListBtnMobile")
-  ];
+  const totalAmount = list.reduce(function(sum, item) {
+    return sum + (Number(item.price || 0) * Number(item.qty || 1));
+  }, 0);
 
-  buttons.forEach(function(btn) {
-    if (!btn) return;
+  const desktopBtn = document.getElementById("yourListBtn");
 
-    btn.textContent = "Your List (" + totalQty + ")";
+  if (desktopBtn) {
+    desktopBtn.textContent = "Your List (" + totalQty + ")";
 
     if (totalQty > 0) {
-      btn.classList.add("active");
+      desktopBtn.classList.add("active");
     } else {
-      btn.classList.remove("active");
+      desktopBtn.classList.remove("active");
     }
-  });
+  }
+
+  const bottomBar = document.getElementById("mobileBottomListBar");
+  const bottomTotal = document.getElementById("mobileBottomTotal");
+  const bottomCount = document.getElementById("mobileBottomCount");
+
+  if (bottomTotal) {
+    bottomTotal.textContent = "₹" + totalAmount.toFixed(0);
+  }
+
+  if (bottomCount) {
+    bottomCount.textContent = totalQty + (totalQty === 1 ? " item" : " items");
+  }
+
+  if (bottomBar) {
+    if (totalQty > 0) {
+      bottomBar.classList.add("show");
+    } else {
+      bottomBar.classList.remove("show");
+
+      const panel = document.getElementById("yourListPanel");
+      if (panel) panel.classList.remove("show");
+    }
+  }
+
+  updateMobileBottomArrow();
 }
 
+function updateMobileBottomArrow() {
+  const panel = document.getElementById("yourListPanel");
+  const arrow = document.getElementById("mobileBottomArrow");
+
+  if (!panel || !arrow) return;
+
+  arrow.textContent = panel.classList.contains("show") ? "⌄" : "⌃";
+}
           function toggleYourList() {
-            const panel = document.getElementById("yourListPanel");
-            renderYourList();
-            panel.classList.toggle("show");
-          }
+  const panel = document.getElementById("yourListPanel");
+  if (!panel) return;
+
+  renderYourList();
+  panel.classList.toggle("show");
+  updateMobileBottomArrow();
+}
 
           function closeYourList() {
-            document.getElementById("yourListPanel").classList.remove("show");
-          }
+  const panel = document.getElementById("yourListPanel");
+  if (!panel) return;
+
+  panel.classList.remove("show");
+  updateMobileBottomArrow();
+}
 
           function renderYourList() {
             const body = document.getElementById("yourListBody");
