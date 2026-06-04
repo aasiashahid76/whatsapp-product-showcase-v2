@@ -473,11 +473,15 @@ function globalHeaderFooterCss() {
 ========================= */
 
 .site-header {
-  grid-template-columns: 70px 1fr 38px;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding: 8px 12px;
 }
 
 .logo-box {
   height: 38px;
+  width: 90px;
+  justify-self: center;
 }
 
 .desktop-right-header,
@@ -488,6 +492,11 @@ function globalHeaderFooterCss() {
 
 .mobile-list-btn {
   display: none;
+}
+
+.mobile-search-box,
+.pages-menu-btn {
+  display: none !important;
 }
 
 .mobile-bottom-list-bar {
@@ -863,12 +872,18 @@ app.get("/", (req, res) => {
 
 .circular-pages-wrap {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 14px;
   overflow-x: auto;
   padding: 8px 2px 18px;
   margin-bottom: 8px;
   text-align: center;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.circular-pages-wrap::-webkit-scrollbar {
+  display: none;
 }
 
 .circular-page-item {
@@ -900,6 +915,35 @@ app.get("/", (req, res) => {
   font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
+}
+
+.home-mobile-search-wrap {
+  margin: 0 0 14px;
+}
+
+.home-mobile-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #DCCCAC;
+  border-radius: 999px;
+  padding: 10px 12px;
+}
+
+.home-mobile-search-box input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #546B41;
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  .home-mobile-search-wrap {
+    display: none;
+  }
 }
 
 @keyframes circlePulse {
@@ -1152,15 +1196,19 @@ app.get("/", (req, res) => {
 
           .card-action-row {
   margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .add-btn {
-  width: 100%;
+  width: auto;
+  min-width: 48px;
   border: none;
   background: #546B41;
   color: #FFF8EC;
   border-radius: 8px;
   height: 26px;
+  padding: 0 10px;
   font-size: 11px;
   font-weight: 800;
   cursor: pointer;
@@ -1450,6 +1498,13 @@ app.get("/", (req, res) => {
 
 <section id="circularPagesWrap" class="circular-pages-wrap"></section>
 
+<section class="home-mobile-search-wrap">
+  <div class="home-mobile-search-box">
+    <span>🔍</span>
+    <input id="homeSearchInput" placeholder="Search products..." oninput="syncHomeSearch()" />
+  </div>
+</section>
+
 <section class="feature-strip">
   <div class="feature-card">
     <span>✅</span>
@@ -1640,9 +1695,30 @@ function toggleDesktopSearch() {
 function filterProductsFromDesktop() {
   const mobileInput = document.getElementById("searchInput");
   const desktopInput = document.getElementById("desktopSearchInput");
+  const homeInput = document.getElementById("homeSearchInput");
 
   if (mobileInput && desktopInput) {
     mobileInput.value = desktopInput.value;
+  }
+
+  if (homeInput && desktopInput) {
+    homeInput.value = desktopInput.value;
+  }
+
+  filterProducts();
+}
+
+function syncHomeSearch() {
+  const hiddenTopInput = document.getElementById("searchInput");
+  const homeInput = document.getElementById("homeSearchInput");
+  const desktopInput = document.getElementById("desktopSearchInput");
+
+  if (hiddenTopInput && homeInput) {
+    hiddenTopInput.value = homeInput.value;
+  }
+
+  if (desktopInput && homeInput) {
+    desktopInput.value = homeInput.value;
   }
 
   filterProducts();
@@ -1726,6 +1802,8 @@ if (footerWhatsappSocial) {
 
 let currentBannerIndex = 0;
 let bannerTimer = null;
+let circularRailTimer = null;
+let circularRailDirection = 1;
 
 async function loadHomeTopDesign() {
   try {
@@ -1793,19 +1871,21 @@ async function loadHomeTopDesign() {
 
     const circularWrap = document.getElementById("circularPagesWrap");
 
-    if (circularWrap) {
-      if (circularPages.length === 0) {
-        circularWrap.style.display = "none";
-      } else {
-        circularWrap.style.display = "flex";
-        circularWrap.innerHTML = circularPages.map(function(page) {
-          return "" +
-            "<a class='circular-page-item' href='/page/" + page.slug + "'>" +
-              "<img class='circular-img' src='" + page.circular_image_url + "' alt='" + page.page_name + "' />" +
-              "<div class='circular-page-name'>" + page.page_name + "</div>" +
-            "</a>";
-        }).join("");
-      }
+    if (circularPages.length === 0) {
+  circularWrap.style.display = "none";
+  stopCircularRailMovement();
+} else {
+  circularWrap.style.display = "flex";
+  circularWrap.innerHTML = circularPages.map(function(page) {
+    return "" +
+      "<a class='circular-page-item' href='/page/" + page.slug + "'>" +
+        "<img class='circular-img' src='" + page.circular_image_url + "' alt='" + page.page_name + "' />" +
+        "<div class='circular-page-name'>" + page.page_name + "</div>" +
+      "</a>";
+  }).join("");
+
+  startCircularRailMovement();
+}
     }
   } catch (error) {
     console.log(error.message);
@@ -1831,6 +1911,39 @@ function startBannerSlider() {
     slides[currentBannerIndex].classList.add("active");
     if (dots[currentBannerIndex]) dots[currentBannerIndex].classList.add("active");
   }, 3500);
+}
+
+function stopCircularRailMovement() {
+  if (circularRailTimer) {
+    clearInterval(circularRailTimer);
+    circularRailTimer = null;
+  }
+}
+
+function startCircularRailMovement() {
+  const wrap = document.getElementById("circularPagesWrap");
+
+  if (!wrap) return;
+
+  stopCircularRailMovement();
+
+  setTimeout(function() {
+    if (wrap.scrollWidth <= wrap.clientWidth + 2) return;
+
+    circularRailTimer = setInterval(function() {
+      const maxScroll = wrap.scrollWidth - wrap.clientWidth;
+
+      if (wrap.scrollLeft >= maxScroll - 2) {
+        circularRailDirection = -1;
+      }
+
+      if (wrap.scrollLeft <= 2) {
+        circularRailDirection = 1;
+      }
+
+      wrap.scrollLeft += circularRailDirection;
+    }, 35);
+  }, 500);
 }
 
 async function loadFixedBanners() {
@@ -5065,15 +5178,19 @@ app.get("/page/:slug", (req, res) => {
 
           .card-action-row {
   margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .add-btn {
-  width: 100%;
+  width: auto;
+  min-width: 48px;
   border: none;
   background: #546B41;
   color: #FFF8EC;
   border-radius: 8px;
   height: 26px;
+  padding: 0 10px;
   font-size: 11px;
   font-weight: 800;
   cursor: pointer;
@@ -5442,9 +5559,30 @@ function toggleDesktopSearch() {
 function filterProductsFromDesktop() {
   const mobileInput = document.getElementById("searchInput");
   const desktopInput = document.getElementById("desktopSearchInput");
+  const homeInput = document.getElementById("homeSearchInput");
 
   if (mobileInput && desktopInput) {
     mobileInput.value = desktopInput.value;
+  }
+
+  if (homeInput && desktopInput) {
+    homeInput.value = desktopInput.value;
+  }
+
+  filterProducts();
+}
+
+function syncHomeSearch() {
+  const hiddenTopInput = document.getElementById("searchInput");
+  const homeInput = document.getElementById("homeSearchInput");
+  const desktopInput = document.getElementById("desktopSearchInput");
+
+  if (hiddenTopInput && homeInput) {
+    hiddenTopInput.value = homeInput.value;
+  }
+
+  if (desktopInput && homeInput) {
+    desktopInput.value = homeInput.value;
   }
 
   filterProducts();
