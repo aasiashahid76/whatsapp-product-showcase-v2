@@ -626,29 +626,6 @@ function globalHeaderFooterCss() {
     text-underline-offset: 4px;
   }
 
-  .desktop-search-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: #546B41;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  padding: 0;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.search-icon-symbol {
-  display: inline;
-}
-
-.search-text-mobile {
-  display: none;
-}
-
     .logo-box {
     height: 44px;
     width: 140px;
@@ -704,10 +681,6 @@ function globalHeaderHtml() {
 </header>
 
 <div id="pagesMenuPanel" class="pages-menu-panel"></div>
-
-<div id="desktopSearchPanel" class="desktop-search-panel">
-  <input id="desktopSearchInput" placeholder="Search products..." oninput="filterProductsFromDesktop()" />
-</div>
 
 <div id="yourListPanel" class="your-list-panel">
   <div class="list-head">
