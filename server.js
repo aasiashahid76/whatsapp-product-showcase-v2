@@ -578,6 +578,7 @@ function globalHeaderFooterCss() {
   .site-header {
     grid-template-columns: 140px 1fr;
     padding: 12px 24px;
+    justify-items: stretch;
   }
 
   .mobile-list-btn,
@@ -627,8 +628,10 @@ function globalHeaderFooterCss() {
     cursor: pointer;
   }
 
-  .logo-box {
+    .logo-box {
     height: 44px;
+    width: 140px;
+    justify-self: start;
   }
 
   .mobile-bottom-list-bar {
@@ -1850,6 +1853,48 @@ async function loadHomeTopDesign() {
             slidesHtml +
             dotsHtml +
           "</div>";
+
+        startBannerSlider();
+      } else {
+        bannerWrap.innerHTML =
+          "<div class='home-banner-slider'>" +
+            "<div class='home-banner-slide active'>" +
+              "<div class='home-banner-content'>" +
+                "<h1>Shop quality products easily</h1>" +
+                "<p>Select products, add them to Your List, and send your order on WhatsApp.</p>" +
+              "</div>" +
+            "</div>" +
+          "</div>";
+      }
+    }
+
+    const circularPages = activePages.filter(function(page) {
+      return (page.create_circular_icon === 1 || page.create_circular_icon === true) && page.circular_image_url;
+    });
+
+    const circularWrap = document.getElementById("circularPagesWrap");
+
+    if (circularWrap) {
+      if (circularPages.length === 0) {
+        circularWrap.style.display = "none";
+        stopCircularRailMovement();
+      } else {
+        circularWrap.style.display = "flex";
+        circularWrap.innerHTML = circularPages.map(function(page) {
+          return "" +
+            "<a class='circular-page-item' href='/page/" + page.slug + "'>" +
+              "<img class='circular-img' src='" + page.circular_image_url + "' alt='" + page.page_name + "' />" +
+              "<div class='circular-page-name'>" + page.page_name + "</div>" +
+            "</a>";
+        }).join("");
+
+        startCircularRailMovement();
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+}
 
         startBannerSlider();
       } else {
