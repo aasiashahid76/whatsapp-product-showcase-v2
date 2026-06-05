@@ -195,9 +195,34 @@ function globalHeaderFooterCss() {
     overflow: hidden;
   }
 
+  body.mobile-search-focus::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: #FFF8EC;
+    z-index: 220;
+  }
+
+  body.mobile-search-focus::after {
+    content: "Type product name...";
+    position: fixed;
+    top: 92px;
+    left: 20px;
+    right: 20px;
+    z-index: 221;
+    text-align: center;
+    color: #6f7a5f;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  body.mobile-search-focus.mobile-search-has-text::after {
+    display: none;
+  }
+
   body.mobile-search-focus .search-shell.mobile-search-active {
     position: fixed !important;
-    top: 10px;
+    top: 12px;
     left: 10px;
     right: 10px;
     z-index: 230;
@@ -209,7 +234,7 @@ function globalHeaderFooterCss() {
 
   body.mobile-search-focus .search-shell.mobile-search-active .search-suggestions-box {
     position: fixed;
-    top: 60px;
+    top: 66px;
     left: 10px;
     right: 10px;
     z-index: 231;
@@ -223,7 +248,6 @@ function globalHeaderFooterCss() {
     display: none !important;
   }
 }
-
 .search-suggestion-item {
   display: grid;
   grid-template-columns: 42px 1fr auto;
@@ -985,7 +1009,11 @@ function syncSearchValue(inputId) {
     homeInput.value = value;
   }
 
-  return value.toLowerCase().trim();
+  if (typeof isMobileSearchScreen === "function" && isMobileSearchScreen() && document.body.classList.contains("mobile-search-focus")) {
+  document.body.classList.toggle("mobile-search-has-text", !!value.trim());
+}
+
+return value.toLowerCase().trim();
 }
 
 function getSearchMatches(q) {
@@ -1130,9 +1158,10 @@ function openMobileSearchFocus(input) {
   });
 
   document.body.classList.add("mobile-search-focus");
-  shell.classList.add("mobile-search-active");
+document.body.classList.toggle("mobile-search-has-text", !!input.value.trim());
+shell.classList.add("mobile-search-active");
 
-  updateMobileSearchResultsHeight();
+updateMobileSearchResultsHeight();
 
   setTimeout(function() {
     window.scrollTo({
@@ -1154,7 +1183,8 @@ function closeMobileSearchFocusIfEmpty() {
   if (value) return;
 
   document.body.classList.remove("mobile-search-focus");
-  activeShell.classList.remove("mobile-search-active");
+document.body.classList.remove("mobile-search-has-text");
+activeShell.classList.remove("mobile-search-active");
 }
 
 document.addEventListener("focusin", function(event) {
@@ -1169,8 +1199,32 @@ document.addEventListener("focusout", function(event) {
   }
 });
 
+let lastMobileViewportHeight = 0;
+
+function handleMobileViewportResize() {
+  updateMobileSearchResultsHeight();
+
+  if (!isMobileSearchScreen()) return;
+
+  const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const activeShell = document.querySelector(".search-shell.mobile-search-active");
+  const input = activeShell ? activeShell.querySelector("input") : null;
+
+  if (lastMobileViewportHeight && height > lastMobileViewportHeight + 120 && input && !input.value.trim()) {
+    document.body.classList.remove("mobile-search-focus");
+    document.body.classList.remove("mobile-search-has-text");
+    activeShell.classList.remove("mobile-search-active");
+
+    if (document.activeElement === input) {
+      input.blur();
+    }
+  }
+
+  lastMobileViewportHeight = height;
+}
+
 if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", updateMobileSearchResultsHeight);
+  window.visualViewport.addEventListener("resize", handleMobileViewportResize);
 }
 
 document.addEventListener("click", function(event) {
