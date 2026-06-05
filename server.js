@@ -2706,6 +2706,17 @@ let total = 0;
   const url = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
 
   window.open(url, "_blank");
+  
+localStorage.removeItem("your_list");
+updateListButton();
+renderYourList();
+
+if (typeof syncProductCardButtons === "function") {
+  syncProductCardButtons();
+}
+
+closeYourList();
+  
 }
           loadSettings().then(async function() {
   loadHeaderPages();
@@ -5417,6 +5428,17 @@ function updateMobileBottomArrow() {
             const url = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
 
             window.open(url, "_blank");
+
+			localStorage.removeItem("your_list");
+updateListButton();
+renderYourList();
+
+if (typeof syncProductCardButtons === "function") {
+  syncProductCardButtons();
+}
+
+closeYourList();
+			
           }
 
           loadSettings();
@@ -6368,6 +6390,17 @@ function updateMobileBottomArrow() {
             const url = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
 
             window.open(url, "_blank");
+
+			localStorage.removeItem("your_list");
+updateListButton();
+renderYourList();
+
+if (typeof syncProductCardButtons === "function") {
+  syncProductCardButtons();
+}
+
+closeYourList();
+			
           }
 
           loadSettings().then(function() {
