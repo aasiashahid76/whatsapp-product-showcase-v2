@@ -538,6 +538,13 @@ function globalHeaderFooterCss() {
   margin-top: 12px;
 }
 
+.footer-social-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
 .footer-browse-link {
   display: inline-block;
   margin-top: 18px;
@@ -2143,7 +2150,12 @@ if (footerEmail) {
 
 if (footerWhatsapp) {
   footerWhatsapp.innerHTML = whatsappNumber
-    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 32 32' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M16.02 3C8.86 3 3.04 8.82 3.04 15.98c0 2.29.6 4.52 1.74 6.49L3 29l6.69-1.75a12.9 12.9 0 0 0 6.33 1.61C23.18 28.86 29 23.04 29 15.98S23.18 3 16.02 3Zm0 23.66c-2.03 0-4.02-.55-5.75-1.6l-.41-.24-3.97 1.04 1.06-3.86-.27-.43a10.68 10.68 0 0 1-1.44-5.59c0-5.95 4.84-10.79 10.79-10.79s10.79 4.84 10.79 10.79-4.85 10.68-10.8 10.68Zm5.92-8.08c-.32-.16-1.91-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.27-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.6-.96-.85-1.6-1.91-1.79-2.23-.19-.32-.02-.5.14-.66.14-.14.32-.38.48-.56.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.86.4-.3.32-1.13 1.1-1.13 2.69s1.16 3.12 1.32 3.34c.16.21 2.28 3.48 5.52 4.88.77.33 1.37.53 1.84.68.77.24 1.48.21 2.04.13.62-.09 1.91-.78 2.18-1.54.27-.75.27-1.4.19-1.54-.08-.13-.3-.21-.62-.37Z'/>" +
+        "</svg>" +
+        "WhatsApp" +
+      "</a>"
     : "";
 }
 
@@ -5478,10 +5490,15 @@ function updateMobileBottomArrow() {
       }
 
       if (footerWhatsapp) {
-        footerWhatsapp.innerHTML = whatsappNumber
-          ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
-          : "";
-      }
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 32 32' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M16.02 3C8.86 3 3.04 8.82 3.04 15.98c0 2.29.6 4.52 1.74 6.49L3 29l6.69-1.75a12.9 12.9 0 0 0 6.33 1.61C23.18 28.86 29 23.04 29 15.98S23.18 3 16.02 3Zm0 23.66c-2.03 0-4.02-.55-5.75-1.6l-.41-.24-3.97 1.04 1.06-3.86-.27-.43a10.68 10.68 0 0 1-1.44-5.59c0-5.95 4.84-10.79 10.79-10.79s10.79 4.84 10.79 10.79-4.85 10.68-10.8 10.68Zm5.92-8.08c-.32-.16-1.91-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.27-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.6-.96-.85-1.6-1.91-1.79-2.23-.19-.32-.02-.5.14-.66.14-.14.32-.38.48-.56.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.86.4-.3.32-1.13 1.1-1.13 2.69s1.16 3.12 1.32 3.34c.16.21 2.28 3.48 5.52 4.88.77.33 1.37.53 1.84.68.77.24 1.48.21 2.04.13.62-.09 1.91-.78 2.18-1.54.27-.75.27-1.4.19-1.54-.08-.13-.3-.21-.62-.37Z'/>" +
+        "</svg>" +
+        "WhatsApp" +
+      "</a>"
+    : "";
+}
 
       if (footerInstagram) {
         footerInstagram.innerHTML = instagram
@@ -6146,10 +6163,15 @@ function syncHomeSearch() {
     }
 
     if (footerWhatsapp) {
-      footerWhatsapp.innerHTML = whatsappNumber
-        ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
-        : "";
-    }
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 32 32' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M16.02 3C8.86 3 3.04 8.82 3.04 15.98c0 2.29.6 4.52 1.74 6.49L3 29l6.69-1.75a12.9 12.9 0 0 0 6.33 1.61C23.18 28.86 29 23.04 29 15.98S23.18 3 16.02 3Zm0 23.66c-2.03 0-4.02-.55-5.75-1.6l-.41-.24-3.97 1.04 1.06-3.86-.27-.43a10.68 10.68 0 0 1-1.44-5.59c0-5.95 4.84-10.79 10.79-10.79s10.79 4.84 10.79 10.79-4.85 10.68-10.8 10.68Zm5.92-8.08c-.32-.16-1.91-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.27-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.6-.96-.85-1.6-1.91-1.79-2.23-.19-.32-.02-.5.14-.66.14-.14.32-.38.48-.56.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.86.4-.3.32-1.13 1.1-1.13 2.69s1.16 3.12 1.32 3.34c.16.21 2.28 3.48 5.52 4.88.77.33 1.37.53 1.84.68.77.24 1.48.21 2.04.13.62-.09 1.91-.78 2.18-1.54.27-.75.27-1.4.19-1.54-.08-.13-.3-.21-.62-.37Z'/>" +
+        "</svg>" +
+        "WhatsApp" +
+      "</a>"
+    : "";
+}
 
     if (footerInstagram) {
       footerInstagram.innerHTML = instagram
