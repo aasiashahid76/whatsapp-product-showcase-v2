@@ -658,6 +658,40 @@ function globalHeaderFooterCss() {
   cursor: pointer;
 }
 
+.floating-whatsapp-btn {
+  position: fixed;
+  right: 16px;
+  bottom: 86px;
+  z-index: 94;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  background: #16a34a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 28px;
+  font-weight: 900;
+  box-shadow: 0 10px 26px rgba(22, 163, 74, 0.35);
+  border: 2px solid white;
+}
+
+.floating-whatsapp-btn:hover {
+  transform: translateY(-2px);
+}
+
+@media (min-width: 768px) {
+  .floating-whatsapp-btn {
+    right: 24px;
+    bottom: 24px;
+    width: 58px;
+    height: 58px;
+    font-size: 30px;
+  }
+}
+
 .your-list-panel .list-footer {
   display: none;
 }
@@ -806,8 +840,36 @@ function globalHeaderHtml() {
   <button class="mobile-bottom-whatsapp-btn" onclick="sendToWhatsapp()">Send to WhatsApp</button>
 </div>
 
+<a href="#" class="floating-whatsapp-btn" onclick="openFloatingWhatsapp(event)" aria-label="Chat on WhatsApp">☏</a>
+
 <script>
 window.globalSearchProducts = window.globalSearchProducts || [];
+
+function openFloatingWhatsapp(event) {
+  if (event) {
+    event.preventDefault();
+  }
+
+  let settings = {};
+
+  try {
+    if (typeof siteSettings !== "undefined") {
+      settings = siteSettings || {};
+    }
+  } catch (error) {
+    settings = {};
+  }
+
+  const whatsappNumber = String(settings.whatsapp_number || "").replace(/[^0-9]/g, "");
+
+  if (!whatsappNumber) {
+    alert("WhatsApp number is not set. Please add it from Manage UI > Header & Footer.");
+    return;
+  }
+
+  const url = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent("Hello");
+  window.open(url, "_blank");
+}
 
 async function loadGlobalSearchProducts() {
   if (window.globalSearchProducts.length > 0) {
