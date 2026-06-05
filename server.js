@@ -220,12 +220,24 @@ function globalHeaderFooterCss() {
     display: none;
   }
 
+  body.mobile-search-focus .site-header {
+    z-index: 240;
+    background: transparent;
+    border-bottom: none;
+  }
+
+  body.mobile-search-focus .site-header .logo-box,
+  body.mobile-search-focus .site-header .pages-menu-btn,
+  body.mobile-search-focus .site-header .desktop-right-header {
+    display: none !important;
+  }
+
   body.mobile-search-focus .search-shell.mobile-search-active {
     position: fixed !important;
     top: 12px;
     left: 10px;
     right: 10px;
-    z-index: 230;
+    z-index: 250;
     width: auto !important;
     max-width: none !important;
     margin: 0 !important;
@@ -237,7 +249,7 @@ function globalHeaderFooterCss() {
     top: 66px;
     left: 10px;
     right: 10px;
-    z-index: 231;
+    z-index: 251;
     max-height: var(--mobile-search-results-height, 320px);
     overflow-y: auto;
     border-radius: 14px;
@@ -248,6 +260,8 @@ function globalHeaderFooterCss() {
     display: none !important;
   }
 }
+
+
 .search-suggestion-item {
   display: grid;
   grid-template-columns: 42px 1fr auto;
@@ -1171,7 +1185,7 @@ updateMobileSearchResultsHeight();
   }, 80);
 }
 
-function closeMobileSearchFocusIfEmpty() {
+function closeMobileSearchFocus(forceClose) {
   if (!isMobileSearchScreen()) return;
 
   const activeShell = document.querySelector(".search-shell.mobile-search-active");
@@ -1180,11 +1194,24 @@ function closeMobileSearchFocusIfEmpty() {
   const input = activeShell.querySelector("input");
   const value = input ? input.value.trim() : "";
 
-  if (value) return;
+  if (!forceClose && value) return;
+
+  document.querySelectorAll(".search-suggestions-box").forEach(function(box) {
+    box.innerHTML = "";
+    box.classList.remove("show");
+  });
 
   document.body.classList.remove("mobile-search-focus");
-document.body.classList.remove("mobile-search-has-text");
-activeShell.classList.remove("mobile-search-active");
+  document.body.classList.remove("mobile-search-has-text");
+  activeShell.classList.remove("mobile-search-active");
+}
+
+function closeMobileSearchFocusIfEmpty() {
+  closeMobileSearchFocus(false);
+}
+
+function closeMobileSearchFocusAlways() {
+  closeMobileSearchFocus(true);
 }
 
 document.addEventListener("focusin", function(event) {
@@ -1210,10 +1237,8 @@ function handleMobileViewportResize() {
   const activeShell = document.querySelector(".search-shell.mobile-search-active");
   const input = activeShell ? activeShell.querySelector("input") : null;
 
-  if (lastMobileViewportHeight && height > lastMobileViewportHeight + 120 && input && !input.value.trim()) {
-    document.body.classList.remove("mobile-search-focus");
-    document.body.classList.remove("mobile-search-has-text");
-    activeShell.classList.remove("mobile-search-active");
+  if (lastMobileViewportHeight && height > lastMobileViewportHeight + 120 && input) {
+    closeMobileSearchFocusAlways();
 
     if (document.activeElement === input) {
       input.blur();
