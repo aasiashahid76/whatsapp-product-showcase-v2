@@ -539,6 +539,11 @@ function globalHeaderFooterCss() {
   flex: 0 0 auto;
 }
 
+.instagram-real-icon {
+  width: 20px;
+  height: 20px;
+}
+
 .footer-browse-link {
   display: inline-block;
   margin-top: 18px;
@@ -2156,8 +2161,10 @@ if (footerWhatsapp) {
 if (footerInstagram) {
   footerInstagram.innerHTML = instagram
     ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>" +
-        "<svg class='footer-social-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
-          "<path fill='currentColor' d='M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.25-2.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z'/>" +
+        "<svg class='footer-social-icon instagram-real-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
+          "<rect x='2' y='2' width='20' height='20' rx='6' fill='#E4405F'/>" +
+          "<circle cx='12' cy='12' r='4.2' fill='none' stroke='white' stroke-width='2'/>" +
+          "<circle cx='17.3' cy='6.7' r='1.3' fill='white'/>" +
         "</svg>" +
         "Instagram" +
       "</a>"
@@ -4757,8 +4764,10 @@ app.get("/legal/:type", async (req, res) => {
 if (footerInstagram) {
   footerInstagram.innerHTML = instagram
     ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>" +
-        "<svg class='footer-social-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
-          "<path fill='currentColor' d='M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.25-2.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z'/>" +
+        "<svg class='footer-social-icon instagram-real-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
+          "<rect x='2' y='2' width='20' height='20' rx='6' fill='#E4405F'/>" +
+          "<circle cx='12' cy='12' r='4.2' fill='none' stroke='white' stroke-width='2'/>" +
+          "<circle cx='17.3' cy='6.7' r='1.3' fill='white'/>" +
         "</svg>" +
         "Instagram" +
       "</a>"
@@ -5514,8 +5523,10 @@ function updateMobileBottomArrow() {
 if (footerInstagram) {
   footerInstagram.innerHTML = instagram
     ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>" +
-        "<svg class='footer-social-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
-          "<path fill='currentColor' d='M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.25-2.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z'/>" +
+        "<svg class='footer-social-icon instagram-real-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
+          "<rect x='2' y='2' width='20' height='20' rx='6' fill='#E4405F'/>" +
+          "<circle cx='12' cy='12' r='4.2' fill='none' stroke='white' stroke-width='2'/>" +
+          "<circle cx='17.3' cy='6.7' r='1.3' fill='white'/>" +
         "</svg>" +
         "Instagram" +
       "</a>"
@@ -6190,8 +6201,10 @@ function syncHomeSearch() {
 if (footerInstagram) {
   footerInstagram.innerHTML = instagram
     ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>" +
-        "<svg class='footer-social-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
-          "<path fill='currentColor' d='M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.25-2.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z'/>" +
+        "<svg class='footer-social-icon instagram-real-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
+          "<rect x='2' y='2' width='20' height='20' rx='6' fill='#E4405F'/>" +
+          "<circle cx='12' cy='12' r='4.2' fill='none' stroke='white' stroke-width='2'/>" +
+          "<circle cx='17.3' cy='6.7' r='1.3' fill='white'/>" +
         "</svg>" +
         "Instagram" +
       "</a>"
