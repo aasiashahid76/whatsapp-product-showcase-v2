@@ -861,7 +861,7 @@ function globalHeaderHtml() {
 
   <div class="search-box mobile-search-box search-shell">
 <button class="search-icon-btn" type="button" onclick="runSearchInPage('searchInput', 'searchSuggestionsBox')">🔍</button>  
-<input id="searchInput" placeholder="Search products..." onpointerdown="openMobileSearchFocus(this)" onclick="openMobileSearchFocus(this)" onfocus="openMobileSearchFocus(this)" oninput="showSearchSuggestions('searchInput', 'searchSuggestionsBox')" onkeydown="handleSearchKey(event, 'searchInput', 'searchSuggestionsBox')" />
+<input id="searchInput" placeholder="Search products..." onfocus="delayMobileSearchFocus(this)" oninput="showSearchSuggestions('searchInput', 'searchSuggestionsBox')" onkeydown="handleSearchKey(event, 'searchInput', 'searchSuggestionsBox')" />
   <div id="searchSuggestionsBox" class="search-suggestions-box"></div>
 </div>
 
@@ -1109,6 +1109,16 @@ function updateMobileSearchResultsHeight() {
   document.documentElement.style.setProperty("--mobile-search-results-height", safeHeight + "px");
 }
 
+function delayMobileSearchFocus(input) {
+  if (!isMobileSearchScreen() || !input) return;
+
+  setTimeout(function() {
+    if (document.activeElement === input) {
+      openMobileSearchFocus(input);
+    }
+  }, 220);
+}
+
 function openMobileSearchFocus(input) {
   if (!isMobileSearchScreen() || !input) return;
 
@@ -1149,7 +1159,7 @@ function closeMobileSearchFocusIfEmpty() {
 
 document.addEventListener("focusin", function(event) {
   if (event.target && event.target.matches(".search-shell input")) {
-    openMobileSearchFocus(event.target);
+    delayMobileSearchFocus(event.target);
   }
 });
 
@@ -1971,7 +1981,7 @@ app.get("/", (req, res) => {
 <section class="home-mobile-search-wrap">
   <div class="home-mobile-search-box search-shell">
 <button class="search-icon-btn" type="button" onclick="runSearchInPage('homeSearchInput', 'homeSearchSuggestionsBox')">🔍</button>
-<input id="homeSearchInput" placeholder="Search products..." onpointerdown="openMobileSearchFocus(this)" onclick="openMobileSearchFocus(this)" onfocus="openMobileSearchFocus(this)" oninput="showSearchSuggestions('homeSearchInput', 'homeSearchSuggestionsBox')" onkeydown="handleSearchKey(event, 'homeSearchInput', 'homeSearchSuggestionsBox')" />
+<input id="homeSearchInput" placeholder="Search products..." onfocus="delayMobileSearchFocus(this)" oninput="showSearchSuggestions('homeSearchInput', 'homeSearchSuggestionsBox')" onkeydown="handleSearchKey(event, 'homeSearchInput', 'homeSearchSuggestionsBox')" />
     <div id="homeSearchSuggestionsBox" class="search-suggestions-box"></div>
   </div>
 </section>
