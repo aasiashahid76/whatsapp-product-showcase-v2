@@ -190,6 +190,40 @@ function globalHeaderFooterCss() {
   display: block;
 }
 
+@media (max-width: 767px) {
+  body.mobile-search-focus {
+    overflow: hidden;
+  }
+
+  body.mobile-search-focus .search-shell.mobile-search-active {
+    position: fixed !important;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 230;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-shadow: 0 10px 24px rgba(84, 107, 65, 0.18);
+  }
+
+  body.mobile-search-focus .search-shell.mobile-search-active .search-suggestions-box {
+    position: fixed;
+    top: 60px;
+    left: 10px;
+    right: 10px;
+    z-index: 231;
+    max-height: var(--mobile-search-results-height, 320px);
+    overflow-y: auto;
+    border-radius: 14px;
+  }
+
+  body.mobile-search-focus .mobile-bottom-list-bar,
+  body.mobile-search-focus .floating-whatsapp-btn {
+    display: none !important;
+  }
+}
+
 .search-suggestion-item {
   display: grid;
   grid-template-columns: 42px 1fr auto;
@@ -1062,12 +1096,81 @@ async function runSearchInPage(inputId, boxId) {
   }
 }
 
+function isMobileSearchScreen() {
+  return window.matchMedia && window.matchMedia("(max-width: 767px)").matches;
+}
+
+function updateMobileSearchResultsHeight() {
+  if (!isMobileSearchScreen()) return;
+
+  const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const safeHeight = Math.max(180, height - 80);
+
+  document.documentElement.style.setProperty("--mobile-search-results-height", safeHeight + "px");
+}
+
+function openMobileSearchFocus(input) {
+  if (!isMobileSearchScreen() || !input) return;
+
+  const shell = input.closest(".search-shell");
+  if (!shell) return;
+
+  document.querySelectorAll(".search-shell.mobile-search-active").forEach(function(item) {
+    item.classList.remove("mobile-search-active");
+  });
+
+  document.body.classList.add("mobile-search-focus");
+  shell.classList.add("mobile-search-active");
+
+  updateMobileSearchResultsHeight();
+
+  setTimeout(function() {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }, 80);
+}
+
+function closeMobileSearchFocusIfEmpty() {
+  if (!isMobileSearchScreen()) return;
+
+  const activeShell = document.querySelector(".search-shell.mobile-search-active");
+  if (!activeShell) return;
+
+  const input = activeShell.querySelector("input");
+  const value = input ? input.value.trim() : "";
+
+  if (value) return;
+
+  document.body.classList.remove("mobile-search-focus");
+  activeShell.classList.remove("mobile-search-active");
+}
+
+document.addEventListener("focusin", function(event) {
+  if (event.target && event.target.matches(".search-shell input")) {
+    openMobileSearchFocus(event.target);
+  }
+});
+
+document.addEventListener("focusout", function(event) {
+  if (event.target && event.target.matches(".search-shell input")) {
+    setTimeout(closeMobileSearchFocusIfEmpty, 180);
+  }
+});
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", updateMobileSearchResultsHeight);
+}
+
 document.addEventListener("click", function(event) {
   if (!event.target.closest(".search-shell")) {
     document.querySelectorAll(".search-suggestions-box").forEach(function(box) {
       box.innerHTML = "";
       box.classList.remove("show");
     });
+
+    closeMobileSearchFocusIfEmpty();
   }
 });
 </script>
