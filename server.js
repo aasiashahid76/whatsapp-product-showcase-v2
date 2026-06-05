@@ -861,7 +861,7 @@ function globalHeaderHtml() {
 
   <div class="search-box mobile-search-box search-shell">
 <button class="search-icon-btn" type="button" onclick="runSearchInPage('searchInput', 'searchSuggestionsBox')">🔍</button>  
-<input id="searchInput" placeholder="Search products..." oninput="showSearchSuggestions('searchInput', 'searchSuggestionsBox')" onkeydown="handleSearchKey(event, 'searchInput', 'searchSuggestionsBox')" />
+<input id="searchInput" placeholder="Search products..." onpointerdown="openMobileSearchFocus(this)" onclick="openMobileSearchFocus(this)" onfocus="openMobileSearchFocus(this)" oninput="showSearchSuggestions('searchInput', 'searchSuggestionsBox')" onkeydown="handleSearchKey(event, 'searchInput', 'searchSuggestionsBox')" />
   <div id="searchSuggestionsBox" class="search-suggestions-box"></div>
 </div>
 
@@ -1971,7 +1971,7 @@ app.get("/", (req, res) => {
 <section class="home-mobile-search-wrap">
   <div class="home-mobile-search-box search-shell">
 <button class="search-icon-btn" type="button" onclick="runSearchInPage('homeSearchInput', 'homeSearchSuggestionsBox')">🔍</button>
-<input id="homeSearchInput" placeholder="Search products..." oninput="showSearchSuggestions('homeSearchInput', 'homeSearchSuggestionsBox')" onkeydown="handleSearchKey(event, 'homeSearchInput', 'homeSearchSuggestionsBox')" />
+<input id="homeSearchInput" placeholder="Search products..." onpointerdown="openMobileSearchFocus(this)" onclick="openMobileSearchFocus(this)" onfocus="openMobileSearchFocus(this)" oninput="showSearchSuggestions('homeSearchInput', 'homeSearchSuggestionsBox')" onkeydown="handleSearchKey(event, 'homeSearchInput', 'homeSearchSuggestionsBox')" />
     <div id="homeSearchSuggestionsBox" class="search-suggestions-box"></div>
   </div>
 </section>
