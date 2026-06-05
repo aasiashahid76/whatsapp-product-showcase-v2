@@ -2148,10 +2148,8 @@ if (footerEmail) {
     : "";
 }
 
-if (footerWhatsapp) {
-  footerWhatsapp.innerHTML = whatsappNumber
-    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>💬 WhatsApp</a>"
-    : "";
+if (footerWhatsappSocial) {
+  footerWhatsappSocial.innerHTML = "";
 }
 
 if (footerInstagram) {
@@ -2161,9 +2159,7 @@ if (footerInstagram) {
 }
 
 if (footerWhatsappSocial) {
-  footerWhatsappSocial.innerHTML = whatsappNumber
-    ? "<a class='footer-social-btn whatsapp' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
-    : "";
+  footerWhatsappSocial.innerHTML = "";
 }
 	
   } catch (error) {
@@ -5484,12 +5480,9 @@ function updateMobileBottomArrow() {
           : "";
       }
 
-      if (footerWhatsapp) {
-  footerWhatsapp.innerHTML = whatsappNumber
-    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>💬 WhatsApp</a>"
-    : "";
+      if (footerWhatsappSocial) {
+  footerWhatsappSocial.innerHTML = "";
 }
-
       if (footerInstagram) {
         footerInstagram.innerHTML = instagram
           ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>📷 Instagram</a>"
@@ -5497,10 +5490,8 @@ function updateMobileBottomArrow() {
       }
 
       if (footerWhatsappSocial) {
-        footerWhatsappSocial.innerHTML = whatsappNumber
-          ? "<a class='footer-social-btn whatsapp' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
-          : "";
-      }
+  footerWhatsappSocial.innerHTML = "";
+}
     });
 }
 
@@ -6152,10 +6143,8 @@ function syncHomeSearch() {
         : "";
     }
 
-    if (footerWhatsapp) {
-  footerWhatsapp.innerHTML = whatsappNumber
-    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>💬 WhatsApp</a>"
-    : "";
+    if (footerWhatsappSocial) {
+  footerWhatsappSocial.innerHTML = "";
 }
 
     if (footerInstagram) {
@@ -6165,10 +6154,8 @@ function syncHomeSearch() {
     }
 
     if (footerWhatsappSocial) {
-      footerWhatsappSocial.innerHTML = whatsappNumber
-        ? "<a class='footer-social-btn whatsapp' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>"
-        : "";
-    }
+  footerWhatsappSocial.innerHTML = "";
+}
   } catch (error) {
     siteSettings = {};
   }
