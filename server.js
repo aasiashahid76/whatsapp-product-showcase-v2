@@ -503,7 +503,8 @@ function globalHeaderFooterCss() {
   flex-wrap: wrap;
 }
 
-.footer-social-btn {
+.footer-social-btn,
+.footer-whatsapp-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -511,7 +512,8 @@ function globalHeaderFooterCss() {
   padding: 10px 16px;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
+  width: fit-content;
 }
 
 .footer-social-btn.instagram {
@@ -519,23 +521,15 @@ function globalHeaderFooterCss() {
   color: #546B41;
 }
 
+.footer-whatsapp-btn {
+  background: #16a34a;
+  color: white;
+  margin-top: 2px;
+}
+
 .footer-social-btn.whatsapp {
   background: #16a34a;
   color: white;
-}
-
-.footer-whatsapp-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #16a34a;
-  color: white;
-  border-radius: 999px;
-  padding: 10px 18px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 700;
-  margin-top: 12px;
 }
 
 .footer-social-icon {
@@ -2148,13 +2142,25 @@ if (footerEmail) {
     : "";
 }
 
-if (footerWhatsappSocial) {
-  footerWhatsappSocial.innerHTML = "";
+if (footerWhatsapp) {
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 32 32' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M16.02 3C8.86 3 3.04 8.82 3.04 15.98c0 2.29.6 4.52 1.74 6.49L3 29l6.69-1.75a12.9 12.9 0 0 0 6.33 1.61C23.18 28.86 29 23.04 29 15.98S23.18 3 16.02 3Zm0 23.66c-2.03 0-4.02-.55-5.75-1.6l-.41-.24-3.97 1.04 1.06-3.86-.27-.43a10.68 10.68 0 0 1-1.44-5.59c0-5.95 4.84-10.79 10.79-10.79s10.79 4.84 10.79 10.79-4.85 10.68-10.8 10.68Zm5.92-8.08c-.32-.16-1.91-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.27-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.6-.96-.85-1.6-1.91-1.79-2.23-.19-.32-.02-.5.14-.66.14-.14.32-.38.48-.56.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.86.4-.3.32-1.13 1.1-1.13 2.69s1.16 3.12 1.32 3.34c.16.21 2.28 3.48 5.52 4.88.77.33 1.37.53 1.84.68.77.24 1.48.21 2.04.13.62-.09 1.91-.78 2.18-1.54.27-.75.27-1.4.19-1.54-.08-.13-.3-.21-.62-.37Z'/>" +
+        "</svg>" +
+        "WhatsApp us" +
+      "</a>"
+    : "";
 }
 
 if (footerInstagram) {
   footerInstagram.innerHTML = instagram
-    ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>📷 Instagram</a>"
+    ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.25-2.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z'/>" +
+        "</svg>" +
+        "Instagram" +
+      "</a>"
     : "";
 }
 
@@ -4738,16 +4744,30 @@ app.get("/legal/:type", async (req, res) => {
       }
 
       if (footerWhatsapp) {
-        footerWhatsapp.innerHTML = whatsappNumber ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>" : "";
-      }
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 32 32' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M16.02 3C8.86 3 3.04 8.82 3.04 15.98c0 2.29.6 4.52 1.74 6.49L3 29l6.69-1.75a12.9 12.9 0 0 0 6.33 1.61C23.18 28.86 29 23.04 29 15.98S23.18 3 16.02 3Zm0 23.66c-2.03 0-4.02-.55-5.75-1.6l-.41-.24-3.97 1.04 1.06-3.86-.27-.43a10.68 10.68 0 0 1-1.44-5.59c0-5.95 4.84-10.79 10.79-10.79s10.79 4.84 10.79 10.79-4.85 10.68-10.8 10.68Zm5.92-8.08c-.32-.16-1.91-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.27-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.6-.96-.85-1.6-1.91-1.79-2.23-.19-.32-.02-.5.14-.66.14-.14.32-.38.48-.56.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.86.4-.3.32-1.13 1.1-1.13 2.69s1.16 3.12 1.32 3.34c.16.21 2.28 3.48 5.52 4.88.77.33 1.37.53 1.84.68.77.24 1.48.21 2.04.13.62-.09 1.91-.78 2.18-1.54.27-.75.27-1.4.19-1.54-.08-.13-.3-.21-.62-.37Z'/>" +
+        "</svg>" +
+        "WhatsApp us" +
+      "</a>"
+    : "";
+}
 
-      if (footerInstagram) {
-        footerInstagram.innerHTML = instagram ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>📷 Instagram</a>" : "";
-      }
+if (footerInstagram) {
+  footerInstagram.innerHTML = instagram
+    ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.25-2.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z'/>" +
+        "</svg>" +
+        "Instagram" +
+      "</a>"
+    : "";
+}
 
-      if (footerWhatsappSocial) {
+if (footerWhatsappSocial) {
   footerWhatsappSocial.innerHTML = "";
-		}
+}
     } catch (error) {}
   }
 
@@ -5480,16 +5500,29 @@ function updateMobileBottomArrow() {
           : "";
       }
 
-      if (footerWhatsappSocial) {
-  footerWhatsappSocial.innerHTML = "";
+      if (footerWhatsapp) {
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 32 32' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M16.02 3C8.86 3 3.04 8.82 3.04 15.98c0 2.29.6 4.52 1.74 6.49L3 29l6.69-1.75a12.9 12.9 0 0 0 6.33 1.61C23.18 28.86 29 23.04 29 15.98S23.18 3 16.02 3Zm0 23.66c-2.03 0-4.02-.55-5.75-1.6l-.41-.24-3.97 1.04 1.06-3.86-.27-.43a10.68 10.68 0 0 1-1.44-5.59c0-5.95 4.84-10.79 10.79-10.79s10.79 4.84 10.79 10.79-4.85 10.68-10.8 10.68Zm5.92-8.08c-.32-.16-1.91-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.27-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.6-.96-.85-1.6-1.91-1.79-2.23-.19-.32-.02-.5.14-.66.14-.14.32-.38.48-.56.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.86.4-.3.32-1.13 1.1-1.13 2.69s1.16 3.12 1.32 3.34c.16.21 2.28 3.48 5.52 4.88.77.33 1.37.53 1.84.68.77.24 1.48.21 2.04.13.62-.09 1.91-.78 2.18-1.54.27-.75.27-1.4.19-1.54-.08-.13-.3-.21-.62-.37Z'/>" +
+        "</svg>" +
+        "WhatsApp us" +
+      "</a>"
+    : "";
 }
-      if (footerInstagram) {
-        footerInstagram.innerHTML = instagram
-          ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>📷 Instagram</a>"
-          : "";
-      }
 
-      if (footerWhatsappSocial) {
+if (footerInstagram) {
+  footerInstagram.innerHTML = instagram
+    ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.25-2.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z'/>" +
+        "</svg>" +
+        "Instagram" +
+      "</a>"
+    : "";
+}
+
+if (footerWhatsappSocial) {
   footerWhatsappSocial.innerHTML = "";
 }
     });
@@ -6143,17 +6176,29 @@ function syncHomeSearch() {
         : "";
     }
 
-    if (footerWhatsappSocial) {
-  footerWhatsappSocial.innerHTML = "";
+    if (footerWhatsapp) {
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 32 32' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M16.02 3C8.86 3 3.04 8.82 3.04 15.98c0 2.29.6 4.52 1.74 6.49L3 29l6.69-1.75a12.9 12.9 0 0 0 6.33 1.61C23.18 28.86 29 23.04 29 15.98S23.18 3 16.02 3Zm0 23.66c-2.03 0-4.02-.55-5.75-1.6l-.41-.24-3.97 1.04 1.06-3.86-.27-.43a10.68 10.68 0 0 1-1.44-5.59c0-5.95 4.84-10.79 10.79-10.79s10.79 4.84 10.79 10.79-4.85 10.68-10.8 10.68Zm5.92-8.08c-.32-.16-1.91-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.27-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.6-.96-.85-1.6-1.91-1.79-2.23-.19-.32-.02-.5.14-.66.14-.14.32-.38.48-.56.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.86.4-.3.32-1.13 1.1-1.13 2.69s1.16 3.12 1.32 3.34c.16.21 2.28 3.48 5.52 4.88.77.33 1.37.53 1.84.68.77.24 1.48.21 2.04.13.62-.09 1.91-.78 2.18-1.54.27-.75.27-1.4.19-1.54-.08-.13-.3-.21-.62-.37Z'/>" +
+        "</svg>" +
+        "WhatsApp us" +
+      "</a>"
+    : "";
 }
 
-    if (footerInstagram) {
-      footerInstagram.innerHTML = instagram
-        ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>📷 Instagram</a>"
-        : "";
-    }
+if (footerInstagram) {
+  footerInstagram.innerHTML = instagram
+    ? "<a class='footer-social-btn instagram' href='" + instagram + "' target='_blank'>" +
+        "<svg class='footer-social-icon' viewBox='0 0 24 24' aria-hidden='true'>" +
+          "<path fill='currentColor' d='M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm5.25-2.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z'/>" +
+        "</svg>" +
+        "Instagram" +
+      "</a>"
+    : "";
+}
 
-    if (footerWhatsappSocial) {
+if (footerWhatsappSocial) {
   footerWhatsappSocial.innerHTML = "";
 }
   } catch (error) {
