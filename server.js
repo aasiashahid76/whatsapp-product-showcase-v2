@@ -2148,8 +2148,10 @@ if (footerEmail) {
     : "";
 }
 
-if (footerWhatsappSocial) {
-  footerWhatsappSocial.innerHTML = "";
+if (footerWhatsapp) {
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>💬 WhatsApp</a>"
+    : "";
 }
 
 if (footerInstagram) {
@@ -4748,8 +4750,8 @@ app.get("/legal/:type", async (req, res) => {
       }
 
       if (footerWhatsappSocial) {
-        footerWhatsappSocial.innerHTML = whatsappNumber ? "<a class='footer-social-btn whatsapp' href='https://wa.me/" + whatsappNumber + "' target='_blank'>💬 WhatsApp</a>" : "";
-      }
+  footerWhatsappSocial.innerHTML = "";
+		}
     } catch (error) {}
   }
 
@@ -5482,8 +5484,10 @@ function updateMobileBottomArrow() {
           : "";
       }
 
-      if (footerWhatsappSocial) {
-  footerWhatsappSocial.innerHTML = "";
+      if (footerWhatsapp) {
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>💬 WhatsApp</a>"
+    : "";
 }
 
       if (footerInstagram) {
@@ -6148,8 +6152,10 @@ function syncHomeSearch() {
         : "";
     }
 
-    if (footerWhatsappSocial) {
-  footerWhatsappSocial.innerHTML = "";
+    if (footerWhatsapp) {
+  footerWhatsapp.innerHTML = whatsappNumber
+    ? "<a class='footer-whatsapp-btn' href='https://wa.me/" + whatsappNumber + "?text=Hello' target='_blank'>💬 WhatsApp</a>"
+    : "";
 }
 
     if (footerInstagram) {
