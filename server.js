@@ -383,14 +383,16 @@ function globalHeaderFooterCss() {
 
 @media (min-width: 768px) {
   .your-list-panel {
-    top: 59px;
+    top: 68px;
     bottom: auto;
-    left: 10px;
-    right: 10px;
+    left: auto;
+    right: 24px;
+    width: 430px;
+    max-width: calc(100vw - 48px);
     z-index: 60;
     border-radius: 0 0 18px 18px;
     box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
-    max-height: 70vh;
+    max-height: 62vh;
   }
 }
 
@@ -1539,14 +1541,16 @@ app.get("/", (req, res) => {
 
 @media (min-width: 768px) {
   .your-list-panel {
-    top: 59px;
+    top: 68px;
     bottom: auto;
-    left: 10px;
-    right: 10px;
+    left: auto;
+    right: 24px;
+    width: 430px;
+    max-width: calc(100vw - 48px);
     z-index: 60;
     border-radius: 0 0 18px 18px;
     box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
-    max-height: 70vh;
+    max-height: 62vh;
   }
 }
 
@@ -4814,14 +4818,16 @@ app.get("/product/:slug", (req, res) => {
 
 @media (min-width: 768px) {
   .your-list-panel {
-    top: 59px;
+    top: 68px;
     bottom: auto;
-    left: 10px;
-    right: 10px;
+    left: auto;
+    right: 24px;
+    width: 430px;
+    max-width: calc(100vw - 48px);
     z-index: 60;
     border-radius: 0 0 18px 18px;
     box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
-    max-height: 70vh;
+    max-height: 62vh;
   }
 }
 
@@ -5630,14 +5636,16 @@ app.get("/page/:slug", (req, res) => {
 
 @media (min-width: 768px) {
   .your-list-panel {
-    top: 59px;
+    top: 68px;
     bottom: auto;
-    left: 10px;
-    right: 10px;
+    left: auto;
+    right: 24px;
+    width: 430px;
+    max-width: calc(100vw - 48px);
     z-index: 60;
     border-radius: 0 0 18px 18px;
     box-shadow: 0 14px 34px rgba(84, 107, 65, 0.18);
-    max-height: 70vh;
+    max-height: 62vh;
   }
 }
 
