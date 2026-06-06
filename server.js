@@ -125,9 +125,9 @@ function globalHeaderFooterCss() {
 }
 
 .logo-box img {
-  width: auto;
-  max-width: 100%;
+  width: 100%;
   height: 100%;
+  max-width: 100%;
   object-fit: contain;
   display: none;
   background: transparent;
@@ -645,8 +645,9 @@ function globalHeaderFooterCss() {
 
 .logo-box {
   height: 42px;
-  width: 96px;
+  width: 86px;
   justify-self: start;
+  flex-shrink: 0;
 }
 
 .desktop-right-header,
@@ -860,8 +861,9 @@ function globalHeaderFooterCss() {
 
     .logo-box {
     height: 52px;
-    width: 160px;
+    width: 150px;
     justify-self: start;
+    flex-shrink: 0;
   }
 
   .mobile-bottom-list-bar {
