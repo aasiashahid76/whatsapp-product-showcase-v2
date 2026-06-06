@@ -113,24 +113,25 @@ function globalHeaderFooterCss() {
 }
 
 .logo-box {
-  border-radius: 10px;
-  background: #546B41;
-  color: #FFF8EC;
+  border-radius: 0;
+  background: transparent;
+  color: #546B41;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-decoration: none;
-  overflow: hidden;
-  border: 1px solid #DCCCAC;
+  overflow: visible;
+  border: none;
 }
 
 .logo-box img {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: 100%;
   object-fit: contain;
   display: none;
-  background: #FFF8EC;
-  padding: 3px;
+  background: transparent;
+  padding: 0;
 }
 
 .logo-box span {
@@ -507,25 +508,26 @@ function globalHeaderFooterCss() {
 .footer-logo-box {
   width: 150px;
   height: 56px;
-  border-radius: 12px;
-  background: #546B41;
+  border-radius: 0;
+  background: transparent;
   color: #FFF8EC;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-decoration: none;
-  overflow: hidden;
-  border: 1px solid #DCCCAC;
+  overflow: visible;
+  border: none;
   margin-bottom: 12px;
 }
 
 .footer-logo-box img {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: 100%;
   object-fit: contain;
   display: none;
-  background: #FFF8EC;
-  padding: 4px;
+  background: transparent;
+  padding: 0;
 }
 
 .footer-logo-box span {
@@ -642,8 +644,8 @@ function globalHeaderFooterCss() {
 }
 
 .logo-box {
-  height: 38px;
-  width: 76px;
+  height: 42px;
+  width: 96px;
   justify-self: start;
 }
 
@@ -857,8 +859,8 @@ function globalHeaderFooterCss() {
   }
 
     .logo-box {
-    height: 44px;
-    width: 140px;
+    height: 52px;
+    width: 160px;
     justify-self: start;
   }
 
