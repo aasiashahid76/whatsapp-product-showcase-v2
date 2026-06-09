@@ -20,32 +20,6 @@ if (!fs.existsSync(MEDIA_DIR)) {
 
 app.use("/media", express.static(MEDIA_DIR));
 
-app.post("/api/admin/upload", verifyAdmin, upload.single("image"), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
-        status: "error",
-        message: "No image uploaded"
-      });
-    }
-
-    const fileUrl = "/media/" + req.file.filename;
-
-    res.json({
-      status: "ok",
-      message: "Image uploaded successfully",
-      file_url: fileUrl,
-      filename: req.file.filename
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: "Upload failed",
-      error: error.message
-    });
-  }
-});
-
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, MEDIA_DIR);
@@ -3953,8 +3927,15 @@ app.post("/api/auth/login", async (req, res) => {
    ADMIN UPLOAD API
 ========================= */
 
-app.post("/api/admin/upload", verifyAdmin, upload.single("image"), async (req, res) => {
-  try {
+app.post("/api/admin/upload", verifyAdmin, (req, res) => {
+  upload.single("image")(req, res, function(error) {
+    if (error) {
+      return res.status(400).json({
+        status: "error",
+        message: error.message || "Upload failed"
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({
         status: "error",
@@ -3962,16 +3943,11 @@ app.post("/api/admin/upload", verifyAdmin, upload.single("image"), async (req, r
       });
     }
 
-    res.json({
+    return res.json({
       status: "ok",
       file_url: "/media/" + req.file.filename
     });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: error.message
-    });
-  }
+  });
 });
 
 /* =========================
@@ -6984,7 +6960,7 @@ app.get("/all-products", (req, res) => {
               html += "<tr>";
 
               html += "<td>";
-              html += "<img class='product-img-small' src='" + image + "' />";
+              html += "<img class='product-img-small' src='" + image + "' onerror=\"this.onerror=null;this.src='https://via.placeholder.com/100x100?text=Product';\" />";
               html += "</td>";
 
               html += "<td>";
@@ -7779,7 +7755,7 @@ app.get("/dashboard", (req, res) => {
               html += "<tr>";
 
               html += "<td>";
-              html += "<img class='product-img-small' src='" + image + "' />";
+              html += "<img class='product-img-small' src='" + image + "' onerror=\"this.onerror=null;this.src='https://via.placeholder.com/100x100?text=Product';\" />";
               html += "</td>";
 
               html += "<td>";
