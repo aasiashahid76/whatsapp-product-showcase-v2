@@ -20,6 +20,22 @@ if (!fs.existsSync(MEDIA_DIR)) {
 
 app.use("/media", express.static(MEDIA_DIR));
 
+app.get("/api/media-path-test", (req, res) => {
+  let files = [];
+
+  try {
+    files = fs.readdirSync(MEDIA_DIR).slice(0, 20);
+  } catch (error) {
+    files = ["Cannot read media folder: " + error.message];
+  }
+
+  res.json({
+    status: "ok",
+    media_dir: MEDIA_DIR,
+    files
+  });
+});
+
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, MEDIA_DIR);
