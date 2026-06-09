@@ -3376,6 +3376,28 @@ function legalPageCss() {
 }
 
 /* =========================
+   TEST API
+========================= */
+
+app.get("/api/db-test", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT 1 + 1 AS result");
+
+    res.json({
+      status: "ok",
+      message: "Database connected successfully",
+      result: rows[0].result
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Database connection failed",
+      error: error.message
+    });
+  }
+});
+
+/* =========================
    PUBLIC ROUTES
 ========================= */
 
