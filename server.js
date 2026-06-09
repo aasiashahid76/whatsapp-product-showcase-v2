@@ -4782,11 +4782,12 @@ app.get("/legal/:type", async (req, res) => {
             }
 
             body {
-              margin: 0;
-              font-family: Arial, sans-serif;
-              background: #FFF8EC;
-              color: #546B41;
-            }
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #F7F8F3;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
 
 			${globalHeaderFooterCss()}
             .page-wrap {
@@ -5004,11 +5005,12 @@ app.get("/product/:slug", (req, res) => {
           }
 
           body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #FFF8EC;
-            color: #546B41;
-          }
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #F7F8F3;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
 
 		  ${globalHeaderFooterCss()}
 
@@ -5804,11 +5806,12 @@ app.get("/page/:slug", (req, res) => {
           }
 
           body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #FFF8EC;
-            color: #546B41;
-          }
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #F7F8F3;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
 
 		  ${globalHeaderFooterCss()}
 
@@ -6916,11 +6919,12 @@ app.get("/manage-ui", (req, res) => {
           }
 
           body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #FFF8EC;
-            color: #546B41;
-          }
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #F7F8F3;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
 
           .topbar {
             background: #546B41;
@@ -8269,11 +8273,12 @@ app.get("/all-products", (req, res) => {
           }
 
           body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #FFF8EC;
-            color: #546B41;
-          }
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #F7F8F3;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
 
           .topbar {
             background: #546B41;
@@ -9126,11 +9131,12 @@ app.get("/dashboard", (req, res) => {
           }
 
           body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #FFF8EC;
-            color: #546B41;
-          }
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #F7F8F3;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
 
           .topbar {
             background: #546B41;
