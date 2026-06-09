@@ -20,6 +20,32 @@ if (!fs.existsSync(MEDIA_DIR)) {
 
 app.use("/media", express.static(MEDIA_DIR));
 
+app.post("/api/admin/upload", verifyAdmin, upload.single("image"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        status: "error",
+        message: "No image uploaded"
+      });
+    }
+
+    const fileUrl = "/media/" + req.file.filename;
+
+    res.json({
+      status: "ok",
+      message: "Image uploaded successfully",
+      file_url: fileUrl,
+      filename: req.file.filename
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Upload failed",
+      error: error.message
+    });
+  }
+});
+
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, MEDIA_DIR);
@@ -1942,7 +1968,7 @@ function productCard(product) {
         "<div class='product-image-wrap'>" +
           discountHtml +
           tagHtml +
-          "<img class='product-img' src='" + image + "' alt='" + product.product_name + "' />" +
+          "<img class='product-img' src='" + image + "' alt='" + product.product_name + "' onerror=\"this.onerror=null;this.src='https://via.placeholder.com/300x300?text=Product';\" />" +
         "</div>" +
       "</a>" +
 
