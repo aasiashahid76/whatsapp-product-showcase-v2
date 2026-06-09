@@ -1129,24 +1129,33 @@ function syncSearchValue(inputId) {
   if (!input) return "";
 
   const value = input.value || "";
+
   const headerInput = document.getElementById("searchInput");
   const homeInput = document.getElementById("homeSearchInput");
+  const desktopInput = document.getElementById("desktopSearchInput");
 
-  if (inputId === "homeSearchInput" && headerInput) {
+  if (inputId !== "searchInput" && headerInput) {
     headerInput.value = value;
   }
 
-  if (inputId === "searchInput" && homeInput) {
+  if (inputId !== "homeSearchInput" && homeInput) {
     homeInput.value = value;
   }
 
-  if (typeof isMobileSearchScreen === "function" && isMobileSearchScreen() && document.body.classList.contains("mobile-search-focus")) {
-  document.body.classList.toggle("mobile-search-has-text", !!value.trim());
-}
+  if (inputId !== "desktopSearchInput" && desktopInput) {
+    desktopInput.value = value;
+  }
 
-return value.toLowerCase().trim();
-}
+  if (
+    typeof isMobileSearchScreen === "function" &&
+    isMobileSearchScreen() &&
+    document.body.classList.contains("mobile-search-focus")
+  ) {
+    document.body.classList.toggle("mobile-search-has-text", !!value.trim());
+  }
 
+  return value.toLowerCase().trim();
+}
 function getSearchMatches(q) {
   const products = getSearchProductsForBox();
   const seen = {};
@@ -2759,19 +2768,23 @@ async function loadHomeSections() {
           function getCurrentSearchQuery() {
   const headerInput = document.getElementById("searchInput");
   const homeInput = document.getElementById("homeSearchInput");
+  const desktopInput = document.getElementById("desktopSearchInput");
 
   const headerValue = headerInput ? headerInput.value.trim() : "";
   const homeValue = homeInput ? homeInput.value.trim() : "";
+  const desktopValue = desktopInput ? desktopInput.value.trim() : "";
 
-  return homeValue || headerValue;
+  return desktopValue || homeValue || headerValue;
 }
 
 function syncSearchInputs(value) {
   const headerInput = document.getElementById("searchInput");
   const homeInput = document.getElementById("homeSearchInput");
+  const desktopInput = document.getElementById("desktopSearchInput");
 
   if (headerInput) headerInput.value = value;
   if (homeInput) homeInput.value = value;
+  if (desktopInput) desktopInput.value = value;
 }
 
 function setHomeSearchMode(isSearchMode) {
