@@ -632,6 +632,75 @@ function globalHeaderFooterCss() {
   font-size: 13px;
 }
 
+.desktop-search-open-btn {
+  display: none;
+}
+
+.desktop-search-overlay {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .desktop-search-open-btn {
+    display: inline-block;
+  }
+
+  .desktop-search-overlay.show {
+    display: flex;
+  }
+
+  .desktop-search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(84, 107, 65, 0.35);
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 86px;
+  }
+
+  .desktop-search-modal {
+    position: relative;
+    width: min(620px, calc(100vw - 40px));
+    background: white;
+    border: 1px solid #DCCCAC;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 18px 48px rgba(84, 107, 65, 0.25);
+  }
+
+  .desktop-search-popup-box {
+    width: 100%;
+  }
+
+  .desktop-search-close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 999px;
+    background: #546B41;
+    color: #FFF8EC;
+    font-size: 22px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .desktop-search-modal .search-suggestions-box {
+    position: static;
+    display: block;
+    margin-top: 12px;
+    max-height: 360px;
+    overflow-y: auto;
+  }
+
+  .desktop-search-modal .search-suggestions-box:not(.show) {
+    display: none;
+  }
+}
+
 /* =========================
    MOBILE HEADER FOOTER CSS
 ========================= */
@@ -908,12 +977,26 @@ function globalHeaderHtml() {
 </div>
 
 <div class="desktop-right-header">
+  <button class="list-btn desktop-search-open-btn" onclick="openDesktopSearchBox()">Search</button>
   <nav id="desktopPagesNav" class="desktop-pages-nav"></nav>
   <button class="list-btn" id="yourListBtn" onclick="toggleYourList()">Your List (0)</button>
 </div>
 
   <button class="pages-menu-btn" onclick="togglePagesMenu()">☰</button>
 </header>
+
+<div id="desktopSearchOverlay" class="desktop-search-overlay">
+  <div class="desktop-search-modal search-shell">
+    <button class="desktop-search-close" onclick="closeDesktopSearchBox()">×</button>
+
+    <div class="search-box desktop-search-popup-box">
+      <button class="search-icon-btn" type="button" onclick="runSearchInPage('desktopSearchInput', 'desktopSearchSuggestionsBox')">🔍</button>
+      <input id="desktopSearchInput" placeholder="Search products..." oninput="showSearchSuggestions('desktopSearchInput', 'desktopSearchSuggestionsBox')" onkeydown="handleSearchKey(event, 'desktopSearchInput', 'desktopSearchSuggestionsBox')" />
+    </div>
+
+    <div id="desktopSearchSuggestionsBox" class="search-suggestions-box show"></div>
+  </div>
+</div>
 
 <div id="pagesMenuPanel" class="pages-menu-panel"></div>
 
@@ -963,6 +1046,36 @@ function globalHeaderHtml() {
 
 <script>
 window.globalSearchProducts = window.globalSearchProducts || [];
+
+function openDesktopSearchBox() {
+  const overlay = document.getElementById("desktopSearchOverlay");
+  const input = document.getElementById("desktopSearchInput");
+
+  if (!overlay) return;
+
+  overlay.classList.add("show");
+
+  setTimeout(function() {
+    if (input) input.focus();
+  }, 80);
+}
+
+function closeDesktopSearchBox() {
+  const overlay = document.getElementById("desktopSearchOverlay");
+  const input = document.getElementById("desktopSearchInput");
+  const box = document.getElementById("desktopSearchSuggestionsBox");
+
+  if (input) input.value = "";
+
+  if (box) {
+    box.innerHTML = "";
+    box.classList.remove("show");
+  }
+
+  if (overlay) {
+    overlay.classList.remove("show");
+  }
+}
 
 function openFloatingWhatsapp(event) {
   if (event) {
@@ -1120,6 +1233,10 @@ async function runSearchInPage(inputId, boxId) {
     box.innerHTML = "";
     box.classList.remove("show");
   }
+
+  if (inputId === "desktopSearchInput") {
+  closeDesktopSearchBox();
+}
 
   if (window.location.pathname !== "/") {
     window.location.href = "/?search=" + encodeURIComponent(q);
