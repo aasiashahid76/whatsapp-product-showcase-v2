@@ -3387,9 +3387,7 @@ app.get("/", (req, res) => {
         <title>Product Showcase</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
-          ${baseCss()}
-          ${globalHeaderFooterCss()}
-          ${productCardCss()}
+          ${globalPublicCss()}
           ${homePageCss()}
         </style>
       </head>
@@ -3468,9 +3466,7 @@ app.get("/page/:slug", (req, res) => {
         <title>Category Page</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
-          ${baseCss()}
-          ${globalHeaderFooterCss()}
-          ${productCardCss()}
+          ${globalPublicCss()}
           ${categoryPageCss()}
         </style>
       </head>
@@ -3510,9 +3506,7 @@ app.get("/product/:slug", (req, res) => {
         <title>Product Detail</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
-          ${baseCss()}
-          ${globalHeaderFooterCss()}
-          ${productCardCss()}
+          ${globalPublicCss()}
           ${productDetailCss()}
         </style>
       </head>
@@ -3578,9 +3572,8 @@ app.get("/legal/:type", async (req, res) => {
           <title>${selected.title}</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <style>
-            ${baseCss()}
-            ${globalHeaderFooterCss()}
-            ${legalPageCss()}
+            ${globalPublicCss()}
+${legalPageCss()}
           </style>
         </head>
 
@@ -5193,11 +5186,6 @@ app.get("/manage-ui", (req, res) => {
           loadFixedBannersAdmin();
           loadPageBannerPosition();
           loadReviewsAdmin();
-        </script>
-      </body>
-    </html>
-  `);
-});
         </script>
       </body>
     </html>
