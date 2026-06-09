@@ -3398,6 +3398,1238 @@ app.get("/api/db-test", async (req, res) => {
 });
 
 /* =========================
+   DATABASE TABLE SETUP
+========================= */
+
+let tablesReady = false;
+
+async function ensureAppTables() {
+  if (tablesReady) return;
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS pages (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      page_name VARCHAR(255) NOT NULL,
+      slug VARCHAR(255) NOT NULL UNIQUE,
+      show_on_header TINYINT(1) DEFAULT 0,
+      show_on_banner TINYINT(1) DEFAULT 0,
+      banner_image_url TEXT,
+      banner_subheading TEXT,
+      create_circular_icon TINYINT(1) DEFAULT 0,
+      circular_image_url TEXT,
+      is_active TINYINT(1) DEFAULT 1,
+      sort_order INT DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS products (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      sku VARCHAR(100),
+      product_name VARCHAR(255) NOT NULL,
+      slug VARCHAR(255) NOT NULL UNIQUE,
+      product_image_url TEXT,
+      show_price DECIMAL(10,2) DEFAULT 0,
+      crossed_price DECIMAL(10,2) DEFAULT 0,
+      tag VARCHAR(50) DEFAULT 'None',
+      dealer_name VARCHAR(255),
+      dealer_price DECIMAL(10,2) DEFAULT 0,
+      qty_in_stock INT DEFAULT 0,
+      demand_color VARCHAR(50) DEFAULT 'Green',
+      is_visible TINYINT(1) DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS product_pages (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      product_id INT NOT NULL,
+      page_id INT NOT NULL,
+      UNIQUE KEY unique_product_page (product_id, page_id)
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS site_settings (
+      setting_key VARCHAR(100) PRIMARY KEY,
+      setting_value LONGTEXT
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS fixed_banners (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      banner_name VARCHAR(255) NOT NULL,
+      image_url TEXT NOT NULL,
+      sort_order INT DEFAULT 0,
+      is_active TINYINT(1) DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS homepage_layout (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      section_type ENUM('page','banner') NOT NULL,
+      page_id INT NULL,
+      banner_id INT NULL,
+      sort_order INT DEFAULT 0
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      customer_name VARCHAR(255) NOT NULL,
+      rating INT DEFAULT 5,
+      review_body TEXT NOT NULL,
+      is_active TINYINT(1) DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  const defaultSettings = [
+    ["logo_url", ""],
+    ["email", ""],
+    ["mobile_number", ""],
+    ["whatsapp_number", ""],
+    ["instagram_link", ""],
+    ["browse_all_products_link", "/page/all-products"],
+    ["policies", ""],
+    ["privacy_policy", ""],
+    ["return_refund", ""],
+    ["terms_condition", ""]
+  ];
+
+  for (const [key, value] of defaultSettings) {
+    await db.query(
+      "INSERT IGNORE INTO site_settings (setting_key, setting_value) VALUES (?, ?)",
+      [key, value]
+    );
+  }
+
+  tablesReady = true;
+}
+
+app.use(async (req, res, next) => {
+  try {
+    await ensureAppTables();
+    next();
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Database table setup failed",
+      error: error.message
+    });
+  }
+});
+
+/* =========================
+   COMMON API HELPERS
+========================= */
+
+async function getSettingsObject() {
+  const [rows] = await db.query("SELECT setting_key, setting_value FROM site_settings");
+
+  const settings = {};
+
+  rows.forEach(function(row) {
+    settings[row.setting_key] = row.setting_value || "";
+  });
+
+  return settings;
+}
+
+async function saveSetting(key, value) {
+  await db.query(
+    `
+    INSERT INTO site_settings (setting_key, setting_value)
+    VALUES (?, ?)
+    ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+    `,
+    [key, value || ""]
+  );
+}
+
+async function getProductRows(whereSql = "", params = []) {
+  const [rows] = await db.query(
+    `
+    SELECT
+      p.*,
+      GROUP_CONCAT(pg.page_name ORDER BY pg.page_name SEPARATOR ', ') AS page_names,
+      GROUP_CONCAT(pg.id ORDER BY pg.id SEPARATOR ',') AS page_ids
+    FROM products p
+    LEFT JOIN product_pages pp ON pp.product_id = p.id
+    LEFT JOIN pages pg ON pg.id = pp.page_id
+    ${whereSql}
+    GROUP BY p.id
+    ORDER BY p.id DESC
+    `,
+    params
+  );
+
+  return rows;
+}
+
+/* =========================
+   PUBLIC API ROUTES
+========================= */
+
+app.get("/api/settings", async (req, res) => {
+  try {
+    const settings = await getSettingsObject();
+
+    res.json({
+      status: "ok",
+      settings
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/pages", async (req, res) => {
+  try {
+    const [pages] = await db.query(
+      "SELECT * FROM pages ORDER BY sort_order ASC, id ASC"
+    );
+
+    res.json({
+      status: "ok",
+      pages
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/header-pages", async (req, res) => {
+  try {
+    const [pages] = await db.query(
+      `
+      SELECT *
+      FROM pages
+      WHERE is_active = 1 AND show_on_header = 1
+      ORDER BY sort_order ASC, id ASC
+      `
+    );
+
+    res.json({
+      status: "ok",
+      pages
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/products", async (req, res) => {
+  try {
+    const products = await getProductRows("WHERE p.is_visible = 1");
+
+    res.json({
+      status: "ok",
+      products
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/page/:slug", async (req, res) => {
+  try {
+    const [pageRows] = await db.query(
+      "SELECT * FROM pages WHERE slug = ? AND is_active = 1 LIMIT 1",
+      [req.params.slug]
+    );
+
+    if (pageRows.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Page not found"
+      });
+    }
+
+    const page = pageRows[0];
+
+    const products = await getProductRows(
+      `
+      INNER JOIN product_pages page_map ON page_map.product_id = p.id
+      WHERE page_map.page_id = ? AND p.is_visible = 1
+      `,
+      [page.id]
+    );
+
+    res.json({
+      status: "ok",
+      page,
+      products
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/product/:slug", async (req, res) => {
+  try {
+    const products = await getProductRows(
+      "WHERE p.slug = ? AND p.is_visible = 1",
+      [req.params.slug]
+    );
+
+    if (products.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Product not found"
+      });
+    }
+
+    res.json({
+      status: "ok",
+      product: products[0]
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/fixed-banners", async (req, res) => {
+  try {
+    const [banners] = await db.query(
+      `
+      SELECT *
+      FROM fixed_banners
+      WHERE is_active = 1
+      ORDER BY sort_order ASC, id ASC
+      `
+    );
+
+    res.json({
+      status: "ok",
+      banners
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/reviews", async (req, res) => {
+  try {
+    const [reviews] = await db.query(
+      `
+      SELECT *
+      FROM reviews
+      WHERE is_active = 1
+      ORDER BY id DESC
+      `
+    );
+
+    res.json({
+      status: "ok",
+      reviews
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/home-sections", async (req, res) => {
+  try {
+    const [layoutRows] = await db.query(
+      `
+      SELECT
+        hl.id AS layout_id,
+        hl.section_type,
+        hl.page_id,
+        hl.banner_id,
+        hl.sort_order,
+        p.page_name,
+        p.slug,
+        p.banner_subheading,
+        b.banner_name,
+        b.image_url
+      FROM homepage_layout hl
+      LEFT JOIN pages p ON p.id = hl.page_id
+      LEFT JOIN fixed_banners b ON b.id = hl.banner_id
+      ORDER BY hl.sort_order ASC, hl.id ASC
+      `
+    );
+
+    let layout = layoutRows;
+
+    if (layout.length === 0) {
+      const [pages] = await db.query(
+        "SELECT * FROM pages WHERE is_active = 1 ORDER BY sort_order ASC, id ASC"
+      );
+
+      layout = pages.map(function(page) {
+        return {
+          section_type: "page",
+          page_id: page.id,
+          page_name: page.page_name,
+          slug: page.slug,
+          banner_subheading: page.banner_subheading
+        };
+      });
+    }
+
+    const sections = [];
+
+    for (const item of layout) {
+      if (item.section_type === "banner" && item.banner_id) {
+        sections.push({
+          section_type: "banner",
+          banner: {
+            id: item.banner_id,
+            banner_name: item.banner_name,
+            image_url: item.image_url
+          }
+        });
+
+        continue;
+      }
+
+      if (item.section_type === "page" && item.page_id) {
+        const [pageRows] = await db.query(
+          "SELECT * FROM pages WHERE id = ? AND is_active = 1 LIMIT 1",
+          [item.page_id]
+        );
+
+        if (pageRows.length === 0) continue;
+
+        const page = pageRows[0];
+
+        const products = await getProductRows(
+          `
+          INNER JOIN product_pages page_map ON page_map.product_id = p.id
+          WHERE page_map.page_id = ? AND p.is_visible = 1
+          `,
+          [page.id]
+        );
+
+        sections.push({
+          section_type: "page",
+          page,
+          products: products.slice(0, 12)
+        });
+      }
+    }
+
+    res.json({
+      status: "ok",
+      sections
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   AUTH API
+========================= */
+
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const email = String(req.body.email || "").trim();
+    const password = String(req.body.password || "");
+
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminName = process.env.ADMIN_NAME || "Admin";
+
+    if (!adminEmail || !adminPassword) {
+      return res.status(500).json({
+        status: "error",
+        message: "Admin environment variables are missing"
+      });
+    }
+
+    if (email !== adminEmail) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password"
+      });
+    }
+
+    let passwordOk = false;
+
+    if (adminPassword.startsWith("$2a$") || adminPassword.startsWith("$2b$")) {
+      passwordOk = await bcrypt.compare(password, adminPassword);
+    } else {
+      passwordOk = password === adminPassword;
+    }
+
+    if (!passwordOk) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password"
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        email,
+        name: adminName,
+        role: "admin"
+      },
+      JWT_SECRET,
+      {
+        expiresIn: "7d"
+      }
+    );
+
+    res.json({
+      status: "ok",
+      token,
+      admin: {
+        email,
+        name: adminName
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   ADMIN UPLOAD API
+========================= */
+
+app.post("/api/admin/upload", verifyAdmin, upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        status: "error",
+        message: "No image uploaded"
+      });
+    }
+
+    res.json({
+      status: "ok",
+      file_url: "/media/" + req.file.filename
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   ADMIN SETTINGS API
+========================= */
+
+app.post("/api/admin/settings", verifyAdmin, async (req, res) => {
+  try {
+    const keys = [
+      "logo_url",
+      "email",
+      "mobile_number",
+      "whatsapp_number",
+      "instagram_link",
+      "browse_all_products_link",
+      "policies",
+      "privacy_policy",
+      "return_refund",
+      "terms_condition"
+    ];
+
+    for (const key of keys) {
+      await saveSetting(key, req.body[key] || "");
+    }
+
+    res.json({
+      status: "ok",
+      message: "Settings saved successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   ADMIN PAGES API
+========================= */
+
+app.post("/api/admin/pages", verifyAdmin, async (req, res) => {
+  try {
+    const pageName = String(req.body.page_name || "").trim();
+
+    if (!pageName) {
+      return res.status(400).json({
+        status: "error",
+        message: "Page name is required"
+      });
+    }
+
+    let slug = createSlug(pageName);
+    let finalSlug = slug;
+    let count = 1;
+
+    while (true) {
+      const [existing] = await db.query(
+        "SELECT id FROM pages WHERE slug = ? LIMIT 1",
+        [finalSlug]
+      );
+
+      if (existing.length === 0) break;
+
+      count += 1;
+      finalSlug = slug + "-" + count;
+    }
+
+    const [maxRows] = await db.query(
+      "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM pages"
+    );
+
+    const sortOrder = maxRows[0].next_order || 1;
+
+    const [result] = await db.query(
+      `
+      INSERT INTO pages
+      (
+        page_name,
+        slug,
+        show_on_header,
+        show_on_banner,
+        banner_image_url,
+        banner_subheading,
+        create_circular_icon,
+        circular_image_url,
+        is_active,
+        sort_order
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+      `,
+      [
+        pageName,
+        finalSlug,
+        req.body.show_on_header ? 1 : 0,
+        req.body.show_on_banner ? 1 : 0,
+        req.body.banner_image_url || "",
+        req.body.banner_subheading || "",
+        req.body.create_circular_icon ? 1 : 0,
+        req.body.circular_image_url || "",
+        sortOrder
+      ]
+    );
+
+    await db.query(
+      "INSERT INTO homepage_layout (section_type, page_id, sort_order) VALUES ('page', ?, ?)",
+      [result.insertId, sortOrder]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Page created successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.put("/api/admin/pages/:id", verifyAdmin, async (req, res) => {
+  try {
+    const pageId = Number(req.params.id);
+    const pageName = String(req.body.page_name || "").trim();
+
+    if (!pageName) {
+      return res.status(400).json({
+        status: "error",
+        message: "Page name is required"
+      });
+    }
+
+    await db.query(
+      `
+      UPDATE pages
+      SET
+        page_name = ?,
+        show_on_header = ?,
+        show_on_banner = ?,
+        banner_image_url = ?,
+        banner_subheading = ?,
+        create_circular_icon = ?,
+        circular_image_url = ?,
+        is_active = ?
+      WHERE id = ?
+      `,
+      [
+        pageName,
+        req.body.show_on_header ? 1 : 0,
+        req.body.show_on_banner ? 1 : 0,
+        req.body.banner_image_url || "",
+        req.body.banner_subheading || "",
+        req.body.create_circular_icon ? 1 : 0,
+        req.body.circular_image_url || "",
+        req.body.is_active ? 1 : 0,
+        pageId
+      ]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Page updated successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.delete("/api/admin/pages/:id", verifyAdmin, async (req, res) => {
+  try {
+    const pageId = Number(req.params.id);
+
+    await db.query("DELETE FROM product_pages WHERE page_id = ?", [pageId]);
+    await db.query("DELETE FROM homepage_layout WHERE page_id = ?", [pageId]);
+    await db.query("DELETE FROM pages WHERE id = ?", [pageId]);
+
+    res.json({
+      status: "ok",
+      message: "Page deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   ADMIN PRODUCTS API
+========================= */
+
+app.get("/api/admin/products", verifyAdmin, async (req, res) => {
+  try {
+    const products = await getProductRows("");
+
+    res.json({
+      status: "ok",
+      products
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.post("/api/admin/products", verifyAdmin, async (req, res) => {
+  try {
+    const productName = String(req.body.product_name || "").trim();
+
+    if (!productName) {
+      return res.status(400).json({
+        status: "error",
+        message: "Product name is required"
+      });
+    }
+
+    let slug = createSlug(productName);
+    let finalSlug = slug;
+    let count = 1;
+
+    while (true) {
+      const [existing] = await db.query(
+        "SELECT id FROM products WHERE slug = ? LIMIT 1",
+        [finalSlug]
+      );
+
+      if (existing.length === 0) break;
+
+      count += 1;
+      finalSlug = slug + "-" + count;
+    }
+
+    const [result] = await db.query(
+      `
+      INSERT INTO products
+      (
+        sku,
+        product_name,
+        slug,
+        product_image_url,
+        show_price,
+        crossed_price,
+        tag,
+        dealer_name,
+        dealer_price,
+        qty_in_stock,
+        demand_color,
+        is_visible
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+      `,
+      [
+        req.body.sku || "",
+        productName,
+        finalSlug,
+        req.body.product_image_url || "",
+        Number(req.body.show_price || 0),
+        Number(req.body.crossed_price || 0),
+        req.body.tag || "None",
+        req.body.dealer_name || "",
+        Number(req.body.dealer_price || 0),
+        Number(req.body.qty_in_stock || 0),
+        req.body.demand_color || "Green"
+      ]
+    );
+
+    const productId = result.insertId;
+    const pageIds = Array.isArray(req.body.page_ids) ? req.body.page_ids : [];
+
+    for (const pageId of pageIds) {
+      await db.query(
+        "INSERT IGNORE INTO product_pages (product_id, page_id) VALUES (?, ?)",
+        [productId, Number(pageId)]
+      );
+    }
+
+    res.json({
+      status: "ok",
+      message: "Product created successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.put("/api/admin/products/:id", verifyAdmin, async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+    const productName = String(req.body.product_name || "").trim();
+
+    if (!productName) {
+      return res.status(400).json({
+        status: "error",
+        message: "Product name is required"
+      });
+    }
+
+    await db.query(
+      `
+      UPDATE products
+      SET
+        sku = ?,
+        product_name = ?,
+        product_image_url = ?,
+        show_price = ?,
+        crossed_price = ?,
+        tag = ?,
+        dealer_name = ?,
+        dealer_price = ?,
+        qty_in_stock = ?,
+        demand_color = ?,
+        is_visible = ?
+      WHERE id = ?
+      `,
+      [
+        req.body.sku || "",
+        productName,
+        req.body.product_image_url || "",
+        Number(req.body.show_price || 0),
+        Number(req.body.crossed_price || 0),
+        req.body.tag || "None",
+        req.body.dealer_name || "",
+        Number(req.body.dealer_price || 0),
+        Number(req.body.qty_in_stock || 0),
+        req.body.demand_color || "Green",
+        req.body.is_visible ? 1 : 0,
+        productId
+      ]
+    );
+
+    await db.query("DELETE FROM product_pages WHERE product_id = ?", [productId]);
+
+    const pageIds = Array.isArray(req.body.page_ids) ? req.body.page_ids : [];
+
+    for (const pageId of pageIds) {
+      await db.query(
+        "INSERT IGNORE INTO product_pages (product_id, page_id) VALUES (?, ?)",
+        [productId, Number(pageId)]
+      );
+    }
+
+    res.json({
+      status: "ok",
+      message: "Product updated successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.put("/api/admin/products/:id/quantity", verifyAdmin, async (req, res) => {
+  try {
+    await db.query(
+      "UPDATE products SET qty_in_stock = ? WHERE id = ?",
+      [Number(req.body.qty_in_stock || 0), Number(req.params.id)]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Quantity updated successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.put("/api/admin/products/:id/visibility", verifyAdmin, async (req, res) => {
+  try {
+    await db.query(
+      "UPDATE products SET is_visible = ? WHERE id = ?",
+      [req.body.is_visible ? 1 : 0, Number(req.params.id)]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Visibility updated successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.put("/api/admin/products/:id/image", verifyAdmin, async (req, res) => {
+  try {
+    await db.query(
+      "UPDATE products SET product_image_url = ? WHERE id = ?",
+      [req.body.product_image_url || "", Number(req.params.id)]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Image updated successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.delete("/api/admin/products/:id", verifyAdmin, async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+
+    await db.query("DELETE FROM product_pages WHERE product_id = ?", [productId]);
+    await db.query("DELETE FROM products WHERE id = ?", [productId]);
+
+    res.json({
+      status: "ok",
+      message: "Product deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   ADMIN FIXED BANNERS API
+========================= */
+
+app.post("/api/admin/fixed-banners", verifyAdmin, async (req, res) => {
+  try {
+    const bannerName = String(req.body.banner_name || "").trim();
+    const imageUrl = String(req.body.image_url || "").trim();
+
+    if (!bannerName || !imageUrl) {
+      return res.status(400).json({
+        status: "error",
+        message: "Banner name and image are required"
+      });
+    }
+
+    const [maxRows] = await db.query(
+      "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM fixed_banners"
+    );
+
+    const sortOrder = maxRows[0].next_order || 1;
+
+    const [result] = await db.query(
+      `
+      INSERT INTO fixed_banners (banner_name, image_url, sort_order, is_active)
+      VALUES (?, ?, ?, 1)
+      `,
+      [bannerName, imageUrl, sortOrder]
+    );
+
+    await db.query(
+      "INSERT INTO homepage_layout (section_type, banner_id, sort_order) VALUES ('banner', ?, ?)",
+      [result.insertId, sortOrder]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Fixed banner added successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.delete("/api/admin/fixed-banners/:id", verifyAdmin, async (req, res) => {
+  try {
+    const bannerId = Number(req.params.id);
+
+    await db.query("DELETE FROM homepage_layout WHERE banner_id = ?", [bannerId]);
+    await db.query("DELETE FROM fixed_banners WHERE id = ?", [bannerId]);
+
+    res.json({
+      status: "ok",
+      message: "Fixed banner deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   ADMIN PAGE + BANNER POSITION API
+========================= */
+
+app.get("/api/admin/page-banner-position", verifyAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `
+      SELECT
+        hl.id AS layout_id,
+        hl.section_type,
+        hl.sort_order,
+        p.page_name,
+        b.banner_name
+      FROM homepage_layout hl
+      LEFT JOIN pages p ON p.id = hl.page_id
+      LEFT JOIN fixed_banners b ON b.id = hl.banner_id
+      ORDER BY hl.sort_order ASC, hl.id ASC
+      `
+    );
+
+    res.json({
+      status: "ok",
+      items: rows
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.post("/api/admin/page-banner-position/reorder", verifyAdmin, async (req, res) => {
+  try {
+    const items = Array.isArray(req.body.items) ? req.body.items : [];
+
+    for (let i = 0; i < items.length; i++) {
+      await db.query(
+        "UPDATE homepage_layout SET sort_order = ? WHERE id = ?",
+        [i + 1, Number(items[i].layout_id)]
+      );
+    }
+
+    res.json({
+      status: "ok",
+      message: "Position saved successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   ADMIN REVIEWS API
+========================= */
+
+app.get("/api/admin/reviews", verifyAdmin, async (req, res) => {
+  try {
+    const [reviews] = await db.query("SELECT * FROM reviews ORDER BY id DESC");
+
+    res.json({
+      status: "ok",
+      reviews
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.post("/api/admin/reviews", verifyAdmin, async (req, res) => {
+  try {
+    const customerName = String(req.body.customer_name || "").trim();
+    const reviewBody = String(req.body.review_body || "").trim();
+
+    if (!customerName || !reviewBody) {
+      return res.status(400).json({
+        status: "error",
+        message: "Customer name and review text are required"
+      });
+    }
+
+    await db.query(
+      `
+      INSERT INTO reviews (customer_name, rating, review_body, is_active)
+      VALUES (?, ?, ?, 1)
+      `,
+      [
+        customerName,
+        Math.max(1, Math.min(5, Number(req.body.rating || 5))),
+        reviewBody
+      ]
+    );
+
+    res.json({
+      status: "ok",
+      message: "Review added successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+app.delete("/api/admin/reviews/:id", verifyAdmin, async (req, res) => {
+  try {
+    await db.query("DELETE FROM reviews WHERE id = ?", [Number(req.params.id)]);
+
+    res.json({
+      status: "ok",
+      message: "Review deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   ADMIN DASHBOARD API
+========================= */
+
+app.get("/api/admin/dashboard", verifyAdmin, async (req, res) => {
+  try {
+    const [summaryRows] = await db.query(
+      `
+      SELECT
+        COUNT(*) AS total_sku,
+        COALESCE(SUM(qty_in_stock), 0) AS total_quantity,
+        COALESCE(SUM(qty_in_stock * dealer_price), 0) AS total_inventory_cost
+      FROM products
+      `
+    );
+
+    const [lowStockProducts] = await db.query(
+      `
+      SELECT *
+      FROM products
+      WHERE qty_in_stock <= 5
+      ORDER BY qty_in_stock ASC, product_name ASC
+      `
+    );
+
+    const [dealerRows] = await db.query(
+      `
+      SELECT DISTINCT dealer_name
+      FROM products
+      WHERE dealer_name IS NOT NULL AND dealer_name != ''
+      ORDER BY dealer_name ASC
+      `
+    );
+
+    res.json({
+      status: "ok",
+      summary: summaryRows[0],
+      low_stock_products: lowStockProducts,
+      dealers: dealerRows.map(function(row) {
+        return row.dealer_name;
+      })
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  }
+});
+
+/* =========================
    PUBLIC ROUTES
 ========================= */
 
@@ -6579,6 +7811,13 @@ app.get("/dashboard", (req, res) => {
   `);
 });
 
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+ensureAppTables()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log("Server running on port " + PORT);
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  });
