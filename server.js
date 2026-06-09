@@ -2669,6 +2669,163 @@ app.get("/", (req, res) => {
               grid-template-columns: 1fr 52px;
             }
           }
+
+			/* =========================
+   PRODUCT CARD V2
+   Quick commerce style
+========================= */
+
+.product-image-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.product-image-wrap {
+  position: relative;
+  background: #f7f8f3;
+  padding: 8px;
+}
+
+.product-img {
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.discount-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  border-radius: 7px;
+  padding: 3px 6px;
+  font-size: 8.5px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+.product-tag {
+  top: 6px !important;
+  right: 6px !important;
+  left: auto !important;
+  z-index: 2;
+}
+
+.delivery-chip {
+  width: fit-content;
+  background: #f1f5ea;
+  color: #344054;
+  border-radius: 6px;
+  padding: 3px 5px;
+  font-size: 9px;
+  font-weight: 900;
+  margin-bottom: 5px;
+}
+
+.product-name {
+  min-height: 30px;
+  margin-bottom: 4px !important;
+}
+
+.product-unit {
+  font-size: 10px;
+  color: #667085;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+.product-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: end;
+}
+
+.product-bottom-row .price-stack {
+  min-width: 0;
+}
+
+.product-bottom-row .product-price {
+  line-height: 1.05;
+}
+
+.product-bottom-row .crossed-price {
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.product-bottom-row .card-action-row {
+  margin-top: 0 !important;
+}
+
+.product-bottom-row .add-btn {
+  min-width: 54px !important;
+  height: 30px !important;
+  border-radius: 9px !important;
+  background: #ffffff !important;
+  color: var(--qc-primary) !important;
+  border: 1.5px solid var(--qc-primary) !important;
+  box-shadow: 0 4px 10px rgba(12, 131, 31, 0.08);
+}
+
+.product-bottom-row .card-qty-control {
+  width: 82px !important;
+  grid-template-columns: 24px 1fr 24px !important;
+  gap: 3px !important;
+}
+
+.product-bottom-row .card-qty-control button {
+  height: 30px !important;
+}
+
+.product-bottom-row .card-qty-control input {
+  height: 30px !important;
+  font-size: 11px !important;
+}
+
+@media (max-width: 767px) {
+  .product-info {
+    padding: 7px !important;
+  }
+
+  .delivery-chip {
+    font-size: 8.5px;
+  }
+
+  .product-name {
+    font-size: 11px !important;
+    min-height: 29px;
+  }
+
+  .product-unit {
+    font-size: 9.5px;
+  }
+
+  .product-bottom-row {
+    grid-template-columns: 1fr auto;
+    gap: 4px;
+  }
+
+  .product-bottom-row .add-btn {
+    min-width: 48px !important;
+    height: 28px !important;
+    font-size: 11px !important;
+  }
+
+  .product-bottom-row .card-qty-control {
+    width: 76px !important;
+    grid-template-columns: 22px 1fr 22px !important;
+  }
+
+  .product-bottom-row .card-qty-control button,
+  .product-bottom-row .card-qty-control input {
+    height: 28px !important;
+  }
+}
+		  
         </style>
       </head>
 
@@ -2744,36 +2901,55 @@ ${globalFooterHtml()}
 
 function productCard(product) {
   const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
-  const price = Number(product.show_price || 0).toFixed(0);
+  const price = Number(product.show_price || 0);
   const crossedPrice = Number(product.crossed_price || 0);
   const tag = String(product.tag || "None");
+
+  let discountPercent = 0;
+
+  if (crossedPrice > price && price > 0) {
+    discountPercent = Math.round(((crossedPrice - price) / crossedPrice) * 100);
+  }
 
   const tagHtml = tag && tag !== "None"
     ? "<div class='product-tag'>" + tag + "</div>"
     : "";
 
-  const crossedPriceHtml = crossedPrice > 0
-    ? "<div class='crossed-price'>₹" + crossedPrice.toFixed(0) + "</div>"
+  const discountHtml = discountPercent > 0
+    ? "<div class='discount-badge'>" + discountPercent + "% OFF</div>"
+    : "";
+
+  const crossedPriceHtml = crossedPrice > price
+    ? "<span class='crossed-price'>₹" + crossedPrice.toFixed(0) + "</span>"
     : "";
 
   return "" +
     "<div class='product-card' data-product-id='" + product.id + "'>" +
-      "<a href='/product/" + product.slug + "'>" +
+
+      "<a class='product-image-link' href='/product/" + product.slug + "'>" +
         "<div class='product-image-wrap'>" +
+          discountHtml +
           tagHtml +
           "<img class='product-img' src='" + image + "' alt='" + product.product_name + "' />" +
         "</div>" +
       "</a>" +
+
       "<div class='product-info'>" +
-        "<div class='name-price-row'>" +
-          "<div class='product-name'>" + product.product_name + "</div>" +
+        "<div class='delivery-chip'>⚡ 10 min</div>" +
+
+        "<div class='product-name'>" + product.product_name + "</div>" +
+
+        "<div class='product-unit'>1 pack</div>" +
+
+        "<div class='product-bottom-row'>" +
           "<div class='price-stack'>" +
-            "<div class='product-price'>₹" + price + "</div>" +
+            "<div class='product-price'>₹" + price.toFixed(0) + "</div>" +
             crossedPriceHtml +
           "</div>" +
-        "</div>" +
-        "<div class='card-action-row' data-product-id='" + product.id + "'>" +
-          productCardActionHtml(product.id) +
+
+          "<div class='card-action-row' data-product-id='" + product.id + "'>" +
+            productCardActionHtml(product.id) +
+          "</div>" +
         "</div>" +
       "</div>" +
     "</div>";
@@ -6770,6 +6946,163 @@ app.get("/page/:slug", (req, res) => {
               grid-template-columns: 1fr 52px;
             }
           }
+
+			/* =========================
+   PRODUCT CARD V2
+   Quick commerce style
+========================= */
+
+.product-image-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.product-image-wrap {
+  position: relative;
+  background: #f7f8f3;
+  padding: 8px;
+}
+
+.product-img {
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.discount-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  border-radius: 7px;
+  padding: 3px 6px;
+  font-size: 8.5px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+.product-tag {
+  top: 6px !important;
+  right: 6px !important;
+  left: auto !important;
+  z-index: 2;
+}
+
+.delivery-chip {
+  width: fit-content;
+  background: #f1f5ea;
+  color: #344054;
+  border-radius: 6px;
+  padding: 3px 5px;
+  font-size: 9px;
+  font-weight: 900;
+  margin-bottom: 5px;
+}
+
+.product-name {
+  min-height: 30px;
+  margin-bottom: 4px !important;
+}
+
+.product-unit {
+  font-size: 10px;
+  color: #667085;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+.product-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: end;
+}
+
+.product-bottom-row .price-stack {
+  min-width: 0;
+}
+
+.product-bottom-row .product-price {
+  line-height: 1.05;
+}
+
+.product-bottom-row .crossed-price {
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.product-bottom-row .card-action-row {
+  margin-top: 0 !important;
+}
+
+.product-bottom-row .add-btn {
+  min-width: 54px !important;
+  height: 30px !important;
+  border-radius: 9px !important;
+  background: #ffffff !important;
+  color: var(--qc-primary) !important;
+  border: 1.5px solid var(--qc-primary) !important;
+  box-shadow: 0 4px 10px rgba(12, 131, 31, 0.08);
+}
+
+.product-bottom-row .card-qty-control {
+  width: 82px !important;
+  grid-template-columns: 24px 1fr 24px !important;
+  gap: 3px !important;
+}
+
+.product-bottom-row .card-qty-control button {
+  height: 30px !important;
+}
+
+.product-bottom-row .card-qty-control input {
+  height: 30px !important;
+  font-size: 11px !important;
+}
+
+@media (max-width: 767px) {
+  .product-info {
+    padding: 7px !important;
+  }
+
+  .delivery-chip {
+    font-size: 8.5px;
+  }
+
+  .product-name {
+    font-size: 11px !important;
+    min-height: 29px;
+  }
+
+  .product-unit {
+    font-size: 9.5px;
+  }
+
+  .product-bottom-row {
+    grid-template-columns: 1fr auto;
+    gap: 4px;
+  }
+
+  .product-bottom-row .add-btn {
+    min-width: 48px !important;
+    height: 28px !important;
+    font-size: 11px !important;
+  }
+
+  .product-bottom-row .card-qty-control {
+    width: 76px !important;
+    grid-template-columns: 22px 1fr 22px !important;
+  }
+
+  .product-bottom-row .card-qty-control button,
+  .product-bottom-row .card-qty-control input {
+    height: 28px !important;
+  }
+}
+		  
         </style>
       </head>
 
@@ -6817,36 +7150,55 @@ app.get("/page/:slug", (req, res) => {
 
 function productCard(product) {
   const image = product.product_image_url || "https://via.placeholder.com/300x300?text=Product";
-  const price = Number(product.show_price || 0).toFixed(0);
+  const price = Number(product.show_price || 0);
   const crossedPrice = Number(product.crossed_price || 0);
   const tag = String(product.tag || "None");
+
+  let discountPercent = 0;
+
+  if (crossedPrice > price && price > 0) {
+    discountPercent = Math.round(((crossedPrice - price) / crossedPrice) * 100);
+  }
 
   const tagHtml = tag && tag !== "None"
     ? "<div class='product-tag'>" + tag + "</div>"
     : "";
 
-  const crossedPriceHtml = crossedPrice > 0
-    ? "<div class='crossed-price'>₹" + crossedPrice.toFixed(0) + "</div>"
+  const discountHtml = discountPercent > 0
+    ? "<div class='discount-badge'>" + discountPercent + "% OFF</div>"
+    : "";
+
+  const crossedPriceHtml = crossedPrice > price
+    ? "<span class='crossed-price'>₹" + crossedPrice.toFixed(0) + "</span>"
     : "";
 
   return "" +
     "<div class='product-card' data-product-id='" + product.id + "'>" +
-      "<a href='/product/" + product.slug + "'>" +
+
+      "<a class='product-image-link' href='/product/" + product.slug + "'>" +
         "<div class='product-image-wrap'>" +
+          discountHtml +
           tagHtml +
           "<img class='product-img' src='" + image + "' alt='" + product.product_name + "' />" +
         "</div>" +
       "</a>" +
+
       "<div class='product-info'>" +
-        "<div class='name-price-row'>" +
-          "<div class='product-name'>" + product.product_name + "</div>" +
+        "<div class='delivery-chip'>⚡ 10 min</div>" +
+
+        "<div class='product-name'>" + product.product_name + "</div>" +
+
+        "<div class='product-unit'>1 pack</div>" +
+
+        "<div class='product-bottom-row'>" +
           "<div class='price-stack'>" +
-            "<div class='product-price'>₹" + price + "</div>" +
+            "<div class='product-price'>₹" + price.toFixed(0) + "</div>" +
             crossedPriceHtml +
           "</div>" +
-        "</div>" +
-        "<div class='card-action-row' data-product-id='" + product.id + "'>" +
-          productCardActionHtml(product.id) +
+
+          "<div class='card-action-row' data-product-id='" + product.id + "'>" +
+            productCardActionHtml(product.id) +
+          "</div>" +
         "</div>" +
       "</div>" +
     "</div>";
